@@ -10,25 +10,29 @@ class Helper {
      * @param type $dirArquivoSample
      */
     public static function nsIncludeConfigFile($dirArquivoSample) {
-        $temp = explode(DIRECTORY_SEPARATOR, self::setDirSeparator($dirArquivoSample));
+        $dirArquivoSample = realpath($dirArquivoSample);
+        $temp = explode(DIRECTORY_SEPARATOR, $dirArquivoSample);
         $configName = array_pop($temp);
         // importar arquivo de configuração desta aplicação.
         $t = explode(DIRECTORY_SEPARATOR, __DIR__);
-        $file = 'composer.json';
+        $file = 'nao-deve-achar.json';
+        array_pop($t);
+        array_pop($t);
         while (!file_exists($file)) {
             array_pop($t);
             $dir = implode(DIRECTORY_SEPARATOR, $t) . DIRECTORY_SEPARATOR;
             $file = $dir . 'composer.json';
         }
-        self::mkdir($dir . DIRECTORY_SEPARATOR . 'nsConfigs', 0777);
-        $config = $dir . $configName;
+        self::mkdir($dir . DIRECTORY_SEPARATOR . 'nsConfig', 0600);
+        $config = $dir . DIRECTORY_SEPARATOR . 'nsConfig' . DIRECTORY_SEPARATOR .  $configName;
         if (!file_exists($config)) {
             copy($dirArquivoSample, $config);
-            echo "<h1>É necessário criar o arquivo de configuração '[DIR_COMPOSER]/nsConfig/$configName'. Tentei gravar um modelo. Caso não esteja, existe um padrão na raiz da aplicação.</h1>";
+            echo "<h1>nsConfig: É necessário criar o arquivo de configuração '[DIR_COMPOSER]/nsConfig/$configName'. <br/>Tentei gravar um modelo. Caso não esteja, existe um padrão na raiz da aplicação.</h1>";
             die();
         }
-        // incluir arquivo de configuracao
         include_once $config;
+        $var = str_replace('.php', '', $configName);
+        return $$var;
     }
 
     public static function sanitize($str) {
@@ -37,12 +41,8 @@ class Helper {
 
     public static function mkdir($path, $perm = 0777) {
         if (!is_dir(!$path)) {
-            mkdir($path, $perm, true);
+            @mkdir($path, $perm, true);
         }
-    }
-
-    public static function setDirSeparator($string) {
-        return str_replace(['/', '\\'], DIRECTORY_SEPARATOR, $string);
     }
 
     public static function convertAscii($string) {
