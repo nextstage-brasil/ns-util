@@ -1,0 +1,23 @@
+{
+    "name": "nextstage-brasil/ns-util",
+    "description": "Metodos e classes de utilidades diversas",
+    "require": {
+        "php": "^7.2"
+    },
+    "license": "MIT",
+    "require-dev": {
+        "phpunit/phpunit": "^8.4",
+        "phpspec/phpspec": "^6.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "NsUtil\\": "src/"
+        }
+    },
+    "authors": [
+        {
+            "name": "Nextstage",
+            "email": "ns@nextstage.com.br"
+        }
+    ]
+}
