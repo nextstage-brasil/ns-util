@@ -4,7 +4,14 @@ namespace NsUtil;
 
 class Helper {
 
-    public static function nsIncludeConfigFile($configName) {
+    /**
+     * 
+     * @param type $configName
+     * @param type $dirArquivoSample
+     */
+    public static function nsIncludeConfigFile($dirArquivoSample) {
+        $temp = explode(DIRECTORY_SEPARATOR, self::setDirSeparator($dirArquivoSample));
+        $configName = array_pop($temp);
         // importar arquivo de configuração desta aplicação.
         $t = explode(DIRECTORY_SEPARATOR, __DIR__);
         $file = 'composer.json';
@@ -16,7 +23,7 @@ class Helper {
         self::mkdir($dir . DIRECTORY_SEPARATOR . 'nsConfigs', 0777);
         $config = $dir . $configName;
         if (!file_exists($config)) {
-            copy(__DIR__ . '/' . $configName, $config);
+            copy($dirArquivoSample, $config);
             echo "<h1>É necessário criar o arquivo de configuração '[DIR_COMPOSER]/nsConfig/$configName'. Tentei gravar um modelo. Caso não esteja, existe um padrão na raiz da aplicação.</h1>";
             die();
         }
@@ -32,6 +39,10 @@ class Helper {
         if (!is_dir(!$path)) {
             mkdir($path, $perm, true);
         }
+    }
+
+    public static function setDirSeparator($string) {
+        return str_replace(['/', '\\'], DIRECTORY_SEPARATOR, $string);
     }
 
     public static function convertAscii($string) {
