@@ -4,6 +4,26 @@ namespace NsUtil;
 
 class Helper {
 
+    public static function nsIncludeConfigFile($configName) {
+        // importar arquivo de configuração desta aplicação.
+        $t = explode(DIRECTORY_SEPARATOR, __DIR__);
+        $file = 'composer.json';
+        while (!file_exists($file)) {
+            array_pop($t);
+            $dir = implode(DIRECTORY_SEPARATOR, $t) . DIRECTORY_SEPARATOR;
+            $file = $dir . 'composer.json';
+        }
+        self::mkdir($dir . DIRECTORY_SEPARATOR . 'nsConfigs', 0777);
+        $config = $dir . $configName;
+        if (!file_exists($config)) {
+            copy(__DIR__ . '/' . $configName, $config);
+            echo "<h1>É necessário criar o arquivo de configuração '[DIR_COMPOSER]/nsConfig/$configName'. Tentei gravar um modelo. Caso não esteja, existe um padrão na raiz da aplicação.</h1>";
+            die();
+        }
+        // incluir arquivo de configuracao
+        include_once $config;
+    }
+
     public static function sanitize($str) {
         return str_replace(" ", "_", preg_replace("/&([a-z])[a-z]+;/i", "$1", htmlentities(trim($str))));
     }
