@@ -87,4 +87,15 @@ class Helper {
         return $string;
     }
 
+    public static function arrayOrderBy(&$array, $element, $sort = 'ASC') {
+        usort($array, function($a, $b) {
+            global $element, $sort;
+            if ($sort === 'ASC') {
+                return $a[$element] < $b[$element];
+            } else {
+                return $a[$element] > $b[$element];
+            }
+        });
+    }
+
 }
