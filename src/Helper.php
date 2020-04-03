@@ -24,7 +24,7 @@ class Helper {
             $file = $dir . 'composer.json';
         }
         self::mkdir($dir . DIRECTORY_SEPARATOR . 'nsConfig', 0600);
-        $config = $dir . DIRECTORY_SEPARATOR . 'nsConfig' . DIRECTORY_SEPARATOR .  $configName;
+        $config = $dir . DIRECTORY_SEPARATOR . 'nsConfig' . DIRECTORY_SEPARATOR . $configName;
         if (!file_exists($config)) {
             copy($dirArquivoSample, $config);
             echo "<h1>nsConfig: É necessário criar o arquivo de configuração '[DIR_COMPOSER]/nsConfig/$configName'. <br/>Tentei gravar um modelo. Caso não esteja, existe um padrão na raiz da aplicação.</h1>";
@@ -75,6 +75,15 @@ class Helper {
         $string = str_replace($search, $replace, $string);
         // Remove any non-ASCII Characters
         $string = preg_replace("/[^\x01-\x7F]/", "", $string);
+        return $string;
+    }
+
+    public static function formatTextAllLowerFirstUpper($str) {
+        $sempreMinusculas = ['a', 'ao', 'da', 'de', 'do', 'dos', 'das', 'ante', 'até', 'após', 'desde', 'em', 'entre', 'com', 'contra', 'para', 'por', 'perante', 'sem', 'sobe', 'sob'];
+        $string = ucwords(mb_strtolower($str));
+        foreach ($sempreMinusculas as $value) {
+            $string = str_ireplace(" $value ", " " . mb_strtolower($value) . " ", $string);
+        }
         return $string;
     }
 
