@@ -1,2 +1,15 @@
+<?php
+
+$nsCheckoutConfig = [
+    'useSandbox' => true, # true: usar ambiente sandbox, false, produção
+    'sandbox' => [
+        'email' => 'cristofer.batschauer@gmail.com',
+        'token' => '56F4915E83904E8AB42C8F97CDA156B7',
+    ],
+    'producao' => [
+        'email' => '',
+        'token' => '',
+    ]
+];
 /tests/
 /nbproject/
