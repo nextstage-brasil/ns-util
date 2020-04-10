@@ -19,14 +19,13 @@ class ConnectionPostgreSQL {
     public $lastInsertId;
     private static $transaction_in_progress;
 
-    public function __construct($host, $user, $pass, $port, $database, $schema = 'public') {
+    public function __construct($host, $user, $pass, $port, $database) {
         $this->config = new stdClass();
         $this->config->host = $host;
         $this->config->port = $port;
         $this->config->database = $database;
         $this->config->user = $user;
         $this->config->pwd = $pass;
-        $this->config->schema = $schema;
         $this->open();
     }
 
@@ -37,7 +36,6 @@ class ConnectionPostgreSQL {
                 $stringConnection = "pgsql:host=" . $this->config->host . ";port=" . $this->config->port . ";dbname=" . $this->config->database . ";user=" . $this->config->user . ";password=" . $this->config->pwd;
                 $this->con = new PDO($stringConnection);
                 $this->con->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-                $this->con->exec('set schema to ' . $this->config->schema);
             } catch (Exception $e) {
                 echo '<p class="alert alert-error text-center">'
                 . 'ERROR: Connection Failed (CPD-167)<br/>' . $e->getMessage()
@@ -83,7 +81,7 @@ class ConnectionPostgreSQL {
         $this->con->autocommit($boolean);
     }
 
-    private function executeQuery($query) {
+    public function executeQuery($query) {
 
         $this->open();
         $res = false;

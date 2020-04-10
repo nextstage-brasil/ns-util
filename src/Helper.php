@@ -104,7 +104,7 @@ class Helper {
      * @param array $prefixo
      * @return type string
      */
-    public static function name2CamelCase($string, $prefixo = false): string {
+    public static function name2CamelCase($string, $prefixo = false) {
         $prefixo = array('mem_', 'sis_', 'anz_', 'aux_', 'app_');
         if (is_array($string)) {
             foreach ($string as $key => $value) {
@@ -121,7 +121,7 @@ class Helper {
         $string = str_replace('_', ' ', $string);
         $out = str_replace(' ', '', ucwords($string));
         $out{0} = mb_strtolower($out{0});
-        return (string) $out;
+        return $out;
     }
 
     /**
