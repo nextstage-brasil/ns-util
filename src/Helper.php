@@ -178,10 +178,12 @@ class Helper {
         // Terminamos o "contador" e exibimos
         list($usec, $sec) = explode(' ', microtime());
         $script_end = (float) $sec + (float) $usec;
-        $elapsed_time = round($script_end - $this->start, 5);
+        $elapsed_time = round($script_end - $this->start, 2);
         $minutos = (int) number_format((double) $elapsed_time / 60, 0);
 
-        return 'Tempo de execução: ' . (($minutos > 0) ? $minutos . 'min' : '') . ceil(($elapsed_time - ($minutos * 60))) . 'segs. Memória utilizada: ' . round(((memory_get_peak_usage(true) / 1024) / 1024), 2) . 'Mb';
+        return 'Elapsed '
+                . gmdate("H:i:s", (int) $elapsed_time)
+                . ' with ' . round(((memory_get_peak_usage(true) / 1024) / 1024), 2) . 'Mb';
     }
 
     public static function deleteFile($filepath, $apagarDiretorio = false, $trash = false) {
@@ -208,24 +210,6 @@ class Helper {
         if (!file_exists($filename)) {
             return false;
         }
-    }
-
-    /**
-     * file-get-contents com uso de SSL
-     * @param type $url
-     * @return type
-     */
-    public static function myFileGetContents($url) {
-        $config = array(
-            "ssl" => array(
-                "verify_peer" => false,
-                "verify_peer_name" => false,
-            ),
-        );
-
-        $context = stream_context_create($config);
-
-        return file_get_contents($url, false, $context);
     }
 
 }

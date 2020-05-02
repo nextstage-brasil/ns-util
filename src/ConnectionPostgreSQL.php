@@ -50,7 +50,7 @@ class ConnectionPostgreSQL {
     }
 
     public function close() {
-        pg_close($this->con);
+        $this->con = null;
     }
 
     public function begin_transaction() {
@@ -82,7 +82,6 @@ class ConnectionPostgreSQL {
     }
 
     public function executeQuery($query) {
-
         $this->open();
         $res = false;
         $this->numRows = 0;
@@ -138,6 +137,45 @@ class ConnectionPostgreSQL {
             $out[] = Helper::name2CamelCase($dd);
         }
         return $out;
+    }
+
+    /**
+     *
+     * @param Connection $db
+     * @param string $this->tableName
+     * @param string[] $fields List of fields names.
+     * @param array[] $records Two-demension array of cells (array of rows).
+     * @return boolean
+     */
+    public function insertByCopy($toTable, array $fields, array $records) {
+        $this->open();
+        static $delimiter = "\t", $nullAs = '';
+        $rows = [];
+        foreach ($records as $record) {
+            $record = array_map(
+                    function ($field) use( $record, $delimiter, $nullAs, $fields) {
+                $value = array_key_exists($field, $record) ? $record[$field] : null;
+                //$value = $record[array_search($field, $fields)];     // CSV e fields estao exatamaente na mesma ordem
+
+                if (is_null($value)) {
+                    $value = $nullAs;
+                } elseif (is_bool($value)) {
+                    $value = $value ? 't' : 'f';
+                }
+
+                $value = str_replace($delimiter, ' ', $value);
+                // Convert multiline text to one line.
+                $value = addcslashes($value, "\0..\37");
+
+                return $value;
+            }, $fields);
+            $rows[] = implode($delimiter, $record) . "\n";
+        }
+
+        $this->con->pgsqlCopyFromArray($toTable, $rows, $delimiter, addslashes($nullAs), implode(',', $fields));
+        unset($rows);
+
+        return true;
     }
 
 }
