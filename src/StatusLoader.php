@@ -7,11 +7,11 @@ class StatusLoader {
     private $startTime, $totalRegistros, $label, $size, $lastDone;
     private $showQtde = false;
 
-    public function __construct($totalRegistros, $label = '', $size = 20) {
+    public function __construct($totalRegistros, $label = '', $size = 60) {
         $this->startTime = time();
         $this->totalRegistros = (int) $totalRegistros;
-        $this->setLabel($label);
         $this->size = (int) $size;
+        $this->setLabel($label);
     }
 
     /**
@@ -22,12 +22,11 @@ class StatusLoader {
         $this->showQtde = $show;
     }
 
-    function setLabel($label) {
-        if (strlen($label) > 20) {
-            $label = mb_substr($label, 0, 20);
-        } else {
-            $label = str_pad($label, 20);
-        }
+    public function setLabel($label) {
+
+        $s = (int) $this->size * 0.5;
+        $label = str_pad($label, ($s + (int) $this->size));
+        $label = mb_substr($label, 0, $s);
         $this->label = $label;
         if ($this->lastDone > 0) {
             $this->done($this->lastDone);
@@ -50,14 +49,14 @@ class StatusLoader {
         $now = time();
 
         $perc = (double) ($done / $this->totalRegistros);
-
-        $bar = floor($perc * $this->size);
+        $tamanho = $this->size * 0.5;
+        $bar = floor($perc * $tamanho);
 
         $status_bar = "\r" . $this->label . " [";
         $status_bar .= str_repeat("=", $bar);
-        if ($bar < $this->size) {
+        if ($bar < $tamanho) {
             $status_bar .= ">";
-            $status_bar .= str_repeat(" ", $this->size - $bar);
+            $status_bar .= str_repeat(" ", $tamanho - $bar);
         } else {
             $status_bar .= "=";
         }
