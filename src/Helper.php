@@ -212,4 +212,17 @@ class Helper {
         }
     }
 
+    public static function myFileGetContents($url) {
+        $config = array(
+            "ssl" => array(
+                "verify_peer" => false,
+                "verify_peer_name" => false,
+            ),
+        );
+
+        $context = stream_context_create($config);
+
+        return file_get_contents($url, false, $context);
+    }
+
 }
