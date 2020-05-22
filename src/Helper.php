@@ -225,4 +225,60 @@ class Helper {
         return file_get_contents($url, false, $context);
     }
 
+    /**
+     * Método que encapsula uma chamada GET a uma url
+     * @param string $url
+     * @param array $params
+     * @param string $method
+     * @return Array
+     */
+    public static function curlCall($url, $params = [], $method = 'GET', $header = ['Content-Type:application/json']) {
+        $options = [
+            CURLOPT_URL => trim($url),
+            CURLOPT_CUSTOMREQUEST => $method,
+            CURLOPT_POST => false,
+            CURLOPT_USERAGENT => 'Mozilla/5.0 (Windows NT 6.1; rv:8.0) Gecko/20100101 Firefox/8.0', //set user agent
+            CURLOPT_COOKIEFILE => "nsutil-curl-cookie.txt",
+            CURLOPT_COOKIEJAR => "nsutil-curl-cookiejar.txt", //set cookie 
+            CURLOPT_RETURNTRANSFER => true, // return web page
+            CURLOPT_FOLLOWLOCATION => true, // follow redirects
+            CURLOPT_ENCODING => "", // handle all encodings
+            CURLOPT_AUTOREFERER => true, // set referer on redirect
+            CURLOPT_CONNECTTIMEOUT => 30, // timeout on connect
+            CURLOPT_TIMEOUT => 30, // timeout on response
+            CURLOPT_MAXREDIRS => 10, // stop after 10 redirects
+            CURLOPT_SSL_VERIFYPEER => true,
+            CURLOPT_HEADER => false,
+            CURLOPT_VERBOSE => false,
+        ];
+        $options[CURLOPT_HTTPHEADER] = $header;
+        if (count($params) > 0) {
+            switch ($method) {
+                case 'POST':
+                    $options[CURLOPT_POST] = true;
+                    $options[CURLOPT_POSTFIELDS] = $params;
+                    break;
+                default:
+                    $options[CURLOPT_POSTFIELDS] = json_encode($params);
+            }
+            $options[CURLOPT_POSTFIELDS] = json_encode($params);
+        }
+        $ch = curl_init();
+        curl_setopt_array($ch, $options);
+        $content = curl_exec($ch);
+        //echo curl_getinfo($ch, CURLINFO_EFFECTIVE_URL).'<br/>';
+        //echo 'error: ' . curl_errno($ch);
+        $ret = (object) [
+                    'content' => $content,
+                    'errorCode' => curl_errno($ch),
+                    'error' => ((curl_error($ch)) ? curl_error($ch) : curl_errno($ch)),
+                    'status' => curl_getinfo($ch)['http_code'],
+                    'http_code' => curl_getinfo($ch)['http_code']
+        ];
+        //Log::error(json_encode($ret));
+        //echo json_encode($content);
+        curl_close($ch);
+        return $ret;
+    }
+
 }
