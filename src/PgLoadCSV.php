@@ -4,7 +4,7 @@ namespace NsUtil;
 
 use stdClass;
 
-class PgLoadingCSV {
+class PgLoadCSV {
 
     private $file, $run;
 
@@ -63,8 +63,6 @@ class PgLoadingCSV {
         $this->run->fields = $cpos = $control = [];
 
         foreach ($head as $key => $val) {
-            //$key = str_replace(['"', "'"], [''], $key);
-            //$val = str_replace(['"', "'", ' '], ['', '', '_'], $val);
             $val = $this->sanitizeField($val);
             $cpos[] = "$val text null";
             if ($this->run->fields[md5($val)]) {
@@ -117,12 +115,9 @@ class PgLoadingCSV {
                             . number_format(round($qtdeLinhas / (microtime(true) - $start), 0), 0, ',', '.')
                             . ' Mem: ' . round($memoriaAlocada / 1048576, 0) . 'MB'
                     );
-                    //. " Mem:" . round(($memoriaAlocada / $this->run->memory_limit * 100), 2) . '%');
-                    // insert on table
-                    //$descarga++;
+                    // descarga
                     if (count($records) > 0) {
                         $this->run->con->insertByCopy($this->run->tableSchema, $this->run->fields, $records);
-                        //$con->pgsqlCopyFromArray($this->run->tableSchema, $records, $this->run->delimiter, addslashes($this->run->nullAs), $this->run->fields);
                         $records = [];
                     }
                 }
@@ -132,18 +127,13 @@ class PgLoadingCSV {
                 if (!$line) {
                     continue;
                 } else {
-                    $records[] = $line; //19===un_hash
+                    $records[] = $line;
                 }
             } while ($qtdeLinhas <= $this->run->linhas);
-
-
-
             fclose($handle);
 
             if (count($records) > 0) {
                 $loader->setLabel('Ingerindo dados finais');
-                //$con->pgsqlCopyFromArray($this->run->tableSchema, $records, $this->run->delimiter, addslashes($this->run->nullAs), $this->run->fields);
-                //$this->pgInsertByCopy($con, $this->run->tableSchema, $this->run->fields, $records);
                 $this->run->con->insertByCopy($this->run->tableSchema, $this->run->fields, $records);
                 $records = [];
             }
@@ -162,21 +152,7 @@ class PgLoadingCSV {
         if ($data === false || $data === null) {
             return false;
         }
-        /*
-          // tratamento para insert on copy
-          foreach ($data as $key => $val) {
-          if (is_null($data[$key])) {
-          $data[$key] = $this->run->nullAs;
-          } elseif (is_bool($data[$key])) {
-          $data[$key] = $data[$key] ? 't' : 'f';
-          }
-          $data[$key] = str_replace($this->run->delimiter, ' ', $data[$key]);
-          // Convert multiline text to one line.
-          $data[$key] = addcslashes($data[$key], "\0..\37");
-          }
-         * 
-         */
-        return $data; // implode($this->run->delimiter, $data);
+        return $data;
     }
 
     private function sanitizeField($str) {
@@ -186,4 +162,5 @@ class PgLoadingCSV {
         }
         return $str;
     }
+
 }
