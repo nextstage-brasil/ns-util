@@ -152,24 +152,24 @@ class ConnectionPostgreSQL {
         static $delimiter = "\t", $nullAs = '';
         $rows = [];
         foreach ($records as $record) {
-            $record = array_map(
-                    function ($field) use( $record, $delimiter, $nullAs, $fields) {
-                $value = array_key_exists($field, $record) ? $record[$field] : null;
-                //$value = $record[array_search($field, $fields)];     // CSV e fields estao exatamaente na mesma ordem
-
-                if (is_null($value)) {
-                    $value = $nullAs;
-                } elseif (is_bool($value)) {
-                    $value = $value ? 't' : 'f';
+            $row = [];
+            foreach ($fields as $key => $field) {
+                //echo $key;
+                $record[$key] = $record[$key] ? $record[$key] : null; //] array_key_exists($field, $record) ? $record[$field] : null;
+                //echo $record[$key];
+                //echo $record[$key];
+                if (is_null($record[$key])) {
+                    $record[$key] = $nullAs;
+                } elseif (is_bool($record[$key])) {
+                    $record[$key] = $record[$key] ? 't' : 'f';
                 }
 
-                $value = str_replace($delimiter, ' ', $value);
+                $record[$key] = str_replace($delimiter, ' ', $record[$key]);
                 // Convert multiline text to one line.
-                $value = addcslashes($value, "\0..\37");
-
-                return $value;
-            }, $fields);
-            $rows[] = implode($delimiter, $record) . "\n";
+                $record[$key] = addcslashes($record[$key], "\0..\37");
+                $row[] = $record[$key];
+            }
+            $rows[] = implode($delimiter, $row) . "\n";
         }
 
         $this->con->pgsqlCopyFromArray($toTable, $rows, $delimiter, addslashes($nullAs), implode(',', $fields));
