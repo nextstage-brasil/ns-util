@@ -49,7 +49,7 @@ class PgLoadCSV {
             echo "File '$file' not exists" . PHP_EOL;
         }
         $t = explode(DIRECTORY_SEPARATOR, $this->file);
-        $this->run->table = str_replace(['.csv', '.', '-'], ['', '_', '_'], \NsUtil\Helper::sanitize(array_pop($t)));
+        $this->run->table = $this->sanitizeField(str_replace(['.csv', '.', '-'], ['', '_', '_'], \NsUtil\Helper::sanitize(array_pop($t))));
         $this->run->tableSchema = $this->run->schema . '.' . $this->run->table;
         $this->head();
         $this->execute();
