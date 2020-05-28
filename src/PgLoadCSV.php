@@ -85,7 +85,7 @@ class PgLoadCSV {
     private function execute() {
         echo 'Tabela: "' . $this->run->tableSchema . '"';
         $this->run->linhas = \NsUtil\Helper::linhasEmArquivo($this->file);
-        echo ' com ' . number_format($this->run->linhas, 0, ',', '.') . ' linhas' . PHP_EOL;
+        echo ' com ' . number_format(($this->run->linhas-1), 0, ',', '.') . ' linhas a verificar' . PHP_EOL;
         $loader = new StatusLoader($this->run->linhas, $this->run->table, 40);
         $loader->setShowQtde(false);
         $setLoader = 0;

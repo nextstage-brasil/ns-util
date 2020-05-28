@@ -62,6 +62,7 @@ class ConnectionPostgreSQL {
     }
 
     public function __shutdown_check() {
+        $this->con = null;
         if (self::$transaction_in_progress) {
             $this->rollback();
         }
@@ -156,6 +157,7 @@ class ConnectionPostgreSQL {
             foreach ($fields as $key => $field) {
                 //echo $key;
                 $record[$key] = $record[$key] ? $record[$key] : null; //] array_key_exists($field, $record) ? $record[$field] : null;
+                //$record[$key] = array_key_exists($field, $record) ? $record[$field] : null;
                 //echo $record[$key];
                 //echo $record[$key];
                 if (is_null($record[$key])) {
