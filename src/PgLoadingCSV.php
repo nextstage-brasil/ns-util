@@ -8,7 +8,7 @@ class PgLoadingCSV {
 
     private $file, $handle, $return, $run;
 
-    public function __construct($file, ConnectionPostgreSQL $con, $schema = 'import') {
+    public function __construct($file, ConnectionPostgreSQL $con, $schema = 'import', $schemaDrop = false) {
         $this->file = realpath($file);
         $this->return = new stdClass();
         $this->run = new stdClass();
@@ -26,6 +26,35 @@ class PgLoadingCSV {
         $t = explode(DIRECTORY_SEPARATOR, $this->file);
         $this->run->table = str_replace(['.csv', '.', '-'], ['', '_', '_'], \NsUtil\Helper::sanitize(array_pop($t)));
         $this->run->tableSchema = $this->run->schema . '.' . $this->run->table;
+        if ($schemaDrop) {
+            $this->run->con->executeQuery("DROP SCHEMA IF EXISTS " . $this->run->schema . ' CASCADE');
+        }
+        $this->run->con->executeQuery("CREATE SCHEMA IF NOT EXISTS " . $this->run->schema);
+        $this->head();
+        $this->run();
+    }
+
+    public function run($file) {
+        $this->file = realpath($file);
+        $this->return = new stdClass();
+        $this->run = new stdClass();
+        $this->run->con = $con;
+        $this->run->schema = \NsUtil\Helper::sanitize($schema);
+        $this->run->delimiter = "\t"; // delimiter to load
+        $this->run->nullAs = ''; // null as to load
+        //$this->run->memory_limit = preg_replace("/[^0-9]/", "", ini_get('memory_limit')); // * 1024 * 1024;
+
+        $this->return->error = false;
+        if (!file_exists($this->file)) {
+            $this->return->error = 'File not exists';
+            die($this->return->error);
+        }
+        $t = explode(DIRECTORY_SEPARATOR, $this->file);
+        $this->run->table = str_replace(['.csv', '.', '-'], ['', '_', '_'], \NsUtil\Helper::sanitize(array_pop($t)));
+        $this->run->tableSchema = $this->run->schema . '.' . $this->run->table;
+        if ($schemaDrop) {
+            $this->run->con->executeQuery("DROP SCHEMA IF EXISTS " . $this->run->schema . ' CASCADE');
+        }
         $this->run->con->executeQuery("CREATE SCHEMA IF NOT EXISTS " . $this->run->schema);
         $this->head();
         $this->run();
@@ -40,17 +69,22 @@ class PgLoadingCSV {
             $this->run->explode = ';';
         }
         $head = explode($this->run->explode, $data[0]);
-        $this->run->fields = $cpos = [];
+        $this->run->fields = $cpos = $control = [];
+
         foreach ($head as $key => $val) {
             //$key = str_replace(['"', "'"], [''], $key);
             //$val = str_replace(['"', "'", ' '], ['', '', '_'], $val);
             $val = $this->sanitizeField($val);
             $cpos[] = "$val text null";
             if ($this->run->fields[md5($val)]) {
-                $val = '_2';
+                $control[md5($val)] ++;
+                $val = $val . '_' . $control[md5($val)];
+            } else {
+                $control[md5($val)] = 1;
             }
-            $this->run->fields[md5($val)] = $val;
+            $this->run->fields[] = $val;
         }
+
         //$this->run->fields = implode(',', $this->run->fields);
         $this->run->con->executeQuery("CREATE TABLE IF NOT EXISTS "
                 . $this->run->tableSchema
@@ -59,7 +93,7 @@ class PgLoadingCSV {
                 . ")");
     }
 
-    private function run() {
+    private function execute() {
         echo 'Tabela: "' . $this->run->tableSchema . '"';
         $this->run->linhas = \NsUtil\Helper::linhasEmArquivo($this->file);
         echo ' com ' . number_format($this->run->linhas, 0, ',', '.') . ' linhas' . PHP_EOL;
@@ -154,19 +188,23 @@ class PgLoadingCSV {
     }
 
     private function sanitizeField($str) {
-        return preg_replace("/[^A-Za-z0-9]/", "_", $str);
+        $str = preg_replace("/[^A-Za-z0-9]/", "_", $str);
+        if (is_numeric($str[0])) {
+            $str = '_' . $str;
+        }
+        return $str;
     }
 
     function pgInsertByCopy($con, $tableName, array $fields, array $records) {
         static $delimiter = "\t", $nullAs = '\\N';
-
         $rows = [];
-
         foreach ($records as $record) {
-
             $row = [];
             foreach ($fields as $key => $field) {
-                $record[$key] = (($record[$key])?$record[$key]:null);// array_key_exists($field, $record) ? $record[$field] : null;
+                //echo $key;
+                $record[$key] = $record[$key] ? $record[$key] : null; //] array_key_exists($field, $record) ? $record[$field] : null;
+                //echo $record[$key];
+                //echo $record[$key];
                 if (is_null($record[$key])) {
                     $record[$key] = $nullAs;
                 } elseif (is_bool($record[$key])) {
@@ -179,30 +217,7 @@ class PgLoadingCSV {
                 $row[] = $record[$key];
             }
             $rows[] = implode($delimiter, $row) . "\n";
-
-
-
-            /*
-            $record = array_map(
-                    function ($field) use( $record, $delimiter, $nullAs) {
-                $value = array_key_exists($field, $record) ? $record[$field] : null;
-
-                if (is_null($value)) {
-                    $value = $nullAs;
-                } elseif (is_bool($value)) {
-                    $value = $value ? 't' : 'f';
-                }
-
-                $value = str_replace($delimiter, ' ', $value);
-                // Convert multiline text to one line.
-                $value = addcslashes($value, "\0..\37");
-
-                return $value;
-            }, $fields);
-            $rows[] = implode($delimiter, $record) . "\n";
-             */ 
         }
-
         return $con->pgsqlCopyFromArray($tableName, $rows, $delimiter, addslashes($nullAs), implode(',', $fields));
     }
 
