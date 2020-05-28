@@ -7,7 +7,7 @@ class StatusLoader {
     private $startTime, $totalRegistros, $label, $size, $lastDone;
     private $showQtde = false;
 
-    public function __construct($totalRegistros, $label = '', $size = 65) {
+    public function __construct($totalRegistros, $label = '', $size = 45) {
         $this->startTime = time();
         $this->totalRegistros = (int) $totalRegistros;
         $this->size = (int) $size;

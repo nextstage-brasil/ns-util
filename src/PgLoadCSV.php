@@ -8,7 +8,7 @@ class PgLoadCSV {
 
     private $file, $run;
 
-    public function __construct(ConnectionPostgreSQL $con, $schema = 'import', bool $schemaDrop = false) {
+    public function __construct(ConnectionPostgreSQL $con, $schema = 'import', bool $schemaDrop = false, $truncateTables = false) {
         //$this->file = realpath($file);
         $this->run = new stdClass();
         $this->run->con = $con;
@@ -16,6 +16,7 @@ class PgLoadCSV {
         $this->run->delimiter = "\t"; // delimiter to load
         $this->run->nullAs = ''; // null as to load
         $this->run->schemaDrop = $schemaDrop;
+        $this->run->truncate = $truncateTables;
 
         $this->run->schema = $schema;
         if ($this->run->schemaDrop) {
@@ -33,11 +34,14 @@ class PgLoadCSV {
                     $ext = strtolower(pathinfo($entry, PATHINFO_EXTENSION));
                     if (in_array($ext, $types)) {
                         $file = $dir . '/' . $entry;
+                        echo "-----------------------------------------------------------" . PHP_EOL;
                         $this->run($file);
+                        echo PHP_EOL;
                     }
                 }
                 closedir($handle);
             }
+            echo "-----------------------------------------------------------" . PHP_EOL;
             return true;
         }
         $this->file = realpath($file_or_dir);
@@ -80,13 +84,16 @@ class PgLoadCSV {
                 . " ("
                 . implode(',', $cpos)
                 . ")");
+        if ($this->run->truncate) {
+            $this->run->con->executeQuery("TRUNCATE TABLE " . $this->run->tableSchema . " CASCADE");
+        }
     }
 
     private function execute() {
         echo 'Tabela: "' . $this->run->tableSchema . '"';
         $this->run->linhas = \NsUtil\Helper::linhasEmArquivo($this->file);
-        echo ' com ' . number_format(($this->run->linhas-1), 0, ',', '.') . ' linhas a verificar' . PHP_EOL;
-        $loader = new StatusLoader($this->run->linhas, $this->run->table, 40);
+        echo ' com ' . number_format(($this->run->linhas - 1), 0, ',', '.') . ' linhas a verificar' . PHP_EOL;
+        $loader = new StatusLoader($this->run->linhas, $this->run->table);
         $loader->setShowQtde(false);
         $setLoader = 0;
         $row = $qtdeLinhas = $setLoader = 0;

@@ -155,11 +155,7 @@ class ConnectionPostgreSQL {
         foreach ($records as $record) {
             $row = [];
             foreach ($fields as $key => $field) {
-                //echo $key;
                 $record[$key] = $record[$key] ? $record[$key] : null; //] array_key_exists($field, $record) ? $record[$field] : null;
-                //$record[$key] = array_key_exists($field, $record) ? $record[$field] : null;
-                //echo $record[$key];
-                //echo $record[$key];
                 if (is_null($record[$key])) {
                     $record[$key] = $nullAs;
                 } elseif (is_bool($record[$key])) {
@@ -178,6 +174,16 @@ class ConnectionPostgreSQL {
         unset($rows);
 
         return true;
+    }
+
+    public function queryRunWithLoader($querys, $label) {
+        $loader = new StatusLoader(count($querys), $label);
+        $loader->done(1);
+        for ($i = 0; $i < count($querys); $i++) {
+            $this->executeQuery($querys[$i]);
+            $loader->done($i + 1);
+        }
+        unset($loader);
     }
 
 }
