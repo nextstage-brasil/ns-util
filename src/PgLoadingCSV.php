@@ -6,58 +6,49 @@ use stdClass;
 
 class PgLoadingCSV {
 
-    private $file, $handle, $return, $run;
+    private $file, $run;
 
-    public function __construct($file, ConnectionPostgreSQL $con, $schema = 'import', $schemaDrop = false) {
-        $this->file = realpath($file);
-        $this->return = new stdClass();
+    public function __construct(ConnectionPostgreSQL $con, $schema = 'import', bool $schemaDrop = false) {
+        //$this->file = realpath($file);
         $this->run = new stdClass();
         $this->run->con = $con;
         $this->run->schema = \NsUtil\Helper::sanitize($schema);
         $this->run->delimiter = "\t"; // delimiter to load
         $this->run->nullAs = ''; // null as to load
-        //$this->run->memory_limit = preg_replace("/[^0-9]/", "", ini_get('memory_limit')); // * 1024 * 1024;
+        $this->run->schemaDrop = $schemaDrop;
 
-        $this->return->error = false;
-        if (!file_exists($this->file)) {
-            $this->return->error = 'File not exists';
-            die($this->return->error);
-        }
-        $t = explode(DIRECTORY_SEPARATOR, $this->file);
-        $this->run->table = str_replace(['.csv', '.', '-'], ['', '_', '_'], \NsUtil\Helper::sanitize(array_pop($t)));
-        $this->run->tableSchema = $this->run->schema . '.' . $this->run->table;
-        if ($schemaDrop) {
+        $this->run->schema = $schema;
+        if ($this->run->schemaDrop) {
             $this->run->con->executeQuery("DROP SCHEMA IF EXISTS " . $this->run->schema . ' CASCADE');
         }
         $this->run->con->executeQuery("CREATE SCHEMA IF NOT EXISTS " . $this->run->schema);
-        $this->head();
-        $this->run();
     }
 
-    public function run($file) {
-        $this->file = realpath($file);
-        $this->return = new stdClass();
-        $this->run = new stdClass();
-        $this->run->con = $con;
-        $this->run->schema = \NsUtil\Helper::sanitize($schema);
-        $this->run->delimiter = "\t"; // delimiter to load
-        $this->run->nullAs = ''; // null as to load
-        //$this->run->memory_limit = preg_replace("/[^0-9]/", "", ini_get('memory_limit')); // * 1024 * 1024;
-
-        $this->return->error = false;
+    public function run(string $file_or_dir) {
+        if (is_dir($file_or_dir)) {
+            $types = array('csv');
+            $dir = realpath($file_or_dir);
+            if ($handle = opendir($dir)) {
+                while ($entry = readdir($handle)) {
+                    $ext = strtolower(pathinfo($entry, PATHINFO_EXTENSION));
+                    if (in_array($ext, $types)) {
+                        $file = $dir . '/' . $entry;
+                        $this->run($file);
+                    }
+                }
+                closedir($handle);
+            }
+            return true;
+        }
+        $this->file = realpath($file_or_dir);
         if (!file_exists($this->file)) {
-            $this->return->error = 'File not exists';
-            die($this->return->error);
+            echo "File '$file' not exists" . PHP_EOL;
         }
         $t = explode(DIRECTORY_SEPARATOR, $this->file);
         $this->run->table = str_replace(['.csv', '.', '-'], ['', '_', '_'], \NsUtil\Helper::sanitize(array_pop($t)));
         $this->run->tableSchema = $this->run->schema . '.' . $this->run->table;
-        if ($schemaDrop) {
-            $this->run->con->executeQuery("DROP SCHEMA IF EXISTS " . $this->run->schema . ' CASCADE');
-        }
-        $this->run->con->executeQuery("CREATE SCHEMA IF NOT EXISTS " . $this->run->schema);
         $this->head();
-        $this->run();
+        $this->execute();
     }
 
     private function head() {
