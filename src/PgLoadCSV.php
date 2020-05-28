@@ -18,7 +18,7 @@ class PgLoadCSV {
         $this->run->schemaDrop = $schemaDrop;
         $this->run->truncate = $truncateTables;
 
-        $this->run->schema = $schema;
+        $this->run->schema = $this->sanitizeField($schema);
         if ($this->run->schemaDrop) {
             $this->run->con->executeQuery("DROP SCHEMA IF EXISTS " . $this->run->schema . ' CASCADE');
         }
