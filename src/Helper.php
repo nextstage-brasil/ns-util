@@ -281,4 +281,29 @@ class Helper {
         return $ret;
     }
 
+    public static function myFGetsCsv($handle, $explode = ';', $blockSize = 1000, $enclosure = '"') {
+        $data = fgetcsv($handle, $blockSize, $explode, $enclosure);
+        if ($data === false || $data === null) {
+            return false;
+        }
+
+        $line = implode('|M|', $data);
+        $line = str_replace(['|EN|', '\\', ';', '"', "'", "\n", "\t", "\r\n", "0x0d"], [$explode, '', ' ', '', '', '', ' ', ' ', ' '], trim($line));
+        $line = mb_convert_encoding($line, "UTF-8");
+        $data = explode('|M|', $line);
+        return $data;
+    }
+
+    public static  function linhasEmArquivo($file) {
+        $l = 0;
+        if ($f = fopen($file, "r")) {
+            while ($d = fgets($f, 1000)) {
+                $l++;
+            }
+        }
+        unset($d);
+        fclose($f);
+        return $l;
+    }
+
 }
