@@ -93,7 +93,7 @@ class PgLoadingCSV {
         $setLoader = 0;
         $row = $qtdeLinhas = $setLoader = 0;
         $start = microtime(true);
-        $con = $this->run->con->getConn();
+        //$con = $this->run->con->getConn();
         $this->run->con->begin_transaction();
 
         if (($handle = fopen($this->file, "r")) !== false) {
@@ -121,7 +121,7 @@ class PgLoadingCSV {
                     // insert on table
                     //$descarga++;
                     if (count($records) > 0) {
-                        $this->pgInsertByCopy($con, $this->run->tableSchema, $this->run->fields, $records);
+                        $this->run->con->insertByCopy($this->run->tableSchema, $this->run->fields, $records);
                         //$con->pgsqlCopyFromArray($this->run->tableSchema, $records, $this->run->delimiter, addslashes($this->run->nullAs), $this->run->fields);
                         $records = [];
                     }
@@ -143,7 +143,8 @@ class PgLoadingCSV {
             if (count($records) > 0) {
                 $loader->setLabel('Ingerindo dados finais');
                 //$con->pgsqlCopyFromArray($this->run->tableSchema, $records, $this->run->delimiter, addslashes($this->run->nullAs), $this->run->fields);
-                $this->pgInsertByCopy($con, $this->run->tableSchema, $this->run->fields, $records);
+                //$this->pgInsertByCopy($con, $this->run->tableSchema, $this->run->fields, $records);
+                $this->run->con->insertByCopy($this->run->tableSchema, $this->run->fields, $records);
                 $records = [];
             }
             $loader->setLabel('OK! R/Seg:'
@@ -185,31 +186,4 @@ class PgLoadingCSV {
         }
         return $str;
     }
-
-    function pgInsertByCopy($con, $tableName, array $fields, array $records) {
-        static $delimiter = "\t", $nullAs = '\\N';
-        $rows = [];
-        foreach ($records as $record) {
-            $row = [];
-            foreach ($fields as $key => $field) {
-                //echo $key;
-                $record[$key] = $record[$key] ? $record[$key] : null; //] array_key_exists($field, $record) ? $record[$field] : null;
-                //echo $record[$key];
-                //echo $record[$key];
-                if (is_null($record[$key])) {
-                    $record[$key] = $nullAs;
-                } elseif (is_bool($record[$key])) {
-                    $record[$key] = $record[$key] ? 't' : 'f';
-                }
-
-                $record[$key] = str_replace($delimiter, ' ', $record[$key]);
-                // Convert multiline text to one line.
-                $record[$key] = addcslashes($record[$key], "\0..\37");
-                $row[] = $record[$key];
-            }
-            $rows[] = implode($delimiter, $row) . "\n";
-        }
-        return $con->pgsqlCopyFromArray($tableName, $rows, $delimiter, addslashes($nullAs), implode(',', $fields));
-    }
-
 }
