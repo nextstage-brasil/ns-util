@@ -2,7 +2,8 @@
     "name": "nextstage-brasil/ns-util",
     "description": "Metodos e classes de utilidades diversas",
     "require": {
-        "php": "^7.2"
+        "php": "^7.2",
+        "guzzlehttp/guzzle": "^6.5.4"
     },
     "license": "Apache-2.0",
     "autoload": {
