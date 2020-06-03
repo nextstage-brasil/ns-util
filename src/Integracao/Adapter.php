@@ -5,6 +5,7 @@ namespace NsUtil\Integracao;
 abstract class Adapter {
 
     protected $token, $endpoint, $appkey, $showLogs, $sessionName;
+    private $atualLoginTime;
 
     public function __construct($endpoint, $appkey, $autologin = false) {
         $this->endpoint = $endpoint;
@@ -34,6 +35,22 @@ abstract class Adapter {
         }
     }
 
+    /**
+     * Ignora por uma unica vez a verificação de login
+     */
+    public function ignoreLogin() {
+        $this->atualLoginTime = $_SESSION[$this->sessionName];
+        $_SESSION[$this->sessionName] = time() + 3000;
+    }
+
+    /**
+     * Executa uma chamada a API conforme recurso. Ira verificar login valido antes de executar
+     * @param type $recurso
+     * @param type $params
+     * @param type $method
+     * @param type $header
+     * @return \stdClass
+     */
     public function call($recurso, $params = [], $method = 'POST', $header = []) {
         $this->login();
         try {
@@ -62,6 +79,11 @@ abstract class Adapter {
             $out->status = $res->getStatusCode();
             $out->error = (boolean) true;
             $out->content = $exc->getMessage();
+        } finally {
+            if ($this->atualLoginTime) {
+                $_SESSION[$this->sessionName] = $this->atualLoginTime;
+                $this->atualLoginTime = false;
+            }
         }
     }
 
