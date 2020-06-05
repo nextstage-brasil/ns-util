@@ -25,7 +25,7 @@ class Licence {
      */
     public function create($filenameOrigem, $filenameDestino) {
         $origem = realpath($filenameOrigem);
-        $destino = realpath($filenameDestino);
+        $destino = $filenameDestino;
 
         if (!file_exists($filenameOrigem)) {
             throw new \Exception('NsLicence: Arquivo de origem não localizado: ' . $origem);
@@ -37,7 +37,7 @@ class Licence {
         // save
         $toSave = $this->crypto->encrypt($pre . $content);
         // return
-        return Helper::saveFile($destino.'.lic', '', $toSave, 'SOBREPOR');
+        return Helper::saveFile($destino, '', $toSave, 'SOBREPOR');
     }
 
     /**
@@ -46,7 +46,7 @@ class Licence {
      * @return type
      */
     public function read($licenceFile) {
-        $filename = realpath($licenceFile.'.lic');
+        $filename = realpath($licenceFile);
         if (!file_exists($filename)) {
             return ['error' => "NsLicence: Arquivo não localizado: $filename"];
         }
