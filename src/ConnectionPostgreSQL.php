@@ -29,7 +29,6 @@ class ConnectionPostgreSQL {
         $this->open();
     }
 
-    // gravar o conector em session, vai garantir uma unica conexão no sistema todo, exceto se solicitado explicitamente new
     public function open() {
         if (!$this->con) {
             try {
@@ -37,10 +36,7 @@ class ConnectionPostgreSQL {
                 $this->con = new PDO($stringConnection);
                 $this->con->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
             } catch (Exception $e) {
-                echo '<p class="alert alert-error text-center">'
-                . 'ERROR: Connection Failed (CPD-167)<br/>' . $e->getMessage()
-                . '</p>';
-                die();
+                throw new Exception($e->getMessage());
             }
         }
     }
