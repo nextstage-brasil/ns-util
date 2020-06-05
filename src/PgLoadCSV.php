@@ -63,6 +63,9 @@ class PgLoadCSV {
         if (stripos($data[0], ';') > 0) {
             $this->run->explode = ';';
         }
+        if (stripos($data[0], "\t") > 0) {
+            $this->run->explode = "\t";
+        }
         $head = explode($this->run->explode, $data[0]);
         $this->run->fields = $cpos = $control = [];
 
