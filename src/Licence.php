@@ -42,13 +42,22 @@ class Licence {
 
     /**
      * Le o arquivo de licenca e retorna decodificado
-     * @param type $licenceFile Path do arquivo de licenca a ser lido
+     * @param type $licenceFile Path do arquivo de licenca a ser lido. Ira buscar em 10 diretorios abaixo procurando este arquivo.
      * @return type
      */
     public function read($licenceFile) {
-        $filename = realpath($licenceFile);
+        // varredura em busca do arquivo
+        $filename = __DIR__ . '/' . $licenceFile;
+        $count = 0;
+        while (!file_exists($filename) && $count < 10) { // paths acima
+            $dirs .= '../';
+            $filename = __DIR__ . $dirs . $licenceFile;
+            $count++;
+        }
+        
+        $filename = realpath($filename);
         if (!file_exists($filename)) {
-            return ['error' => "NsLicence: Arquivo não localizado: $filename"];
+            die ("NsLicence: Arquivo não localizado: $licenceFile");
         }
 
         // decodificar config
