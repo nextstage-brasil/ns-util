@@ -47,11 +47,12 @@ class Licence {
      */
     public function read($licenceFile) {
         // varredura em busca do arquivo
-        $filename = __DIR__ . '/' . $licenceFile;
+        $dirarray = explode(DIRECTORY_SEPARATOR, __DIR__);
+        $filename = implode(DIRECTORY_SEPARATOR, $dirarray) . DIRECTORY_SEPARATOR . $licenceFile;
         $count = 0;
         while (!file_exists($filename) && $count < 10) { // paths acima
-            $dirs .= '../';
-            $filename = __DIR__ . $dirs . $licenceFile;
+            array_pop($dirarray);
+            $filename = implode(DIRECTORY_SEPARATOR, $dirarray) . DIRECTORY_SEPARATOR . $licenceFile;
             $count++;
         }
         
