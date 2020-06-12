@@ -69,7 +69,7 @@ class Licence {
 
         // validação que o código não foi alterado
         if ($pre !== $md5) {
-            return ['error' => 'NsLicence: Arquivo de configuração violado'];
+            die('NsLicence: Arquivo de configuração inválido ou violado');
         }
         return $code;
     }
