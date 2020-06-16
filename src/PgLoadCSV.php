@@ -166,7 +166,19 @@ class PgLoadCSV {
     }
 
     private function sanitizeField($str) {
+        //$str = preg_replace("/[^A-Za-z0-9]/", "_", $str);
+
+
+        $from = "áàãâéêíóôõúüçÁÀÃÂÉÊÍÓÔÕÚÜÇ";
+        $to = "aaaaeeiooouucAAAAEEIOOOUUC";
+        $keys = array();
+        $values = array();
+        preg_match_all('/./u', $from, $keys);
+        preg_match_all('/./u', $to, $values);
+        $mapping = array_combine($keys[0], $values[0]);
+        $str = strtr($str, $mapping);
         $str = preg_replace("/[^A-Za-z0-9]/", "_", $str);
+
         if (is_numeric($str[0])) {
             $str = '_' . $str;
         }

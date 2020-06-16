@@ -1,0 +1,34 @@
+<div class="container" id="nsSuporteContainer">
+
+    <!-- lista de tickets -->
+    <div id="nsSuporteList">
+        <div class="lineFilters"></div>
+        <div class="lineTable">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th scope="col">Assunto</th>
+                        <th scope="col">Data criação</th>
+                        <th scope="col">Status</th>
+                        <th scope="col">Ações</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr ng-repeat="item in Tickets">
+                        <td ng-bind-html="item.titulo">Mark</td>
+                        <td ng-bind-html="item.data">Otto</td>
+                        <td ng-bind-html="item.status">@mdo</td>
+                        <td ng-bind-html="">@mdo</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- ticket aberto -->
+    <div id="nsSuporteCreate"></div>
+
+    <!-- ticket aberto -->
+    <div id="nsSuporteView"></div>
+
+</div>
