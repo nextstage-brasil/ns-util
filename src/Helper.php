@@ -186,11 +186,23 @@ class Helper {
                 . ' with ' . round(((memory_get_peak_usage(true) / 1024) / 1024), 2) . 'Mb';
     }
 
+    /**
+     * Remove um arquivo em disco
+     * @param type $filepath
+     * @param type $apagarDiretorio
+     * @param type $trash
+     * @return boolean
+     */
     public static function deleteFile($filepath, $apagarDiretorio = false, $trash = false) {
         ///echo $filename;
         $filename = realpath($filepath);
         $t = explode(DIRECTORY_SEPARATOR, $filename);
-
+        /*
+          $file = array_pop($t);
+          $root = implode(DIRECTORY_SEPARATOR, $t);
+          $adapter = new \League\Flysystem\Adapter\Local($root);
+          $fs = new \League\Flysystem\Filesystem($adapter);
+         */
         if (is_dir($filename)) {
             $dir = dir($filename);
             while ($arquivo = $dir->read()) {
@@ -212,6 +224,11 @@ class Helper {
         }
     }
 
+    /**
+     * Permite o uso em ambientes com SSL
+     * @param type $url
+     * @return type
+     */
     public static function myFileGetContents($url) {
         $config = array(
             "ssl" => array(
@@ -238,8 +255,8 @@ class Helper {
             CURLOPT_CUSTOMREQUEST => $method,
             CURLOPT_POST => false,
             CURLOPT_USERAGENT => 'Mozilla/5.0 (Windows NT 6.1; rv:8.0) Gecko/20100101 Firefox/8.0', //set user agent
-            CURLOPT_COOKIEFILE => "nsutil-curl-cookie.txt",
-            CURLOPT_COOKIEJAR => "nsutil-curl-cookiejar.txt", //set cookie 
+            CURLOPT_COOKIEFILE => "/tmp/nsutil-curl-cookie.txt",
+            CURLOPT_COOKIEJAR => "/tmp/nsutil-curl-cookiejar.txt", //set cookie 
             CURLOPT_RETURNTRANSFER => true, // return web page
             CURLOPT_FOLLOWLOCATION => true, // follow redirects
             CURLOPT_ENCODING => "", // handle all encodings
@@ -281,6 +298,14 @@ class Helper {
         return $ret;
     }
 
+    /**
+     * Retorna um array associativo de um handle aberto via fopen
+     * @param type $handle
+     * @param type $explode
+     * @param type $blockSize
+     * @param type $enclosure
+     * @return boolean
+     */
     public static function myFGetsCsv($handle, $explode = ';', $blockSize = 1000, $enclosure = '"') {
         $data = fgetcsv($handle, $blockSize, $explode, $enclosure);
         if ($data === false || $data === null) {
@@ -294,7 +319,12 @@ class Helper {
         return $data;
     }
 
-    public static  function linhasEmArquivo($file) {
+    /**
+     * Conta a quantidade linhas em um arquivo CSV ou TXT
+     * @param type $file
+     * @return int
+     */
+    public static function linhasEmArquivo($file) {
         $l = 0;
         if ($f = fopen($file, "r")) {
             while ($d = fgets($f, 1000)) {
@@ -304,6 +334,50 @@ class Helper {
         unset($d);
         fclose($f);
         return $l;
+    }
+
+    /**
+     * Trata de dados de entrada via APIs, removendo caracteres não desejados e nulls
+     * @param type $dados
+     * @return boolean
+     */
+    public static function recebeDadosFromView(&$dados) {
+        if (!is_array($dados)) {
+            return false;
+        }
+        foreach ($dados as $key => $value) {
+            if (is_array($value)) {
+                self::recebeDadosFromView($dados[$key]);
+            } else {
+                // tirar "undefined" do javascript
+                if ($value === 'undefined' || $value === 'null' || $value === null) {
+                    continue;
+                } else {
+                    $dados[$key] = filter_var($value, FILTER_SANITIZE_STRING);
+                    $dados[$key] = str_replace(['NS21', '&#34;'], ['&', '"'], $dados[$key]);
+                }
+            }
+        }
+    }
+
+    public static function depara(array $depara, array $dados, $retornaSomenteDepara = true) {
+        if ($retornaSomenteDepara) {
+            $out = [];
+        } else {
+            $out = $dados;
+        }
+        foreach ($depara as $key => $val) {
+            $out[$key] = $dados[$val];
+        }
+        return $out;
+    }
+    
+ public static function compareString($str1, $str2, $case = false) {
+        if (!$case) {
+            return (mb_strtoupper($str1) === mb_strtoupper($str2));
+        } else {
+            return ($str1 === $str2);
+        }
     }
 
 }
