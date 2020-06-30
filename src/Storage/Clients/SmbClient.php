@@ -119,7 +119,6 @@ class SmbClient {
         $remote_filename = str_replace(DIRECTORY_SEPARATOR, '\\', $remote_filename);
 
         $cmd = "get \"$remote_filename\" \"$local_filename\"";
-
         $retval = $this->execute($cmd);
         return $retval;
     }
@@ -342,7 +341,7 @@ class SmbClient {
                 $cmd = "dir";
             }
         }
-
+        
         $retval = $this->execute($cmd);
         if (!$retval) {
             return $retval;
@@ -381,6 +380,7 @@ class SmbClient {
             1 => array("file", $outfile, "w"),
             2 => array("file", $errfile, "w")
         );
+        
         $proc = proc_open($this->_cmd, $descriptorspec, $pipes);
 
         if (!is_resource($proc))

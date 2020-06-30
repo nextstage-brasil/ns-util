@@ -9,7 +9,7 @@ class Ioncube {
     public function __construct() {
         $this->licenseProperties = ioncube_license_properties();
         if ($this->licenseProperties === false) {
-            throw new Exception("Ioncube: Unable to read license properties");
+            throw new \Exception("Ioncube: Unable to read license properties");
         }
         $new = [];
         foreach ($this->licenseProperties as $key => $val) {
@@ -25,7 +25,7 @@ class Ioncube {
         if (isset($this->licenseProperties->specialFeaturesAccess)) {
             return $this->licenseProperties->specialFeaturesAccess;
         } else {
-            throw new Exception("Ioncube: Unable to read key '$key'");
+            throw new \Exception("Ioncube: Unable to read key '$key'");
         }
     }
 

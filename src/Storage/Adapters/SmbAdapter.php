@@ -39,8 +39,8 @@ class SmbAdapter implements AdapterInterface {
 
     public function getMetadata($path) {
         if (!$this->pathCache[md5($path)]['type']) {
-            $dir_ret = $this->smbclient->dir('', $path)[0];
-            $this->mapFile($dir_ret);
+            $dir_ret = $this->smbclient->dir('', $path);
+            $this->mapFile($dir_ret[0], $path);
         }
         return $this->pathCache[md5($path)];
     }
@@ -63,14 +63,15 @@ class SmbAdapter implements AdapterInterface {
 
     public function has($path) {
         $ret = $this->getMetadata($path);
-        return (($ret['mtime']) ? true : false);
+        //var_export($this->smbclient->get_last_cmd_stderr());die();
+        return (($ret['type']) ? true : false);
     }
 
     public function listContents($directory = '', $recursive = false): array {
         $list = $this->smbclient->dir($directory);
         $out = [];
         foreach ($list as $item) {
-            $out[] = $this->mapFile($item);
+            $out[] = $this->mapFile($item, 'qwqco');
         }
     }
 
@@ -122,8 +123,8 @@ class SmbAdapter implements AdapterInterface {
         return $this->smbclient->put($local, $path);
     }
 
-    protected function mapFile($returnOfDir) {
-        $this->pathCache[md5($returnOfDir['filename'])] = [
+    protected function mapFile($returnOfDir, $path) {
+        $this->pathCache[md5($path)] = [
             'type' => $returnOfDir['isdir'] ? 'dir' : 'file',
             'path' => $returnOfDir['filename'],
             //'contents' => '',
@@ -131,16 +132,19 @@ class SmbAdapter implements AdapterInterface {
             'visibility' => 'public',
             'timestamp' => (int) $returnOfDir['mtime'],
             'size' => (int) $returnOfDir['isdir'] ? $returnOfDir['size'] : 0,
-            'mimetype' => mime_content_type('php.gif')
+            'mimetype' => \NsUtil\Storage\libs\Mimes::getMimeType($returnOfDir['filename'])
         ];
+        return $this->pathCache[md5($path)];
     }
 
-    protected function download($path, $path_save) {
+    public function download($path, $path_save) {
         if ($this->has($path)) {
-            $local = realpath($path_save);
+            $local = $path_save;
             $this->smbclient->get($path, $local);
+            //var_export($this->smbclient->get_last_cmd_stderr());die();
             return (bool) file_exists($local) && filesize($local) > 0;
         } else {
+            var_export($this->smbclient->get_last_cmd_stderr());die();
             return false;
         }
     }

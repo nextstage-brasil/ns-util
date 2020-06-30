@@ -48,7 +48,7 @@ class Mimes {
      * @param boolean $encoding Define se também será retornado a codificação do arquivo
      * @return string
      */
-    public function getMimeType($file, $encoding = true) {
+    public static function getMimeType($file, $encoding = true) {
         if (function_exists('finfo_open') && is_file($file) && is_readable($file)) {
             $finfo = new finfo($encoding ? FILEINFO_MIME : FILEINFO_MIME_TYPE);
             $out = explode(';', $finfo->file($file))[0];
