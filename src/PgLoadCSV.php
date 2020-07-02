@@ -25,7 +25,13 @@ class PgLoadCSV {
         $this->run->con->executeQuery("CREATE SCHEMA IF NOT EXISTS " . $this->run->schema);
     }
 
-    public function run(string $file_or_dir) {
+    /**
+     * 
+     * @param string $file_or_dir Diretorio ou CSV que deve ser ingerido
+     * @param string $tablename - Caso false, será utilizado o nome do arquivo CSV sanitizado
+     * @return boolean
+     */
+    public function run(string $file_or_dir, $tablename = false) {
         if (is_dir($file_or_dir)) {
             $types = array('csv');
             $dir = realpath($file_or_dir);
@@ -35,7 +41,7 @@ class PgLoadCSV {
                     if (in_array($ext, $types)) {
                         $file = $dir . '/' . $entry;
                         echo "-----------------------------------------------------------" . PHP_EOL;
-                        $this->run($file);
+                        $this->run($file, $tablename);
                         echo PHP_EOL;
                     }
                 }
@@ -48,8 +54,9 @@ class PgLoadCSV {
         if (!file_exists($this->file)) {
             echo "File '$file' not exists" . PHP_EOL;
         }
+        Helper::fileConvertToUtf8($filepath);
         $t = explode(DIRECTORY_SEPARATOR, $this->file);
-        $this->run->table = $this->sanitizeField(str_replace(['.csv', '.', '-'], ['', '_', '_'], \NsUtil\Helper::sanitize(array_pop($t))));
+        $this->run->table = $tablename ? $tablename : $this->sanitizeField(str_replace(['.csv', '.', '-'], ['', '_', '_'], Helper::sanitize(array_pop($t))));
         $this->run->tableSchema = $this->run->schema . '.' . $this->run->table;
         $this->head();
         $this->execute();
@@ -58,6 +65,9 @@ class PgLoadCSV {
     private function head() {
         $fh = fopen($this->file, "rb") or die('not open');
         $data = fgetcsv($fh, 1000, '\\');
+
+        $data = array_map("utf8_encode", $data); //para tornar sempre utf8encoded. validar se é necessário
+
         fclose($fh);
         $this->run->explode = ',';
         if (stripos($data[0], ';') > 0) {

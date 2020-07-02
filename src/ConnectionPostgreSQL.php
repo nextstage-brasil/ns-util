@@ -172,10 +172,13 @@ class ConnectionPostgreSQL {
         return true;
     }
 
-    public function queryRunWithLoader($querys, $label) {
+    public function queryRunWithLoader($querys, $label, $showQueryOnLabel = false) {
         $loader = new StatusLoader(count($querys), $label);
         $loader->done(1);
         for ($i = 0; $i < count($querys); $i++) {
+            if ($showQueryOnLabel) {
+                $loader->setLabel($querys[$i]);
+            }
             $this->executeQuery($querys[$i]);
             $loader->done($i + 1);
         }

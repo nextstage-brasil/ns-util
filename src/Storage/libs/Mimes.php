@@ -50,7 +50,7 @@ class Mimes {
      */
     public static function getMimeType($file, $encoding = true) {
         if (function_exists('finfo_open') && is_file($file) && is_readable($file)) {
-            $finfo = new finfo($encoding ? FILEINFO_MIME : FILEINFO_MIME_TYPE);
+            $finfo = new \finfo($encoding ? FILEINFO_MIME : FILEINFO_MIME_TYPE);
             $out = explode(';', $finfo->file($file))[0];
         } else {
             $plim = explode('.', $file);

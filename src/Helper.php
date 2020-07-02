@@ -2,6 +2,7 @@
 
 namespace NsUtil;
 
+// Helper funcionrs
 class Helper {
 
     /**
@@ -382,12 +383,40 @@ class Helper {
         }
         return $out;
     }
-    
- public static function compareString($str1, $str2, $case = false) {
+
+    public static function compareString($str1, $str2, $case = false) {
         if (!$case) {
             return (mb_strtoupper($str1) === mb_strtoupper($str2));
         } else {
             return ($str1 === $str2);
+        }
+    }
+
+    public static function fileGetEncoding($filename) {
+        $so = php_uname();
+        if (stripos($so, 'linux') > -1) {
+            $cmd = 'file -bi ' . $filename . ' | sed -e "s/.*[ ]charset=//"';
+            $cod = shell_exec($cmd);
+        } else {
+            throw new \Exception('getFileEncoding somente funciona em sistemas Linux. O seu é ' . $so);
+        }
+        return trim($cod);
+    }
+
+    public static function fileConvertToUtf8($filepath, $output = false) {
+        if (file_exists($filepath)) {
+            $enc = self::fileGetEncoding($filepath);
+            if ($enc !== 'utf-8') {
+                $output = $output ? $output : $filepath;
+                $cmd = "iconv -f $enc -t utf-8 -o $output $filepath ";
+                //echo $cmd;
+                $ret = shell_exec($cmd);
+                if (strlen($ret) > 0) {
+                    throw new \Exception("Erro ao converter arquivo $filepath pata UTF-8: " . $ret);
+                }
+            }
+        } else {
+            return 'File not exists';
         }
     }
 

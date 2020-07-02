@@ -11,7 +11,7 @@ class Format {
     private $timezone;
     private $string;
 
-    public function __construct($string=false, $timezone = 'America/Sao_Paulo') {
+    public function __construct($string = false, $timezone = 'America/Sao_Paulo') {
         $this->timezone = $timezone;
         $this->string = $string;
     }
@@ -132,12 +132,20 @@ class Format {
         return $timestamp;
     }
 
-    public function subDays($days) {
-        $d = self::formatDate($this->string);
+    public function subDays(int $days, $operacao = '-') {
+        $d = $this->date();
         $d = date_parse($d);
-        $d = mktime($d['hour'], $d['minute'], $d['second'], $d['month'], $d['day'] - $days, $d['year']);
-        return self::formatDate($d);
+        $dia = $operacao === '-' ? $d['day'] - $days : $d['day'] + $days;
+        $d = mktime($d['hour'], $d['minute'], $d['second'], $d['month'], $dia, $d['year']);
+        return date('Y-m-d H:i:s', $d);
+    }
+
+    public function subMonths(int $months, $operacao = '-') {
+        $d = $this->date();
+        $d = date_parse($d);
+        $mes = $operacao === '-' ? ($d['month'] - $months) : ($d['month'] + $months);
+        $d = mktime($d['hour'], $d['minute'], $d['second'], $mes, date('day'), $d['year']);
+        return date('Y-m-d H:i:s', $d);
     }
 
 }
-

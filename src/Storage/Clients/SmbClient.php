@@ -35,6 +35,7 @@ class SmbClient {
     private $_password;
     private $_smbver;
     private $_cmd;
+    private $_credentialFile = '/tmp/s147m456b852.tmp';
 
     /**
      * Gets the most recently executed command string
@@ -105,6 +106,19 @@ class SmbClient {
         $this->_username = $username;
         $this->_password = $password;
         $this->_smbver = $smbver;
+        $this->credentialsSet();
+    }
+
+    private function credentialsSet() {
+        // precisa ser desse jeito pra nao gerar erro na criação do arquivo
+        $credential = "username = $this->_username
+password = $this->_password
+domain   = $this->_service";
+        file_put_contents($this->_credentialFile, $credential);
+    }
+
+    public function __destruct() {
+        unlink($this->_credentialFile);
     }
 
     /**
@@ -341,7 +355,7 @@ class SmbClient {
                 $cmd = "dir";
             }
         }
-        
+
         $retval = $this->execute($cmd);
         if (!$retval) {
             return $retval;
@@ -365,8 +379,6 @@ class SmbClient {
 
         return $xary;
     }
-    
-    
 
     private function execute($cmd) {
         $this->build_full_cmd($cmd);
@@ -380,7 +392,7 @@ class SmbClient {
             1 => array("file", $outfile, "w"),
             2 => array("file", $errfile, "w")
         );
-        
+
         $proc = proc_open($this->_cmd, $descriptorspec, $pipes);
 
         if (!is_resource($proc))
@@ -407,9 +419,15 @@ class SmbClient {
     }
 
     private function build_full_cmd($cmd = '') {
-        $this->_cmd = "smbclient '" . $this->_service . "'";
 
-        $this->_cmd .= " -U '" . $this->_username . "%" . $this->_password . "'" . ($this->_smbver ? " -m " . $this->_smbver : "");
+
+        $this->_cmd = "smbclient "
+                . " -A " . $this->_credentialFile
+                . " '" . $this->_service . "'";
+
+        $this->_cmd .= ""
+                //. " -U '" . $this->_username . "%" . $this->_password . "'"
+                . ($this->_smbver ? " -m " . $this->_smbver : "");
 
         if ($cmd) {
             $this->_cmd .= " -c '$cmd'";
@@ -429,6 +447,5 @@ class SmbClient {
             log_msg('[' . self::$debug_label . "] $msg");
         }
     }
-    
 
 }
