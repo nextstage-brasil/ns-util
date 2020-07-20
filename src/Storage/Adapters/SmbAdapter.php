@@ -12,13 +12,13 @@ class SmbAdapter implements AdapterInterface {
     private $smbclient;
     private $pathCache = [];
 
-    public function __construct($service, $username, $password, $smbver = "", $tmp_dir = '/tmp') {
+    public function __construct($service, $username, $password, $domain='', $smbver = "", $tmp_dir = '/tmp') {
         $this->service = $service;
         $this->username = $username;
         $this->password = $password;
         $this->smbver = $smbver;
         $this->tmp_dir = $tmp_dir;
-        $this->smbclient = new SmbClient($service, $username, $password, $smbver);
+        $this->smbclient = new SmbClient($service, $username, $password, $domain, $smbver);
     }
 
     public function copy($path, $saveToLocal): bool {
@@ -131,7 +131,7 @@ class SmbAdapter implements AdapterInterface {
             //'stream' => '',
             'visibility' => 'public',
             'timestamp' => (int) $returnOfDir['mtime'],
-            'size' => (int) $returnOfDir['isdir'] ? $returnOfDir['size'] : 0,
+            'size' => (int) ((!$returnOfDir['isdir']) ? $returnOfDir['size'] : 0),
             'mimetype' => \NsUtil\Storage\libs\Mimes::getMimeType($returnOfDir['filename'])
         ];
         return $this->pathCache[md5($path)];

@@ -45,7 +45,7 @@ class Licence {
      * @param type $licenceFile Path do arquivo de licenca a ser lido. Ira buscar em 10 diretorios abaixo procurando este arquivo.
      * @return type
      */
-    public function read($licenceFile) {
+    public function read($licenceFile, $dieIfNotExists = true) {
         // varredura em busca do arquivo
         $dirarray = explode(DIRECTORY_SEPARATOR, __DIR__);
         $filename = implode(DIRECTORY_SEPARATOR, $dirarray) . DIRECTORY_SEPARATOR . $licenceFile;
@@ -55,10 +55,14 @@ class Licence {
             $filename = implode(DIRECTORY_SEPARATOR, $dirarray) . DIRECTORY_SEPARATOR . $licenceFile;
             $count++;
         }
-        
+
         $filename = realpath($filename);
         if (!file_exists($filename)) {
-            die ("NsLicence: Arquivo não localizado: $licenceFile");
+            if (!$dieIfNotExists) {
+                return null;
+            }
+
+            die("NsLicence: Arquivo não localizado: $licenceFile");
         }
 
         // decodificar config

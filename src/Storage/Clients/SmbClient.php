@@ -34,6 +34,7 @@ class SmbClient {
     private $_username;
     private $_password;
     private $_smbver;
+    private $_domain;
     private $_cmd;
     private $_credentialFile = '/tmp/s147m456b852.tmp';
 
@@ -101,11 +102,12 @@ class SmbClient {
      * @param string $password the password to use when connecting
      * @param string $smbver the version of SMB to use when connecting (optional)
      */
-    public function __construct($service, $username, $password, $smbver = "") {
+    public function __construct($service, $username, $password, $domain = '', $smbver = "") {
         $this->_service = $service;
         $this->_username = $username;
         $this->_password = $password;
         $this->_smbver = $smbver;
+        $this->_domain = $domain;
         $this->credentialsSet();
     }
 
@@ -113,7 +115,7 @@ class SmbClient {
         // precisa ser desse jeito pra nao gerar erro na criação do arquivo
         $credential = "username = $this->_username
 password = $this->_password
-domain   = $this->_service";
+domain   = $this->_domain";
         file_put_contents($this->_credentialFile, $credential);
     }
 
@@ -133,6 +135,7 @@ domain   = $this->_service";
         $remote_filename = str_replace(DIRECTORY_SEPARATOR, '\\', $remote_filename);
 
         $cmd = "get \"$remote_filename\" \"$local_filename\"";
+
         $retval = $this->execute($cmd);
         return $retval;
     }
@@ -385,6 +388,7 @@ domain   = $this->_service";
 
         self::log_msg($this->_cmd);
 
+
         $outfile = tempnam(".", "cmd");
         $errfile = tempnam(".", "cmd");
         $descriptorspec = array(
@@ -395,8 +399,9 @@ domain   = $this->_service";
 
         $proc = proc_open($this->_cmd, $descriptorspec, $pipes);
 
-        if (!is_resource($proc))
+        if (!is_resource($proc)) {
             return 255;
+        }
 
         fclose($pipes[0]);    //Don't really want to give any input
 
@@ -430,6 +435,9 @@ domain   = $this->_service";
                 . ($this->_smbver ? " -m " . $this->_smbver : "");
 
         if ($cmd) {
+            if (stripos($cmd, 'get') > -1) {
+                $this->_cmd .= "  --socket-options='TCP_NODELAY IPTOS_LOWDELAY SO_KEEPALIVE SO_RCVBUF=131072 SO_SNDBUF=131072'";
+            }
             $this->_cmd .= " -c '$cmd'";
         }
     }
@@ -439,8 +447,8 @@ domain   = $this->_service";
      * @param string $msg the message to log
      */
     private static function log_msg($msg) {
-        if (!self::$debug_mode) {
-            return;
+        if (self::$debug_mode === false) {
+            return true;
         }
 
         if (function_exists('log_msg')) {
