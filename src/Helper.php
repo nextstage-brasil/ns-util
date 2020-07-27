@@ -208,18 +208,11 @@ class Helper {
     public static function deleteFile($filepath, $apagarDiretorio = false, $trash = false) {
         ///echo $filename;
         $filename = realpath($filepath);
-        $t = explode(DIRECTORY_SEPARATOR, $filename);
-        /*
-          $file = array_pop($t);
-          $root = implode(DIRECTORY_SEPARATOR, $t);
-          $adapter = new \League\Flysystem\Adapter\Local($root);
-          $fs = new \League\Flysystem\Filesystem($adapter);
-         */
         if (is_dir($filename)) {
             $dir = dir($filename);
             while ($arquivo = $dir->read()) {
                 if ($arquivo != '.' && $arquivo != '..') {
-                    self::deleteFile($filename . $arquivo, false, $trash);
+                    self::deleteFile($filename . DIRECTORY_SEPARATOR . $arquivo, false, $trash);
                 }
             }
             $dir->close();

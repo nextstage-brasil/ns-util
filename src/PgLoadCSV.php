@@ -56,7 +56,10 @@ class PgLoadCSV {
         }
         Helper::fileConvertToUtf8($filepath);
         $t = explode(DIRECTORY_SEPARATOR, $this->file);
-        $this->run->table = $tablename ? $tablename : $this->sanitizeField(str_replace(['.csv', '.', '-'], ['', '_', '_'], Helper::sanitize(array_pop($t))));
+        
+        $tbl = str_replace('.csv', '', array_pop($t));
+        $this->run->table = $tablename ? $tablename : $this->sanitizeField(str_replace(['.csv', '.', '-'], ['', '_', '_'], Helper::sanitize($tbl)));
+
         $this->run->tableSchema = $this->run->schema . '.' . $this->run->table;
         $this->head();
         $this->execute();
@@ -66,7 +69,7 @@ class PgLoadCSV {
         $fh = fopen($this->file, "rb") or die('not open');
         $data = fgetcsv($fh, 1000, '\\');
 
-        $data = array_map("utf8_encode", $data); //para tornar sempre utf8encoded. validar se é necessário
+        //$data = array_map("utf8_encode", $data); //para tornar sempre utf8encoded. validar se é necessário
 
         fclose($fh);
         $this->run->explode = ',';
@@ -178,7 +181,7 @@ class PgLoadCSV {
     private function sanitizeField($str) {
         //$str = preg_replace("/[^A-Za-z0-9]/", "_", $str);
 
-
+        $str =  trim(str_replace('"', '', $str));
         $from = "áàãâéêíóôõúüçÁÀÃÂÉÊÍÓÔÕÚÜÇ";
         $to = "aaaaeeiooouucAAAAEEIOOOUUC";
         $keys = array();
