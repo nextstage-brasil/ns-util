@@ -2,10 +2,10 @@
 
 namespace NsUtil;
 
-use PHPMailer\PHPMailer\PHPMailer;
+require __DIR__ . '/lib/phpmailer/class.phpmailer.php';
 
 class Sendmail {
-    
+
     /**
      * 
      * @param array $to ['Nome' => 'Email']
@@ -14,12 +14,12 @@ class Sendmail {
      * @param array $config [host=>'host', SMTPAuth, username, email, password, port, smtpSecure]
      * @return boolean
      */
-    public static function send(array $to, $subject, $text, array $config) {
+    public static function send(array $to, $subject, $text, array $config, $debug = false) {
         $mail = new PHPMailer();
         $mail->IsSMTP(); // Define que a mensagem será SMTP
         $mail->Host = $config['host'];
         $mail->SMTPAuth = $config['SMTPAuth']; // Autenticação
-        $mail->SMTPDebug = 1;
+        $mail->SMTPDebug = $debug;
         $mail->Username = $config['email'];
         $mail->Password = $config['password'];
         $mail->Port = $config['port']; //465;
