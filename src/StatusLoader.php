@@ -4,7 +4,7 @@ namespace NsUtil;
 
 class StatusLoader {
 
-    private $startTime, $totalRegistros, $label, $size, $lastDone;
+    private $startTime, $totalRegistros, $label, $size, $lastDone, $lastStatusBar;
     private $showQtde = false;
 
     public function __construct($totalRegistros, $label = '', $size = 45) {
@@ -82,8 +82,14 @@ class StatusLoader {
 
         // when done, send a newline
         if ($done == $this->totalRegistros) {
+            // Salvar os dados do status bar concluido
+            $this->lastStatusBar = $this->label . ': Elapsed ' . gmdate("H:i:s", (int) $elapsed);
             echo "\n";
         }
+    }
+
+    function getLastStatusBar() {
+        return $this->lastStatusBar;
     }
 
 }

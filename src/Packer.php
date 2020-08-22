@@ -97,6 +97,11 @@ class Packer {
         $this->_specialChars = $_specialChars;
         $this->_removeSemicolons = $_removeSemicolons;
     }
+	
+    public static function jsPack($js) {
+        $packer = new Packer($js, 'Normal', true, false, true);
+        return '<script>' . $packer->pack() . '</script>';
+    }
 
     public function pack() {
         $this->_addParser('_basicCompression');

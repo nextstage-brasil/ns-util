@@ -430,4 +430,51 @@ class Helper {
         }
     }
 
+    public static function packerAndPrintJS($js) {
+        $packer = new Packer($js, 'Normal', true, false, true);
+        $packed_js = $packer->pack();
+        echo "<script>$packed_js</script>";
+    }
+
+    /**
+     * Verifica se o dados existe, se o conteudo é diferente de '' ou null ou false
+     * @param type $value
+     */
+    public static function hasContent($value, $type = 'string') {
+        if (is_array($value)) {
+            foreach ($value as $item) {
+                if (!self::hasContent($item, $type)) {
+                    return false;
+                }
+            }
+            return true;
+        }
+        $out = false;
+        switch ($type) {
+            case 'int':
+                $t = (int) $value;
+                $out = $t > 0;
+                break;
+            default:
+                $out = strlen((string) $value) > 0;
+                break;
+        }
+        return $out;
+    }
+
+    /**
+     * Retorna um array com errors
+     * @param array $dadosObrigatorios Array contendo array: ['value' => $dados['idCurso'], 'msg' => 'Informe a data inicial', 'type' => 'int'],
+     */
+    public static function validarCamposObrigatorios($dadosObrigatorios) {
+        $error = [];
+        foreach ($dadosObrigatorios as $item) {
+            $has = self::hasContent($item['value'], (($item['type']) ? $item['type'] : 'string'));
+            if ($has===false) {
+                $error[] = $item['msg'];
+            }
+        }
+            return $error;
+    }
+
 }

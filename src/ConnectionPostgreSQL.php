@@ -183,7 +183,7 @@ class ConnectionPostgreSQL {
             $this->executeQuery($querys[$i]);
             $loader->done($i + 1);
         }
-        unset($loader);
+        return $loader->getLastStatusBar();
     }
 
 }

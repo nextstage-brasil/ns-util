@@ -15,7 +15,7 @@ class Sendmail {
      * @return boolean
      */
     public static function send(array $to, $subject, $text, array $config, $debug = false) {
-        $mail = new PHPMailer();
+        $mail = new \PHPMailer();
         $mail->IsSMTP(); // Define que a mensagem será SMTP
         $mail->Host = $config['host'];
         $mail->SMTPAuth = $config['SMTPAuth']; // Autenticação
