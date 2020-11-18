@@ -198,6 +198,14 @@ class Helper {
                 . ' with ' . round(((memory_get_peak_usage(true) / 1024) / 1024), 2) . 'Mb';
     }
 
+    public static function deleteDir($dir) {
+        $files = array_diff(scandir($dir), array('.', '..'));
+        foreach ($files as $file) {
+            (is_dir("$dir/$file")) ? self::deleteDir("$dir/$file") : unlink("$dir/$file");
+        }
+        return rmdir($dir);
+    }
+
     /**
      * Remove um arquivo em disco
      * @param type $filepath
@@ -218,7 +226,7 @@ class Helper {
             }
             $dir->close();
             if ($apagarDiretorio) {
-                unlink($filename);
+                rmdir($filename);
             }
         } else {
             if (file_exists($filename)) {
