@@ -1,0 +1,26 @@
+{
+    "name": "nsutil",
+    "version": "1.0.0",
+    "description": "",
+    "main": "index.js",
+    "directories": {
+        "test": "tests"
+    },
+    "scripts": {
+        "test": "echo \"Error: no test specified\" && exit 1"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://cristofer.batschauer%40gmail.com@github.com/nextstage-brasil/ns-util.git"
+    },
+    "author": "",
+    "license": "ISC",
+    "bugs": {
+        "url": "https://github.com/nextstage-brasil/ns-util/issues"
+    },
+    "homepage": "https://github.com/nextstage-brasil/ns-util#readme",
+    "dependencies": {
+        "concat-typed-array": "^1.0.2",
+        "libsodium-wrappers": "0.7.3"
+    }
+}

@@ -6,8 +6,15 @@ use stdClass;
 
 class PgLoadCSV {
 
-    private $file, $run;
+    private $file, $run, $consoleTable;
 
+    /**
+     * 
+     * @param \NsUtil\ConnectionPostgreSQL $con
+     * @param type $schema
+     * @param bool $schemaDrop
+     * @param type $truncateTables
+     */
     public function __construct(ConnectionPostgreSQL $con, $schema = 'import', bool $schemaDrop = false, $truncateTables = false) {
         //$this->file = realpath($file);
         $this->run = new stdClass();
@@ -23,6 +30,18 @@ class PgLoadCSV {
             $this->run->con->executeQuery("DROP SCHEMA IF EXISTS " . $this->run->schema . ' CASCADE');
         }
         $this->run->con->executeQuery("CREATE SCHEMA IF NOT EXISTS " . $this->run->schema);
+
+        $this->consoleTable = new \NsUtil\ConsoleTable();
+        $this->consoleTable->setHeaders(['Schema', 'Tabela', 'Linhas', 'Resultado']);
+    }
+
+    public function getConsoleTable() {
+        $this->consoleTable instanceof ConsoleTable;
+        return $this->consoleTable;
+    }
+
+    private function consoleTableAddLine($qtdeLinhas, $message) {
+        $this->consoleTable->addRow([$this->run->schema, $this->run->table, $qtdeLinhas, $message]);
     }
 
     /**
@@ -56,7 +75,7 @@ class PgLoadCSV {
         }
         Helper::fileConvertToUtf8($filepath);
         $t = explode(DIRECTORY_SEPARATOR, $this->file);
-        
+
         $tbl = str_replace('.csv', '', array_pop($t));
         $this->run->table = $tablename ? $tablename : $this->sanitizeField(str_replace(['.csv', '.', '-'], ['', '_', '_'], Helper::sanitize($tbl)));
 
@@ -165,6 +184,8 @@ class PgLoadCSV {
             );
 
             $loader->done($this->run->linhas); // por causa do inicio em 0
+            $this->consoleTableAddLine($this->run->linhas, $loader->getLastStatusBar());
+
             $this->run->con->commit();
         }
     }
@@ -181,7 +202,7 @@ class PgLoadCSV {
     private function sanitizeField($str) {
         //$str = preg_replace("/[^A-Za-z0-9]/", "_", $str);
 
-        $str =  trim(str_replace('"', '', $str));
+        $str = trim(str_replace('"', '', $str));
         $from = "áàãâéêíóôõúüçÁÀÃÂÉÊÍÓÔÕÚÜÇ";
         $to = "aaaaeeiooouucAAAAEEIOOOUUC";
         $keys = array();

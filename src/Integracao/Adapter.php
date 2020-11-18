@@ -38,9 +38,13 @@ abstract class Adapter {
     /**
      * Ignora por uma unica vez a verificação de login
      */
-    public function ignoreLogin() {
+    public function ignoreLogin($segundos = 3) {
         $this->atualLoginTime = $_SESSION[$this->sessionName];
-        $_SESSION[$this->sessionName] = time() + 3000;
+        $_SESSION[$this->sessionName] = time() + 3 * $segundos;
+    }
+
+    public function call($recurso, $params = [], $method = 'POST', $header = []) {
+        return $this->_call($recurso, $params, $method, $header);
     }
 
     /**
@@ -51,7 +55,7 @@ abstract class Adapter {
      * @param type $header
      * @return \stdClass
      */
-    public function call($recurso, $params = [], $method = 'POST', $header = []) {
+    public function _call($recurso, $params = [], $method = 'POST', $header = []) {
         $this->login();
         try {
             $url = $this->endpoint . '/' . $recurso;
