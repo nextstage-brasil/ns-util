@@ -27,7 +27,7 @@ class S3ZipFiles {
         $this->filename = str_replace('.zip', '', Helper::sanitize($filenameSave)) . '.zip';
         $this->itens = $itens;
         $this->config = [
-            'tmpdir' => 'c:\\temp'
+            'tmpdir' => '/tmp'
         ];
     }
 
