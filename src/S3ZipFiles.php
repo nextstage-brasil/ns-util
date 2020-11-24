@@ -27,18 +27,20 @@ class S3ZipFiles {
         $this->filename = str_replace('.zip', '', Helper::sanitize($filenameSave)) . '.zip';
         $this->itens = $itens;
         $this->config = [
-            'tmpdir' => '/tmp'
+            'tmpdir' => 'c:\\temp'
         ];
     }
 
-    public function setCredentials($key, $secret, $bucket_public, $region, $version) {
+    public function setCredentials($key, $secret, $bucket, $bucket_public, $region, $version) {
         $this->config['s3'] = [
             'key' => $key,
             'secret' => $secret,
+            'bucket' => $bucket,
             'bucket-public' => $bucket_public,
             'region' => $region,
             'version' => $version
         ];
+        return $this;
     }
 
     /**
@@ -63,7 +65,6 @@ class S3ZipFiles {
         $fs = $this->config['s3']; // \Config::getData('fileserver', 'S3');
         $s3 = new S3($fs['key'], $fs['secret'], $fs['bucket-public'], $fs['region'], $fs['version']);
 
-
         // se já existir, notificar link
         if ($s3->getFs()->has($pathZip)) {
             $link = $s3->endpoint . '/' . $pathZip;
@@ -75,15 +76,21 @@ class S3ZipFiles {
             $out = ['error' => false];
             $resize = new ResizeImage('', '');
             foreach ($this->itens as $item) {
+
+                
                 if (!$s3->getFs()->has($item['file'])) {
                     continue;
                 }
+
                 // Obter arquivo
                 $path = $dirTemp . '/' . $item['nome'];
                 // Obter o arquivo
+
                 $ctt = $s3->getFs()->read($item['file']);
                 file_put_contents($path, $ctt);
                 unset($ctt);
+
+
 
                 if ($item['resolucao']) {
                     // resize imagem
@@ -91,7 +98,7 @@ class S3ZipFiles {
                             ->setResolucao($item['resolucao'])
                             ->run();
                 }
-                
+
                 $content = file_get_contents($path);
                 $zipFile->addFromString('/pacote-' . $this->filename . '/' . $item['nome'], $content);
                 // Adicionar ao ZIP

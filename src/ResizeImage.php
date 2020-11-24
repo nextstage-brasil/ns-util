@@ -2,6 +2,8 @@
 
 namespace NsUtil;
 
+require_once __DIR__ . '/lib/wideimage/WideImage.php';
+
 class ResizeImage {
 
     private $file;
