@@ -13,7 +13,8 @@ class Security {
     }
 
     private static function addSessionToKey(&$chave) {
-        $chave = hash('md5', filter_input(INPUT_SERVER, 'REMOTE_ADDR', FILTER_SANITIZE_STRING) . date('Ymd') . $chave);
+        $ip = session_id();
+        $chave = hash('md5', $ip . date('Ymd') . $chave);
     }
 
     public static function getUrlOfFileInDisc($filepath) {
@@ -60,18 +61,17 @@ class Security {
      * @param type $var
      * @param type $chave
      * @return typeDecripta uma variavel criada pela funcao JS, MyCripto()
-     
-    public static function decryptFromJS($var, $chave) {
-        self::addSessionToKey($chave);
-        $iv_1 = substr(hash('sha256', $chave . '_IV'), 0, 16);
-        $key = pack('H*', $chave);
-        $iv = pack('H*', $iv_1);
-        $decrypted = openssl_decrypt(base64_decode($var), "AES-256-CBC", $key, OPENSSL_RAW_DATA, $iv);
-        return json_decode($decrypted);
-    }
-    */
-    
-    
+
+      public static function decryptFromJS($var, $chave) {
+      self::addSessionToKey($chave);
+      $iv_1 = substr(hash('sha256', $chave . '_IV'), 0, 16);
+      $key = pack('H*', $chave);
+      $iv = pack('H*', $iv_1);
+      $decrypted = openssl_decrypt(base64_decode($var), "AES-256-CBC", $key, OPENSSL_RAW_DATA, $iv);
+      return json_decode($decrypted);
+      }
+     */
+
     /**
      * Decrypt data from a CryptoJS json encoding string
      *

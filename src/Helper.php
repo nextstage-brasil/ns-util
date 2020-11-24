@@ -545,4 +545,9 @@ class Helper {
         }
     }
 
+    public static function getIP() {
+        $var = (($_SERVER['HTTP_X_FORWARDED_FOR']) ? 'HTTP_X_FORWARDED_FOR' : 'REMOTE_ADDR');
+        return filter_input(INPUT_SERVER, $var, FILTER_SANITIZE_STRING);
+    }
+
 }
