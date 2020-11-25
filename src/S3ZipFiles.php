@@ -91,14 +91,13 @@ class S3ZipFiles {
                 unset($ctt);
 
 
-
                 if ($item['resolucao']) {
                     // resize imagem
                     $resize->setFile($path)
                             ->setResolucao($item['resolucao'])
-                            ->run();
+                            ->reduz();
                 }
-
+                
                 $content = file_get_contents($path);
                 $zipFile->addFromString('/pacote-' . $this->filename . '/' . $item['nome'], $content);
                 // Adicionar ao ZIP
