@@ -14,6 +14,7 @@ class Crypto {
             throw new Exception('NsCrypto: Atenção: chave com menos de 16 caracteres considerada insegura');
         }
         $this->chave = $chave;
+        
     }
 
     public function encrypt($string, $chaveExtra = '') {
