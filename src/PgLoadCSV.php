@@ -52,13 +52,37 @@ class PgLoadCSV {
      */
     public function run(string $file_or_dir, $tablename = false) {
         if (is_dir($file_or_dir)) {
-            $types = array('csv');
+            $types = array('csv', 'xlsx');
             $dir = realpath($file_or_dir);
             if ($handle = opendir($dir)) {
                 while ($entry = readdir($handle)) {
                     $ext = strtolower(pathinfo($entry, PATHINFO_EXTENSION));
                     if (in_array($ext, $types)) {
                         $file = $dir . '/' . $entry;
+
+
+
+
+                        // Caso seja xlsx, converter para CSV usando lib python
+                        if ($ext === 'xlsx') {
+                            $ret = shell_exec('type xlsx2csv');
+                            if (stripos($ret, 'not found') > -1) {
+                                die("### ATENÇÃO ### \nBiblioteca xlsx2csv não esta instalada. "
+                                        . "\nPara continuar, execute: 'sudo apt-get update && sudo apt-get install -y xlsx2csv'"
+                                        . "\n"
+                                        . "###############"
+                                        . "\n\n\n");
+                            }
+                            $t = explode(DIRECTORY_SEPARATOR, $file);
+                            $csv = '/tmp/' . str_replace('.xlsx', '.csv', array_pop($t));
+                            $csv_error = shell_exec("xlsx2csv $file $csv");
+                            if (!file_exists($csv)) {
+                                die('Ocorreu erro ao converter arquivo XLSX para CSV: ' . $csv_error);
+                            }
+                            $file = $csv;
+                        }
+
+
                         echo "-----------------------------------------------------------" . PHP_EOL;
                         $this->run($file, $tablename);
                         echo PHP_EOL;
@@ -73,7 +97,7 @@ class PgLoadCSV {
         if (!file_exists($this->file)) {
             echo "File '$file' not exists" . PHP_EOL;
         }
-        Helper::fileConvertToUtf8($filepath);
+        Helper::fileConvertToUtf8($file_or_dir);
         $t = explode(DIRECTORY_SEPARATOR, $this->file);
 
         $tbl = str_replace('.csv', '', array_pop($t));
@@ -88,8 +112,6 @@ class PgLoadCSV {
         $fh = fopen($this->file, "rb") or die('not open');
         $data = fgetcsv($fh, 1000, '\\');
 
-        //$data = array_map("utf8_encode", $data); //para tornar sempre utf8encoded. validar se é necessário
-
         fclose($fh);
         $this->run->explode = ',';
         if (stripos($data[0], ';') > 0) {
@@ -103,9 +125,12 @@ class PgLoadCSV {
 
         foreach ($head as $key => $val) {
             $val = $this->sanitizeField($val);
+            if (strlen($val) === 0) {
+                continue;
+            }
             $cpos[] = "$val text null";
             if ($this->run->fields[md5($val)]) {
-                $control[md5($val)] ++;
+                $control[md5($val)]++;
                 $val = $val . '_' . $control[md5($val)];
             } else {
                 $control[md5($val)] = 1;
