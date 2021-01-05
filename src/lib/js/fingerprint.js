@@ -1061,25 +1061,29 @@ var options = {
     timeout: 5000,
     maximumAge: 75000
 };
-function error(error) {
+var nsGeoLocationError = false;
+var geolocation = {'error': nsGeoLocationError};
+function geolocationError(error) {
     switch (error.code) {
         case error.PERMISSION_DENIED:
-            geolocation.error = "Usuário rejeitou a solicitação de Geolocalização.";
+            nsGeoLocationError = "Usuário rejeitou a solicitação de geo localização";//.<br/><br/> Acesse as configurações do navegador para autorizar o acesso a geo localização.";
             break;
         case error.POSITION_UNAVAILABLE:
-            geolocation.error = "Localização indisponível.";
+            nsGeoLocationError = "Localização indisponível.";
             break;
         case error.TIMEOUT:
-            geolocation.error = "A requisição expirou ou ainda não foi liberada pelo usuário.";
+            nsGeoLocationError = "A requisição expirou ou ainda não foi liberada pelo usuário.";
             break;
         case error.UNKNOWN_ERROR:
-            geolocation.error = "Algum erro desconhecido aconteceu.";
+            nsGeoLocationError = "Algum erro desconhecido aconteceu.";
             break;
     }
-    ////console.warn('ERROR(' + err.code + '): ' + err.message);
+    //console.info('geolocation-error', nsGeoLocationError);
+    console.info('geolocation-error', nsGeoLocationError);
+    //console.warn('ERROR(' + error.code + '): ' + error.message);
 }
 
-var geolocation = {'error': 'Não liberado pelo usuário'};
+
 var FingerCrypto = '';
 
 var fp = new Fingerprint({
@@ -1128,7 +1132,7 @@ if (Date.parse(currentDate) < Date.parse(expirationDate) && sessionObject.geoloc
                 geolocation: geolocation
             };
             sessionStorage.setItem('NsGeoLocation', JSON.stringify(sessionObjectOrigin));
-        }, error, options);
+        }, geolocationError, options);
     } else {
         geolocation = {'error': 'GeoLocation is disabled', 'disabled': true};
     }
@@ -1156,7 +1160,8 @@ var fingerprint = {
     useragent: fingerprint_useragent(),
     truebrowser: fingerprint_truebrowser(),
     geolocation: geolocation,
-    isMobile: fp.isMobile()
+    isMobile: fp.isMobile(), 
+    geolocationError: nsGeoLocationError
 };
 
 function NSUtilFingerprint(force) {

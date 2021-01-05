@@ -211,12 +211,34 @@ class Helper {
                 . ' with ' . round(((memory_get_peak_usage(true) / 1024) / 1024), 2) . 'Mb';
     }
 
-    public static function deleteDir($dir) {
-        $files = array_diff(scandir($dir), array('.', '..'));
-        foreach ($files as $file) {
-            (is_dir("$dir/$file")) ? self::deleteDir("$dir/$file") : unlink("$dir/$file");
+    public static function directorySeparator(&$var) {
+        $var = str_replace('/', DIRECTORY_SEPARATOR, $var);
+    }
+
+    public static function deleteDir($pasta) {
+        self::directorySeparator($pasta);
+        if (!is_dir($pasta)) {
+            return true;
         }
-        return rmdir($dir);
+
+        $iterator = new \RecursiveDirectoryIterator($pasta, \FilesystemIterator::SKIP_DOTS);
+        $rec_iterator = new \RecursiveIteratorIterator($iterator, \RecursiveIteratorIterator::CHILD_FIRST);
+
+        foreach ($rec_iterator as $file) {
+            $file->isFile() ? unlink($file->getPathname()) : rmdir($file->getPathname());
+        }
+
+        /*
+          $files = array_diff(scandir($dir), array('.', '..'));
+          foreach ($files as $file) {
+          $todel = $dir . DIRECTORY_SEPARATOR . $file;
+          (is_dir($todel)) ? self::deleteDir($todel) : unlink($todel);
+          }
+          sleep(0.5);
+         * 
+         */
+        rmdir($pasta);
+        return is_dir($pasta);
     }
 
     /**
@@ -276,7 +298,7 @@ class Helper {
      * @param string $method
      * @return Array
      */
-    public static function curlCall($url, $params = [], $method = 'GET', $header = ['Content-Type:application/json']) {
+    public static function curlCall($url, $params = [], $method = 'GET', $header = ['Content-Type:application/json'], $ssl = true) {
         $options = [
             CURLOPT_URL => trim($url),
             CURLOPT_CUSTOMREQUEST => $method,
@@ -291,7 +313,7 @@ class Helper {
             CURLOPT_CONNECTTIMEOUT => 30, // timeout on connect
             CURLOPT_TIMEOUT => 30, // timeout on response
             CURLOPT_MAXREDIRS => 10, // stop after 10 redirects
-            CURLOPT_SSL_VERIFYPEER => true,
+            CURLOPT_SSL_VERIFYPEER => $ssl,
             CURLOPT_HEADER => false,
             CURLOPT_VERBOSE => false,
         ];
@@ -564,6 +586,50 @@ class Helper {
     public static function getIP() {
         $var = (($_SERVER['HTTP_X_FORWARDED_FOR']) ? 'HTTP_X_FORWARDED_FOR' : 'REMOTE_ADDR');
         return filter_input(INPUT_SERVER, $var, FILTER_SANITIZE_STRING);
+    }
+
+    /**
+     * Ira filtrar um array de entrada de dados conforme os tipos identificados
+     * @param type $var
+     * @return type
+     */
+    public static function filterSanitize($var) {
+        if (is_array($var)) {
+            foreach ($var as $key => $value) {
+                if (is_array($value)) {
+                    $var[$key] = self::filterSanitize($value);
+                } else {
+                    if (substr($key, 0, 2) === 'id') {
+                        $var[$key] = filter_var($value, FILTER_VALIDATE_INT);
+                    }
+                    if (stripos($key, 'email') > -1) {
+                        $var[$key] = filter_var($value, FILTER_VALIDATE_EMAIL);
+                    } else {
+                        $var[$key] = filter_var($value, FILTER_SANITIZE_STRING);
+                    }
+                }
+            }
+            return $var;
+        } else {
+            return filter_var($var, FILTER_SANITIZE_STRING);
+        }
+    }
+
+    public static function array2csv($array, $filepath, $withBom = true) {
+        $fp = fopen($filepath, 'w');
+        if ($withBom) {
+            fputs($fp, $bom = ( chr(0xEF) . chr(0xBB) . chr(0xBF) ));
+        }
+        fputcsv($fp, array_keys($array[0])); // gravar o cabecalho
+        foreach ($array as $linha) {
+            fputcsv($fp, $linha);
+        }
+        fclose($fp);
+        return file_exists($filepath);
+    }
+
+    public static function getSO() {
+        return mb_strtolower(explode(' ', php_uname())[0]);
     }
 
 }

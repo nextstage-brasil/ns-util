@@ -32,6 +32,8 @@ class Licence {
         }
         // carga do conteudo
         $content = file_get_contents($origem);
+        $content = str_replace('<?php', '', $content);
+        
         // crypto
         $pre = $this->crypto->getHash($content);
         // save

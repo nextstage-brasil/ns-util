@@ -9,31 +9,9 @@ class LoadArgs {
     private $help;
 
     /**
-      $params = [
-      'h' => 'Host',
-      'u' => 'User',
-      'w' => 'Password',
-      'p' => 'port',
-      'd' => 'Database',
-      's' => 'Schema',
-      't' => 'Truncate table',
-      'x' => 'Path to files'
-      ];
-
-      $defaultValues = [
-      'h' => 'localhost',
-      'u' => 'postgres',
-      'w' => '',
-      'p' => '5432',
-      'd' => 'postgres',
-      's' => 'public',
-      't' => 'false',
-      'x' => '~/$HOME'
-      ];
-      $usageExample = "php pgloader.php -h localhost -u postgres -w 123456 -p 5432 -d my_database -s public -x /dados/csv_to_import -t";
-
-     * @param array $params
-     * @param array $defaultValues
+     * 
+     * @param array $params = ['q' => ['LABEL', 'DEFAULT']]
+     * @param type $usageExample "php geocode_update.php -q 30"
      */
     public function __construct(array $params, $usageExample = 'Não definido') {
         $newparamns = [];
@@ -49,7 +27,7 @@ class LoadArgs {
 
         $options = [];
         foreach ($newparamns as $key => $val) {
-            $help[] = "\t-$key\t" . $val . ". Default: '" . $defaultValues[$key] . "'";
+            $help[] = "\t-$key\t" . $val . ". Default: " . $defaultValues[$key];
             $options[$key] = "$key:";
         }
         $help [] = '';
