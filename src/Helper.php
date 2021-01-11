@@ -405,6 +405,9 @@ class Helper {
                     $dados[$key] = filter_var($value, FILTER_SANITIZE_STRING);
                     $dados[$key] = str_replace(['NS21', '&#34;'], ['&', '"'], $dados[$key]);
                 }
+                if (substr($key, 0, 2) === 'id') {
+                    $dados[$key] = (int) filter_var($value, FILTER_VALIDATE_INT);
+                }
             }
         }
     }
