@@ -400,6 +400,7 @@ class Helper {
             } else {
                 // tirar "undefined" do javascript
                 if ($value === 'undefined' || $value === 'null' || $value === null) {
+                    unset($dados[$key]);
                     continue;
                 } else {
                     $dados[$key] = filter_var($value, FILTER_SANITIZE_STRING);
@@ -633,6 +634,10 @@ class Helper {
 
     public static function getSO() {
         return mb_strtolower(explode(' ', php_uname())[0]);
+    }
+
+    public static function parseInt($var) {
+        return preg_replace("/[^0-9]/", "", $var);
     }
 
 }

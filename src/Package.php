@@ -70,7 +70,7 @@ class Package {
         $ret = Helper::curlCall("https://localhost/$projectName/$build/builder.php?pack=true", [], 'GET', [], false);
         echo $ret->status;
         if ((int) $ret->status !== 200) {
-            //var_export($ret);
+            var_export($ret);
             die("\n################## ERROR!!: #################### \n\n STATUS BUILDER <> 200 \n\n###########################################\n");
         }
 
@@ -78,6 +78,7 @@ class Package {
         $ret = Helper::curlCall("https://localhost/$projectName/$build/compile.php?pack=true&compileToBuild=YES&recompile=ALL", [], 'GET', [], false);
         echo $ret->status;
         if ((int) $ret->status !== 200) {
+            var_export($ret);
             die("\n################## ERROR!!: #################### \n\n STATUS COMPILE <> 200 \n\n###########################################\n");
         }
 
