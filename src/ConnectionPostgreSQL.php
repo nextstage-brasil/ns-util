@@ -186,4 +186,77 @@ class ConnectionPostgreSQL {
         return $loader->getLastStatusBar();
     }
 
+    /**
+     * Executara um update na tabela com prepared. Os nomes do campos já devem estar no formato da tabela, sem camelcase
+     * @param type $table
+     * @param type $array
+     * @param type $cpoWhere
+     * @return boolean
+     * @throws SistemaException
+     */
+    public function insert($table, $array, $nomeCpoId, $onConflict = '') {
+        $preValues = $update = $valores = [];
+        foreach ($array as $key => $value) {
+            $keys[] = $key;
+            $preValues[] = '?';
+            $valores[] = $value;
+        }
+        $query = "INSERT INTO $table (" . implode(',', $keys) . ") VALUES (" . implode(',', $preValues) . ")"
+                . " $onConflict "
+                . " returning $nomeCpoId as nsnovoid";
+        $this->open();
+        $res = false;
+        $this->numRows = 0;
+        $this->result = false;
+        $this->error = false;
+        try {
+            $this->result = $this->con->prepare($query);
+            if (!$this->result->execute($valores)) {
+                $this->error = $this->result->errorInfo()[2];
+                throw new Exception($this->result->errorInfo()[0] . $this->result->errorInfo()[2], 0);
+            }
+            return $res;
+        } catch (Exception $exc) {
+            $this->result = false;
+            throw new Exception($exc->getMessage() . $query);
+        }
+    }
+
+    /**
+     * Executara um update na tabela com prepared. Os nomes do campos já devem estar no formato da tabela, sem camelcase
+     * @param type $table
+     * @param type $array
+     * @param type $cpoWhere
+     * @return boolean
+     * @throws SistemaException
+     */
+    public function update($table, $array, $cpoWhere) {
+        $update = $valores = [];
+        $idWhere = $array[$cpoWhere];
+        unset($array[$cpoWhere]);
+        foreach ($array as $key => $value) {
+            $valores[] = $value;
+            $update[] = "$key=?";
+        }
+        // where
+        $valores[] = $idWhere;
+        $query = "update $table set " . implode(',', $update) . " where $cpoWhere=?";
+        $this->open();
+        $res = false;
+        $this->numRows = 0;
+        $this->result = false;
+        $this->error = false;
+        try {
+            $this->result = $this->con->prepare($query);
+            if (!$this->result->execute($valores)) {
+                $this->error = $this->result->errorInfo()[2];
+                throw new Exception($this->result->errorInfo()[0] . $this->result->errorInfo()[2], 0);
+            }
+            return $res;
+        } catch (Exception $exc) {
+            $this->result = false;
+            throw new Exception($exc->getMessage() . $query);
+        }
+    }
+
 }
