@@ -389,8 +389,8 @@ domain   = $this->_domain";
         self::log_msg($this->_cmd);
 
 
-        $outfile = tempnam(".", "cmd");
-        $errfile = tempnam(".", "cmd");
+        $outfile = tempnam("/tmp", "cmd");
+        $errfile = tempnam("/tmp", "cmd");
         $descriptorspec = array(
             0 => array("pipe", "r"),
             1 => array("file", $outfile, "w"),
