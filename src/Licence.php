@@ -30,15 +30,15 @@ class Licence {
         if (!file_exists($filenameOrigem)) {
             throw new \Exception('NsLicence: Arquivo de origem não localizado: ' . $origem);
         }
-        // carga do conteudo
+// carga do conteudo
         $content = file_get_contents($origem);
         $content = str_replace('<?php', '', $content);
-        
-        // crypto
+
+// crypto
         $pre = $this->crypto->getHash($content);
-        // save
+// save
         $toSave = $this->crypto->encrypt($pre . $content);
-        // return
+// return
         return Helper::saveFile($destino, '', $toSave, 'SOBREPOR');
     }
 
@@ -48,7 +48,7 @@ class Licence {
      * @return type
      */
     public function read($licenceFile, $dieIfNotExists = true) {
-        // varredura em busca do arquivo
+// varredura em busca do arquivo
         $dirarray = explode(DIRECTORY_SEPARATOR, __DIR__);
         $filename = implode(DIRECTORY_SEPARATOR, $dirarray) . DIRECTORY_SEPARATOR . $licenceFile;
         $count = 0;
@@ -67,18 +67,26 @@ class Licence {
             die("NsLicence: Arquivo não localizado: $licenceFile");
         }
 
-        // decodificar config
+// decodificar config
         $string = file_get_contents($filename);
         $config = $this->crypto->decrypt($string);
         $md5 = substr($config, 0, 64);
         $code = substr($config, 64);
         $pre = $this->crypto->getHash($code);
 
-        // validação que o código não foi alterado
+// validação que o código não foi alterado
         if ($pre !== $md5) {
             die('NsLicence: Arquivo de configuração inválido ou violado');
         }
         return $code;
+    }
+
+    public static function readFromIoncube($licenceName) {
+        if (function_exists('ioncube_license_properties')) {
+            return ioncube_license_properties()[$licenceName]['value'];
+        } else {
+            die('Obrigatório utilização do Ioncube (NS88)');
+        }
     }
 
 }
