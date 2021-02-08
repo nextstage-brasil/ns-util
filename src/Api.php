@@ -15,11 +15,12 @@ class Api {
         $this->headers = $this->getAllHeaders();
 
         // Obtenção do body
-        if (Helper::compareString($this->headers['Content-Type'], 'application/json')) {
-            $this->body = json_decode(file_get_contents('php://input'), true);
-        } else {
-            $this->body = $_POST;
+        $this->body = $_POST;
+        $dd = json_decode(file_get_contents('php://input'), true);
+        if (is_array($dd))   {
+            $this->body = array_merge($_POST, $dd);
         }
+
         Helper::recebeDadosFromView($this->body);
 
         $this->eficiencia = new \NsUtil\Eficiencia();

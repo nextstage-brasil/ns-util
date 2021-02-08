@@ -74,23 +74,25 @@ class Router {
             }
             $countValuesDir = $countValuesDir + 1;
         }
+        $this->allParam = [];
+        $this->param = [];
 
         //Se array search for falso 
         if (!$search_array) {
             //Retorna o caminho da url toda
             $url = $this->valorTotalURl;
             //retorna $url para rota
-            return $url;
-        }
+            /*return $url;*/
+        } else {
 
-        //Começa a contar os campos apartir da nimeração do $countValuesDir, a partir dai puxa a rota!
-        $url = preg_replace("/(.+)$url[$countValuesDir]/", '', $this->valorTotalURl);
+            //Começa a contar os campos apartir da nimeração do $countValuesDir, a partir dai puxa a rota!
+            $url = preg_replace("/(.+)$url[$countValuesDir]/", '', $this->valorTotalURl);
+        }
         //$url = $this->routePrefix . $url;
         //Retorna a Rota
         $this->allParam = Helper::filterSanitize(explode('/', $url));
 
         // IDENTIFICAR PARAMETROS
-        $this->param = [];
         $temp = explode('/', $url);
         $this->param[] = (int) $temp[2]; // obrigatoriamente um ID deve ser um inteiro
         unset($temp[0]); // zero, vazio
@@ -140,7 +142,7 @@ class Router {
             if (Helper::compareString($rota, $rotaConfigurada) || Helper::compareString($rota, $rotaConfigurada . '/')) {
                 $this->entidade = explode('/', $dirConfigurado)[0];
                 $this->route = $rotaConfigurada;
-                $this->includeFile = Helper::directorySeparator($dirConfigurado);
+                $this->includeFile = $dirConfigurado;
             }
         }
         return $this;
@@ -195,7 +197,7 @@ class Router {
     }
 
     function getParam($key = false) {
-        if ($key) {
+        if ($key !== false) {
             return $this->param[$key];
         } else {
             return $this->param;
@@ -203,11 +205,15 @@ class Router {
     }
 
     function getAllParam($key = false) {
-        if ($key) {
+        if ($key !== false) {
             return $this->allParam[$key];
         } else {
             return $this->allParam;
         }
+    }
+
+    function getEntidade() {
+        return $this->entidade;
     }
 
 }
