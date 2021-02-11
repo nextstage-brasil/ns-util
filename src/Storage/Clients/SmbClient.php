@@ -388,9 +388,9 @@ domain   = $this->_domain";
 
         self::log_msg($this->_cmd);
 
-
-        $outfile = tempnam("/tmp", "cmd");
-        $errfile = tempnam("/tmp", "cmd");
+        $prefix = 'cmd_' . hash('crc32', $cmd);
+        $outfile = tempnam("/tmp", $prefix);
+        $errfile = tempnam("/tmp", $prefix);
         $descriptorspec = array(
             0 => array("pipe", "r"),
             1 => array("file", $outfile, "w"),

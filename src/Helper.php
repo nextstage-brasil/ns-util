@@ -619,17 +619,37 @@ class Helper {
         }
     }
 
-    public static function array2csv($array, $filepath, $withBom = true) {
-        $fp = fopen($filepath, 'w');
-        if ($withBom) {
-            fputs($fp, $bom = ( chr(0xEF) . chr(0xBB) . chr(0xBF) ));
+    /**
+     * 
+     * @param type $array 
+     * @param type $filepath if false, retorna em text
+     * @param type $withBom
+     * @return type
+     */
+    public static function array2csv($array, $filepath = false, $withBom = true) {
+        if ($filepath) {
+            $fp = fopen($filepath, 'w');
+            if ($withBom) {
+                fputs($fp, $bom = ( chr(0xEF) . chr(0xBB) . chr(0xBF) ));
+            }
+            fputcsv($fp, array_keys($array[0])); // gravar o cabecalho
+            foreach ($array as $linha) {
+                fputcsv($fp, $linha);
+            }
+            fclose($fp);
+            return file_exists($filepath);
+        } else {
+            $handle = fopen('php://temp', 'r+');
+            foreach ($array as $line) {
+                fputcsv($handle, $line, ';', '"');
+            }
+            rewind($handle);
+            while (!feof($handle)) {
+                $contents .= fread($handle, 8192);
+            }
+            fclose($handle);
+            return $contents;
         }
-        fputcsv($fp, array_keys($array[0])); // gravar o cabecalho
-        foreach ($array as $linha) {
-            fputcsv($fp, $linha);
-        }
-        fclose($fp);
-        return file_exists($filepath);
     }
 
     public static function getSO() {

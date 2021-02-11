@@ -175,6 +175,10 @@ class ConsoleTable {
         echo $this->getTable();
     }
 
+    public function getCsv() {
+        return Helper::array2csv($this->data);
+    }
+
     /**
      * Get the printable table content
      * @return string

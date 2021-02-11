@@ -17,12 +17,14 @@ class Assync {
     private $verbose;
     private $status;
     private $done = 0;
+    private $eficiencia;
 
     public function __construct(int $limit = 3, $verboseTitle = false) {
         $this->limit = $limit;
         if ($verboseTitle) {
             $this->verbose = $verboseTitle;
         }
+        $this->status = new \NsUtil\StatusLoader(count($this->list), 'NsPHPAssync');
     }
 
     /**
@@ -44,6 +46,10 @@ class Assync {
      * Executa os processos adicionados, limitando a N processos por vez, conforme configuração
      */
     public function run() {
+        $this->checkRunning();
+        if (!$this->eficiencia) {
+            $this->eficiencia = new \NsUtil\Eficiencia();
+        }
         foreach ($this->list as $key => $item) {
             if (!$item['pid'] && count($this->emAndamento) < $this->limit) {
                 $res = exec($item['command']);
@@ -63,10 +69,10 @@ class Assync {
             $this->checkRunning();
             return $this->run(); // looping até concluir
         } else {
+            $this->verbosePrint();
             $this->list = [];
             $this->done = 0;
-            $this->verbosePrint();
-            return true;
+            return $this->eficiencia->end()->text;
         }
     }
 

@@ -5,7 +5,6 @@ namespace NsUtil;
 require __DIR__ . '/lib/phpmailer/class.phpmailer.php';
 
 class Sendmail {
-
     /**
      * 
      * @param array $to ['Nome' => 'Email']
@@ -14,7 +13,26 @@ class Sendmail {
      * @param array $config [host=>'host', SMTPAuth, username, email, password, port, smtpSecure]
      * @return boolean
      */
-    public static function send(array $to, $subject, $text, array $config, $debug = false) {
+
+    /**
+     * 
+     * @param array $to array ['Nome descritivo' => 'email@notem.com]
+     * @param type $subject Assunto
+     * @param type $text Corpo do email
+     * @param array $config [
+      'host' => 'mail.host.com.br',
+      'email' => 'nome@email.com',
+      'username' => 'Nome od usuario que envia',
+      'password' => 'pass',
+      'port' => 465,
+      'smtpSecure' => 'ssl', // ssl ou tpl
+      'SMTPAuth' => true
+      ]
+     * @param type $debug
+     * @param type $attach
+     * @return boolean
+     */
+    public static function send(array $to, $subject, $text, array $config, $debug = false, array $attach = []) {
         $mail = new \PHPMailer();
         $mail->IsSMTP(); // Define que a mensagem será SMTP
         $mail->Host = $config['host'];
@@ -43,7 +61,14 @@ class Sendmail {
 
 
         //Anexos (opcional)
-        //$mail->AddAttachment("e:\home\login\web\documento.pdf", "novo_nome.pdf");
+        if (count($attach) > 0) {
+            foreach ($attach as $file) {
+                if (file_exists($file)) {
+                    $mail->AddAttachment($file);
+                } 
+            }
+        }
+
         //Envio da Mensagem
         $enviado = $mail->Send();
 
