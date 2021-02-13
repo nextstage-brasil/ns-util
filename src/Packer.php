@@ -97,8 +97,11 @@ class Packer {
         $this->_specialChars = $_specialChars;
         $this->_removeSemicolons = $_removeSemicolons;
     }
-	
-    public static function jsPack($js) {
+
+    public static function jsPack($js, $removeConsole = false) {
+        if ($removeConsole) {
+            $js = str_replace('console', '//console', $js);
+        }
         $packer = new Packer($js, 'Normal', true, false, true);
         return '<script>' . $packer->pack() . '</script>';
     }
@@ -240,7 +243,7 @@ class Packer {
                     $protected['$' . $values[$j]] = $j++;
                 }
                 // increment the word counter
-                $this->_count[$word] ++;
+                $this->_count[$word]++;
             } while ($i > 0);
             // prepare to sort the word list, first we must protect
             //  words that are also used as codes. we assign them a code
@@ -475,7 +478,7 @@ class Packer {
       }';
      */
     // code-snippet inserted into the unpacker to speed up decoding
-    const JSFUNCTION_decodeBody =//_decode = function() {
+    const JSFUNCTION_decodeBody = //_decode = function() {
 // does the browser support String.replace where the
 //  replacement value is a function?
             '    if (!\'\'.replace(/^/, String)) {
@@ -717,7 +720,7 @@ class ParseMaster {
         } else {
             $temp = '';
         }
-        $this->buffer['i'] ++;
+        $this->buffer['i']++;
         return $this->buffer['escapeChar'] . $temp;
     }
 
