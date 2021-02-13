@@ -41,7 +41,7 @@ class Assync {
         }
         return $this;
     }
-
+    
     /**
      * Executa os processos adicionados, limitando a N processos por vez, conforme configuração
      */
