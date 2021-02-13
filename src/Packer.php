@@ -98,12 +98,23 @@ class Packer {
         $this->_removeSemicolons = $_removeSemicolons;
     }
 
-    public static function jsPack($js, $removeConsole = false) {
+    /**
+     * Aplica o Pack ao JS enviado
+     * 
+     * @param type $js Javascript a ser packer
+     * @param type $includeTagScript Se deve ser incluido as tags <script>$packed</script>
+     * @param type $removeConsole Se deve ser removido as informações de console do JS
+     * @return type
+     */
+    public static function jsPack($js, $includeTagScript = true, $removeConsole = false) {
         if ($removeConsole) {
             $js = str_replace('console', '//console', $js);
         }
-        $packer = new Packer($js, 'Normal', true, false, true);
-        return '<script>' . $packer->pack() . '</script>';
+        $packed = (new Packer($js, 'Normal', true, false, true))->pack();
+        if ($includeTagScript) {
+            $packed = '<script>' . $packed . '</script>';
+        }
+        return $packed;
     }
 
     public function pack() {
