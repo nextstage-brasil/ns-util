@@ -25,7 +25,7 @@ class DirectoryManipulation {
                         $this->total[$type]['count'] = 0;
                         $this->total[$type]['size'] = 0;
                     }
-                    $this->total[$type]['count'] ++;
+                    $this->total[$type]['count']++;
                     $this->total[$type]['size'] += filesize($path);
                 }
             }
@@ -36,6 +36,26 @@ class DirectoryManipulation {
     public function getSize($dir, $type) {
         $this->getSizeOf($dir);
         return $this->total[mb_strtolower($type)];
+    }
+
+    /**
+     * Le um diretório em disco e retorna os arquivos constantes ali. Inclusive nome dos diretórios
+     * 
+     * Importante: não é recursivo.
+     * @param type $dir
+     * @return type
+     */
+    public static function openDir($dir) {
+        $out = [];
+        if ($handle = opendir($dir)) {
+            while (false !== ($file = readdir($handle))) {
+                if ($file != "." && $file != ".." && stripos($file, '__NEW__') === false) {
+                    $out[] = $file;
+                }
+            }
+            closedir($handle);
+        }
+        return $out;
     }
 
 }
