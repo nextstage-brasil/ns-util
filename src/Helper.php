@@ -447,7 +447,7 @@ class Helper {
     public static function fileConvertToUtf8($filepath, $output = false) {
         if (file_exists($filepath)) {
             $enc = self::fileGetEncoding($filepath);
-            if ($enc !== 'utf-8') {
+            if ($enc !== 'utf-8' && stripos($enc, 'ascii') === false) {
                 $output = $output ? $output : $filepath;
                 $cmd = "iconv -f $enc -t utf-8 -o $output $filepath ";
                 //echo $cmd;
