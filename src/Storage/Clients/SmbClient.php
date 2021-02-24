@@ -120,7 +120,9 @@ domain   = $this->_domain";
     }
 
     public function __destruct() {
-        unlink($this->_credentialFile);
+        if (file_exists($this->_credentialFile)) {
+            unlink($this->_credentialFile);
+        }
     }
 
     /**
@@ -248,8 +250,9 @@ domain   = $this->_domain";
                           }
                          */
                     }
-
-                    unlink($tmp_local_filename);
+                    if (file_exists($tmp_local_filename)) {
+                        unlink($tmp_local_filename);
+                    }
                 }
             }
 
@@ -261,8 +264,9 @@ domain   = $this->_domain";
             $this->_safe_retry_count++;
             usleep($this->_safe_retry_interval);
         }
-
-        unlink($tmp_local_filename);
+        if (file_exists($tmp_local_filename)) {
+            unlink($tmp_local_filename);
+        }
         return false;
     }
 
@@ -414,8 +418,12 @@ domain   = $this->_domain";
         self::log_msg("stdout: " . join("\n", $this->_last_cmd_stdout));
         self::log_msg("stderr: " . join("\n", $this->_last_cmd_stderr));
 
-        unlink($outfile);
-        unlink($errfile);
+        if (file_exists($outfile)) {
+            unlink($outfile);
+        }
+        if (file_exists($errfile)) {
+            unlink($errfile);
+        }
 
         if ($exit) {
             return false;
