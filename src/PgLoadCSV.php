@@ -7,6 +7,7 @@ use stdClass;
 class PgLoadCSV {
 
     private $file, $run, $consoleTable;
+    private $csv = [];
 
     /**
      * 
@@ -33,14 +34,21 @@ class PgLoadCSV {
 
         $this->consoleTable = new \NsUtil\ConsoleTable();
         $this->consoleTable->setHeaders(['Schema', 'Tabela', 'Linhas', 'Resultado']);
+        $this->csv[] = ['Schema', 'Tabela', 'Linhas', 'Tamanho', 'Resultado'];
     }
 
     public function getConsoleTable() {
         $this->consoleTable instanceof ConsoleTable;
         return $this->consoleTable;
     }
+    
+    public function getCsv() {
+        return $this->csv;
+    }
 
-    private function consoleTableAddLine($qtdeLinhas, $message) {
+    
+    private function consoleTableAddLine($qtdeLinhas, $filesize, $message) {
+        $this->csv[$this->file] = [$this->run->schema, $this->run->table, $qtdeLinhas, $filesize, $message];
         $this->consoleTable->addRow([$this->run->schema, $this->run->table, $qtdeLinhas, $message]);
     }
 
@@ -152,6 +160,7 @@ class PgLoadCSV {
     private function execute() {
         echo 'Tabela: "' . $this->run->tableSchema . '"';
         $this->run->linhas = \NsUtil\Helper::linhasEmArquivo($this->file);
+        $this->run->filesize = filesize($this->file);
         echo ' com ' . number_format(($this->run->linhas - 1), 0, ',', '.') . ' linhas a verificar' . PHP_EOL;
         $loader = new StatusLoader($this->run->linhas, $this->run->table);
         $loader->setShowQtde(false);
@@ -209,7 +218,7 @@ class PgLoadCSV {
             );
 
             $loader->done($this->run->linhas); // por causa do inicio em 0
-            $this->consoleTableAddLine($this->run->linhas, $loader->getLastStatusBar());
+            $this->consoleTableAddLine($this->run->linhas, $this->run->filesize, $loader->getLastStatusBar());
 
             $this->run->con->commit();
         }

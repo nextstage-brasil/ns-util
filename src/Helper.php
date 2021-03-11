@@ -632,7 +632,7 @@ class Helper {
             if ($withBom) {
                 fputs($fp, $bom = ( chr(0xEF) . chr(0xBB) . chr(0xBF) ));
             }
-            fputcsv($fp, array_keys($array[0])); // gravar o cabecalho
+            //fputcsv($fp, array_keys($array[0])); // gravar o cabecalho
             foreach ($array as $linha) {
                 fputcsv($fp, $linha);
             }
