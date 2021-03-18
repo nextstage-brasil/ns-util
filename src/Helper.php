@@ -660,4 +660,36 @@ class Helper {
         return preg_replace("/[^0-9]/", "", $var);
     }
 
+    /**
+     * Com base na data informada, retorna um array verificando se é feriado, prox dia util....
+     * 
+     * @param type $date formato yyyy-mm-dd
+     * @return array {"isDiaUtil":true,"proxDiaUtil":"2021-03-19","ultDiaUtil":"2021-03-17"}
+     */
+    public static function feriado($date) {
+        $url = 'https://syncpay.usenextstep.com.br/api/util/feriado/' . Helper::parseInt($date);
+        $ret = Helper::getWebPage($url)->content;
+        $ret1 = json_decode($ret, true);
+        return $ret1['content'];
+    }
+
+    /**
+     * Com base na data informaada, calcula a proxima data útil no calendario, com prazo N estabelecido
+     * @param type $vencimento Data inicial, no formato yyyy-mm-dd
+     * @param type $prazo Prazo em 
+     * @return type String, no formato yyyy-mm-dd
+     */
+    public static function calculaVencimentoUtil($vencimento, $prazo = 0) {
+        if ($prazo > 0) {
+            // rotina para varrer somente dias úteis
+            $count = 0;
+            while ($count < $prazo) {
+                $ret = self::feriado($vencimento);
+                $vencimento = $ret['proxDiaUtil'];
+                $count++;
+            }
+        }
+        return $vencimento;
+    }
+
 }
