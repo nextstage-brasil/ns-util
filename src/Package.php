@@ -108,7 +108,7 @@ class Package {
             '*nbproject*',
             '*.gitignore*',
             '*XPTO*',
-            '*OLD*',
+            '*_OLD*',
             '*/samples/*',
             '*/docs/*',
             '*/.github/*',
