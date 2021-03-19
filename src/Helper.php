@@ -667,8 +667,8 @@ class Helper {
      * @return array {"isDiaUtil":true,"proxDiaUtil":"2021-03-19","ultDiaUtil":"2021-03-17"}
      */
     public static function feriado($date) {
-        $url = 'https://syncpay.usenextstep.com.br/api/util/feriado/' . Helper::parseInt($date);
-        $ret = Helper::getWebPage($url)->content;
+        $url = 'https://syncpay.usenextstep.com.br/api/util/feriado/' . self::parseInt($date);
+        $ret = self::curlCall($url)->content;
         $ret1 = json_decode($ret, true);
         return $ret1['content'];
     }
