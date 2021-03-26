@@ -692,4 +692,17 @@ class Helper {
         return $vencimento;
     }
 
+    /**
+     * Ira retornar um array contendo apenas os valores das chaves selecionadas
+     * @param array $origem
+     * @param array $chaves
+     */
+    public static function arrayReduceKeys(array $origem, array $chaves) {
+        $out = [];
+        foreach ($chaves as $val) {
+            $out[$val] = $origem[$val];
+        }
+        return $out;
+    }
+
 }

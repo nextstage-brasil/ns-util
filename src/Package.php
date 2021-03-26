@@ -31,6 +31,7 @@ class Package {
 
         date_default_timezone_set('America/Recife');
         Helper::directorySeparator($dirOutput);
+        
         // projectName
         $fontes = str_replace('/', DIRECTORY_SEPARATOR, $origem);
         $t = explode(DIRECTORY_SEPARATOR, $fontes);

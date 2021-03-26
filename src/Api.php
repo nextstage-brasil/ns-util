@@ -17,7 +17,7 @@ class Api {
         // Obtenção do body
         $this->body = $_POST;
         $dd = json_decode(file_get_contents('php://input'), true);
-        if (is_array($dd))   {
+        if (is_array($dd)) {
             $this->body = array_merge($_POST, $dd);
         }
 
@@ -72,7 +72,7 @@ class Api {
 
         // Sanitização
         if ($this->responseData['error'] !== false || ($this->responseCode > 401 && stripos($this->responseData, 'SQLSTATE') === false)) {
-            $this->responseData = ['error' => $this->responseData['error']];
+            $this->responseData = ['error' => $this->responseData['error'], 'content' => []];
         }
 
         // Saida
