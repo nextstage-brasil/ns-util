@@ -71,6 +71,7 @@ class Api {
         ]);
 
         // Sanitização
+        $this->responseData['error'] = (($this->responseData['error']) ? $this->responseData['error'] : false);
         if ($this->responseData['error'] !== false || ($this->responseCode > 401 && stripos($this->responseData, 'SQLSTATE') === false)) {
             $this->responseData = ['error' => $this->responseData['error'], 'content' => []];
         }
@@ -111,4 +112,5 @@ class Api {
                 ], $config);
         Config::init($data);
     }
+
 }
