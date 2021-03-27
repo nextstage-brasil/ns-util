@@ -8,6 +8,7 @@ class Config {
      * @var array
      */
     protected $settings = [];
+    private static $data = [];
 
     /**
      * @var Config|null
@@ -80,7 +81,6 @@ class Config {
      */
     public function set($key, $value) {
         $this->settings[$key] = $value;
-
         return $this;
     }
 
@@ -95,6 +95,42 @@ class Config {
         $this->fallback = $fallback;
 
         return $this;
+    }
+
+    /**
+     * Init para utilização da classe de forma estatica
+     * @param array $data
+     */
+    public static function init(array $data = []) {
+        self::$data = $data;
+    }
+
+    /**
+     * Set data
+     * @param type $key1
+     * @param type $value
+     * @param type $key2
+     */
+    public static function setData($key1, $value, $key2 = false) {
+        if (!$key2) {
+            self::$data[$key1] = $value;
+        } else {
+            self::$data[$key1][$key2] = $value;
+        }
+    }
+
+    /**
+     * Get data
+     * @param type $key
+     * @param type $key2
+     * @return type
+     */
+    public static function getData($key, $key2 = false) {
+        if ($key2) {
+            return self::$data[$key][$key2];
+        } else {
+            return self::$data[$key];
+        }
     }
 
 }
