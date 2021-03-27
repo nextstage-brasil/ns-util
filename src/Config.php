@@ -111,11 +111,11 @@ class Config {
      * @param type $value
      * @param type $key2
      */
-    public static function setData($key1, $value, $key2 = false) {
-        if (!$key2) {
-            self::$data[$key1] = $value;
+    public static function setData($key1, $value, $merge = true) {
+        if (isset(self::$data[$key1]) && is_array($value) && $merge) {
+            self::$data[$key1] = array_merge(self::$data[$key1], $value);
         } else {
-            self::$data[$key1][$key2] = $value;
+            self::$data[$key1] = $value;
         }
     }
 
@@ -131,6 +131,10 @@ class Config {
         } else {
             return self::$data[$key];
         }
+    }
+
+    public static function getDataFull(): array {
+        return self::$data;
     }
 
 }

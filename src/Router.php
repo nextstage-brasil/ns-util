@@ -36,7 +36,8 @@ class Router {
         if (file_exists($page404Path)) {
             $this->page404 = $page404Path;
         } else {
-            die('NsUtil::Router Error: Page404 não existe: ' . $page404Path);
+            $this->page404 = '404.html';
+            //die('NsUtil::Router Error: Page404 não existe: ' . $page404Path);
         }
         $this->routes();
     }
@@ -82,7 +83,7 @@ class Router {
             //Retorna o caminho da url toda
             $url = $this->valorTotalURl;
             //retorna $url para rota
-            /*return $url;*/
+            /* return $url; */
         } else {
 
             //Começa a contar os campos apartir da nimeração do $countValuesDir, a partir dai puxa a rota!

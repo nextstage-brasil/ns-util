@@ -94,4 +94,21 @@ class Api {
         $api->response($response, $code);
     }
 
+    public function setConfig(array $config = [], $page404 = '') {
+        $router = new Router($page404);
+
+        // Config para aplicação
+        $data = array_merge([
+            'headers' => $this->getHeaders(),
+            'rota' => $router->getAllParam(1) . '/' . $router->getAllParam(2),
+            'acao' => 'ws_' . $router->getAllParam(2),
+            'controller' => ucwords($router->getAllParam(1)),
+            'includeFile' => $router->getIncludeFile(),
+            'ParamsRouter' => $router->getAllParam(),
+            'dados' => array_merge($this->getBody(), [
+                'idFromRoute' => (int) $router->getAllParam(3),
+            ]),
+                ], $config);
+        Config::init($data);
+    }
 }
