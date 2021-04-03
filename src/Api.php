@@ -101,7 +101,7 @@ class Api {
         // Config para aplicação
         $data = array_merge([
             'headers' => $this->getHeaders(),
-            'rota' => $router->getAllParam(1) . '/' . $router->getAllParam(2),
+            'rota' => $router->getAllParam(1) . (($router->getAllParam(2)) ? '/' . $router->getAllParam(2) : ''),
             'acao' => 'ws_' . $router->getAllParam(2),
             'controller' => ucwords($router->getAllParam(1)),
             'includeFile' => $router->getIncludeFile(),
@@ -111,6 +111,18 @@ class Api {
             ]),
                 ], $config);
         Config::init($data);
+    }
+
+    public function getUsernameAndPasswordFromBasicAuthorizationHeader() {
+        $dt = explode(':', base64_decode(substr($this->getHeaders()['Authorization'], 6)));
+        return [
+            'username' => $dt[0],
+            'password' => $dt[1]
+        ];
+    }
+
+    public function getAuthorizationCodeFromHeader() {
+        return substr($this->getHeaders()['Authorization'], 6);
     }
 
 }
