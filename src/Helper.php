@@ -519,7 +519,12 @@ class Helper {
         foreach ($dadosObrigatorios as $item) {
             $has = self::hasContent($item['value'], (($item['type']) ? $item['type'] : 'string'));
             if ($has === false) {
-                $error[] = $item['msg'];
+                if ($item['key']) {
+                    //$item['msg'] = '{' . $item['key'] . '}: ' . $item['msg'];
+                    $error[$item['key']] = $item['msg'];
+                } else {
+                    $error[] = $item['msg'];
+                }
             }
         }
         return $error;

@@ -4,6 +4,8 @@ namespace NsUtil;
 
 class Validate {
 
+    private $obrigatorios = [];
+
     public function __construct() {
         
     }
@@ -122,8 +124,8 @@ class Validate {
             return 'CNPJ Inválido: Cálculo do dígito verificador inválido';
         }
     }
-    
-        // Define uma função que poderá ser usada para validar e-mails usando regexp
+
+    // Define uma função que poderá ser usada para validar e-mails usando regexp
     public static function validaEmail($email) {
         return
                 $er = "/^(([0-9a-zA-Z]+[-._+&])*[0-9a-zA-Z]+@([-0-9a-zA-Z]+[.])+[a-zA-Z]{2,6}){0,1}$/";
@@ -134,5 +136,26 @@ class Validate {
         }
     }
 
+    public function addCampoObrigatorio($key, $msg, $type = 'string') {
+        $this->obrigatorios['list'][] = ['key' => $key, 'msg' => $msg, 'type' => $type];
+    }
+
+    /**
+     * Valida os dados informados em $data. Caso não seja satisfeito, retorna o codigo definido
+     * @param array $data
+     * @param \NsUtil\Api $api
+     * @param type $errorCode
+     * @return type
+     */
+    public function runValidateData(array $data, Api $api, $errorCode = 200) {
+        $campos = [];
+        foreach ($this->obrigatorios['list'] as $item) {
+            $campos[] = ['key' => $item['key'], 'value' => $data[$item['key']], 'msg' => $item['msg'], 'type' => $item['type']];
+        }
+        $error = \NsUtil\Helper::validarCamposObrigatorios($campos);
+        if (count($error) > 0) {
+            $api->error($error);
+        }
+    }
 
 }

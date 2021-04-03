@@ -15,7 +15,7 @@ class Format {
         $this->timezone = $timezone;
         $this->string = $string;
     }
-
+    
     public function setString($string) {
         $this->string = $string;
         return $this;

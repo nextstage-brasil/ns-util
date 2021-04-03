@@ -9,6 +9,7 @@ class Api {
     private $responseData = ['content' => [], 'error' => false];
     private $eficiencia;
     private $responseCode = 200;
+    private $config = [];
 
     public function __construct() {
         // Obtenção dos headers
@@ -24,6 +25,20 @@ class Api {
         Helper::recebeDadosFromView($this->body);
 
         $this->eficiencia = new \NsUtil\Eficiencia();
+
+        // Config para aplicação
+        $router = new Router('');
+        $this->config = [
+            'headers' => $this->getHeaders(),
+            'rota' => $router->getAllParam(1) . (($router->getAllParam(2)) ? '/' . $router->getAllParam(2) : ''), // '/' . $router->getAllParam(2),
+            'acao' => 'ws_' . $router->getAllParam(2),
+            'controller' => ucwords($router->getAllParam(1)),
+            'includeFile' => $router->getIncludeFile(),
+            'ParamsRouter' => $router->getAllParam(),
+            'dados' => array_merge($this->getBody(), [
+                'idFromRoute' => (int) $router->getAllParam(3),
+            ]),
+        ];
     }
 
     private function getAllHeaders() {
@@ -82,6 +97,15 @@ class Api {
         die();
     }
 
+    /**
+     * responde a aplicação com um erro
+     * @param type $mensagem
+     * @param int $code
+     */
+    public function error($mensagem, int $code = 0) {
+        $this->response(['error' => $mensagem], $code);
+    }
+
     function getBody() {
         return $this->body;
     }
@@ -95,34 +119,26 @@ class Api {
         $api->response($response, $code);
     }
 
+    /**
+     * Recebe um array com as configuração e seta a configuração estatica de Config 
+     * @param array $config
+     * @param type $page404
+     */
     public function setConfig(array $config = [], $page404 = '') {
         $router = new Router($page404);
 
         // Config para aplicação
-        $data = array_merge([
-            'headers' => $this->getHeaders(),
-            'rota' => $router->getAllParam(1) . (($router->getAllParam(2)) ? '/' . $router->getAllParam(2) : ''),
-            'acao' => 'ws_' . $router->getAllParam(2),
-            'controller' => ucwords($router->getAllParam(1)),
-            'includeFile' => $router->getIncludeFile(),
-            'ParamsRouter' => $router->getAllParam(),
-            'dados' => array_merge($this->getBody(), [
-                'idFromRoute' => (int) $router->getAllParam(3),
-            ]),
-                ], $config);
-        Config::init($data);
+        $this->config = array_merge($this->config, $config);
+        Config::init($this->config);
     }
 
-    public function getUsernameAndPasswordFromBasicAuthorizationHeader() {
-        $dt = explode(':', base64_decode(substr($this->getHeaders()['Authorization'], 6)));
-        return [
-            'username' => $dt[0],
-            'password' => $dt[1]
-        ];
-    }
-
-    public function getAuthorizationCodeFromHeader() {
-        return substr($this->getHeaders()['Authorization'], 6);
+    /**
+     * Retorna configurações da API
+     * @param type $key
+     * @return type
+     */
+    public function getRota() {
+        return $this->config['rota'];
     }
 
 }
