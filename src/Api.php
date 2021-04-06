@@ -55,28 +55,49 @@ class Api {
         }
     }
 
+    /**
+     * Adiciona a chave de error para response da Api
+     * @param type $mensagem
+     * @param type $code
+     * @return $this
+     */
     public function setError($mensagem, $code = 200) {
         $this->responseData['error'] = $mensagem;
         $this->responseCode = $code;
         return $this;
     }
 
+    /**
+     * Dado um array, faz o merge com o response body atual
+     * @param array $response
+     * @return $this
+     */
     public function responseMerge(array $response) {
         $this->responseData = array_merge($this->responseData, $response);
         return $this;
     }
 
+    /**
+     * Adiciona ao body de saída uma chave => valor
+     * @param type $chave
+     * @param type $valor
+     * @return $this
+     */
     public function addResponse($chave, $valor) {
         $this->responseMerge([$chave => $valor]);
         return $this;
     }
 
+    /**
+     * Responde a requisição, encerrando o script
+     * @param array $response
+     * @param int $responseCode
+     */
     public function response(array $response = [], int $responseCode = 0) {
         // Setar o codigo final de saida
         if ($responseCode > 0) {
             $this->responseCode = $responseCode;
         }
-
 
         // Adicionar parametros default
         $this->responseMerge($response);
@@ -103,17 +124,31 @@ class Api {
      * @param int $code
      */
     public function error($mensagem, int $code = 0) {
-        $this->response(['error' => $mensagem], $code);
+        $this->setError($mensagem, $code);
+        $this->response();
     }
 
+    /**
+     * Retorna o body da requisição
+     * @return type
+     */
     function getBody() {
         return $this->body;
     }
 
+    /**
+     * Retorna o headers da requisição
+     * @return type
+     */
     function getHeaders() {
         return $this->headers;
     }
 
+    /**
+     * Estaticamente, cria uma instancia da API e responde o body com o código citado
+     * @param type $code
+     * @param type $response
+     */
     public static function result($code, $response) {
         $api = new Api();
         $api->response($response, $code);
@@ -139,6 +174,28 @@ class Api {
      */
     public function getRota() {
         return $this->config['rota'];
+    }
+
+    /**
+     * Retorna um array contento username e password enviado. 
+     * 
+     * Espera uma string em base64_encode contendo {username}:{password} no headers
+     * @return array
+     */
+    public function getUsernameAndPasswordFromAuthorizationHeaders(): array {
+        $dt = explode(':', base64_decode(substr($this->getHeaders()['Authorization'], 6)));
+        return [
+            'username' => $dt[0],
+            'password' => $dt[1]
+        ];
+    }
+
+    /**
+     * Retorna a string enviada como Token no cabeçalho Authorization
+     * @return string
+     */
+    public function getTokenFromAuthorizationHeaders(): string {
+        return (string) substr($this->getHeaders()['Authorization'], 6);
     }
 
 }
