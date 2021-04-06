@@ -31,7 +31,7 @@ class Package {
 
         date_default_timezone_set('America/Recife');
         Helper::directorySeparator($dirOutput);
-        
+
         // projectName
         $fontes = str_replace('/', DIRECTORY_SEPARATOR, $origem);
         $t = explode(DIRECTORY_SEPARATOR, $fontes);
@@ -52,6 +52,12 @@ class Package {
         $versao = "$X.$Y.$Z." . date('YmdHi');
         file_put_contents($file, $versao);
 
+        // composer
+        if (file_exists($origem . '/vendor/autoload.php')) {
+            echo " - Atualizando pacotes via composer ...";
+            shell_exec('composer install -q --prefer-dist --optimize-autoloader --no-dev --working-dir="' . $origem . '"');
+        }
+
         // builder and compile
         switch (true) {
             case (is_dir($fontes . DIRECTORY_SEPARATOR . '_build')):
@@ -67,7 +73,7 @@ class Package {
                 die('Diretorio build não definido');
                 break;
         }
-        echo " - Construindo aplicacao ... ";
+        echo "\n - Construindo aplicacao ... ";
         $ret = Helper::curlCall("https://localhost/$projectName/$build/builder.php?pack=true", [], 'GET', [], false);
         echo $ret->status;
         if ((int) $ret->status !== 200) {
@@ -75,7 +81,7 @@ class Package {
             die("\n################## ERROR!!: #################### \n\n STATUS BUILDER <> 200 \n\n###########################################\n");
         }
 
-        echo "\n - Compilando JS e components ...";
+        echo "\n - Construindo JS e Componentes ...";
         $ret = Helper::curlCall("https://localhost/$projectName/$build/compile.php?pack=true&compileToBuild=YES&recompile=ALL", [], 'GET', [], false);
         echo $ret->status;
         if ((int) $ret->status !== 200) {
