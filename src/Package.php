@@ -53,7 +53,7 @@ class Package {
         file_put_contents($file, $versao);
 
         // composer
-        if (file_exists($origem . '/vendor/autoload.php')) {
+        if (file_exists($origem . '/composer.json')) {
             echo " - Atualizando pacotes via composer ...";
             shell_exec('composer install -q --prefer-dist --optimize-autoloader --no-dev --working-dir="' . $origem . '"');
         }
