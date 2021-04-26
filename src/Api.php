@@ -113,6 +113,11 @@ class Api {
             $this->responseCode = $responseCode;
         }
 
+        // caso content não venha nada, vou  colocar por padrão
+        if ($response['content'] === null) {
+            $response['content'] = false;
+        }
+
         // Adicionar parametros default
         $this->responseMerge($response);
         $this->responseMerge([
