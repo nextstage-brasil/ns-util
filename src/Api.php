@@ -56,6 +56,20 @@ class Api {
     }
 
     /**
+     * ATENÇÃO: Retorna o dado conforme foi enviado, sem nenhum tratamento de segurança. Use com atenção.
+     * @param type $key
+     */
+    public function getOriginalData($key) {
+        // Obtenção do body
+        $b = $_POST;
+        $dd = json_decode(file_get_contents('php://input'), true);
+        if (is_array($dd)) {
+            $b = array_merge($_POST, $dd);
+        }
+        return $b[$key];
+    }
+
+    /**
      * Adiciona a chave de error para response da Api
      * @param type $mensagem
      * @param type $code
