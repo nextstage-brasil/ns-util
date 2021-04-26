@@ -631,13 +631,13 @@ class Helper {
      * @param type $withBom
      * @return type
      */
-    public static function array2csv($array, $filepath = false, $withBom = true) {
+    public static function array2csv(array $array, $filepath = false, bool $withBom = true) {
         if ($filepath) {
             $fp = fopen($filepath, 'w');
             if ($withBom) {
                 fputs($fp, $bom = ( chr(0xEF) . chr(0xBB) . chr(0xBF) ));
             }
-            //fputcsv($fp, array_keys($array[0])); // gravar o cabecalho
+            fputcsv($fp, array_keys($array[0])); // gravar o cabecalho
             foreach ($array as $linha) {
                 fputcsv($fp, $linha);
             }
