@@ -1066,7 +1066,10 @@ var geolocation = {'error': nsGeoLocationError};
 function geolocationError(error) {
     switch (error.code) {
         case error.PERMISSION_DENIED:
-            nsGeoLocationError = "Usuário rejeitou a solicitação de geo localização";//.<br/><br/> Acesse as configurações do navegador para autorizar o acesso a geo localização.";
+            nsGeoLocationError = "Usuário rejeitou a solicitação de geo localização."
+                    + ""
+                    //+ " <br/><a href=\"https://www.google.com.br\" target=\"_blank\">Tutorial</a>"
+                    ;
             break;
         case error.POSITION_UNAVAILABLE:
             nsGeoLocationError = "Localização indisponível.";
@@ -1160,7 +1163,7 @@ var fingerprint = {
     useragent: fingerprint_useragent(),
     truebrowser: fingerprint_truebrowser(),
     geolocation: geolocation,
-    isMobile: fp.isMobile(), 
+    isMobile: fp.isMobile(),
     geolocationError: nsGeoLocationError
 };
 

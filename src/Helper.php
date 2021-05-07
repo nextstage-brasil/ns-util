@@ -634,10 +634,16 @@ class Helper {
     public static function array2csv(array $array, $filepath = false, bool $withBom = true) {
         if ($filepath) {
             $fp = fopen($filepath, 'w');
+            // BOM
             if ($withBom) {
                 fputs($fp, $bom = ( chr(0xEF) . chr(0xBB) . chr(0xBF) ));
             }
-            fputcsv($fp, array_keys($array[0])); // gravar o cabecalho
+            
+            // Gravar o cabeçalho
+            $keys = array_keys($array[0]);
+            fputcsv($fp, $keys);
+            
+            // Gravar dados
             foreach ($array as $linha) {
                 fputcsv($fp, $linha);
             }
