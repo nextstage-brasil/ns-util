@@ -128,6 +128,11 @@ class PgLoadCSV {
         if (stripos($data[0], "\t") > 0) {
             $this->run->explode = "\t";
         }
+        
+        // Remover BOM
+        $data[0] = str_replace("\xEF\xBB\xBF",'', $data[0]);
+        
+        
         $head = explode($this->run->explode, $data[0]);
         $this->run->fields = $cpos = $control = [];
 
