@@ -97,6 +97,10 @@ class Config {
         return $this;
     }
 
+    public function getAll() {
+        return $this->settings;
+    }
+
     /**
      * Init para utilização da classe de forma estatica
      * @param array $data

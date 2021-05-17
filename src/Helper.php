@@ -749,4 +749,24 @@ class Helper {
         return $out;
     }
 
+    public static function formatDate($date, $escolha = 'arrumar', $datahora = false, $alterarTimeZone = false) {
+        return (new Format($date))->date($escolha, $datahora, $alterarTimeZone);
+    }
+
+    public static function formatCep($cep) {
+        return (new Format($cep))->cep();
+    }
+
+    public static function formatCpfCnpj($var) {
+        $var = self::parseInt($var);
+        if (strlen($var) === 11) { // cpf
+            $out = substr($var, 0, 3) . '.' . substr($var, 3, 3) . '.' . substr($var, 6, 3) . '-' . substr($var, 9, 2);
+        } else if (strlen($var) === 14) { // cnpj
+            $out = substr($var, 0, 2) . '.' . substr($var, 2, 3) . '.' . substr($var, 5, 3) . '/' . substr($var, 8, 4) . '-' . substr($var, 12, 2);
+        } else {
+            $out = $var;
+        }
+        return $out;
+    }
+
 }
