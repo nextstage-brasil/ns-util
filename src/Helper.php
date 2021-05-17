@@ -638,11 +638,11 @@ class Helper {
             if ($withBom) {
                 fputs($fp, $bom = ( chr(0xEF) . chr(0xBB) . chr(0xBF) ));
             }
-            
+
             // Gravar o cabeçalho
             $keys = array_keys($array[0]);
             fputcsv($fp, $keys);
-            
+
             // Gravar dados
             foreach ($array as $linha) {
                 fputcsv($fp, $linha);
@@ -712,6 +712,39 @@ class Helper {
         $out = [];
         foreach ($chaves as $val) {
             $out[$val] = $origem[$val];
+        }
+        return $out;
+    }
+
+    /**
+     * Ira buscar o path da aplicação, antes da pasta /vendor
+     */
+    public static function getPathApp() {
+        return str_replace(DIRECTORY_SEPARATOR . 'vendor' . DIRECTORY_SEPARATOR . 'nextstage-brasil' . DIRECTORY_SEPARATOR . 'ns-util' . DIRECTORY_SEPARATOR . 'src', '', __DIR__);
+    }
+
+    /**
+     * Retorna um valor baseado em um tipo
+     * @param type $string
+     * @param type $type
+     */
+    public static function getValByType($string, $type) {
+        switch ($type) {
+            case 'int':
+                $out = filter_var($string, FILTER_VALIDATE_INT);
+                if (!$out) {
+                    $out = null;
+                }
+                break;
+            case 'double':
+                $out = filter_var($string, FILTER_VALIDATE_FLOAT);
+                if (!$out) {
+                    $out = null;
+                }
+                break;
+            default:
+                $out = filter_var($string, FILTER_SANITIZE_STRING);
+                break;
         }
         return $out;
     }
