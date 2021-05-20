@@ -645,6 +645,9 @@ class Helper {
 
             // Gravar dados
             foreach ($array as $linha) {
+                if (is_array($linha) || is_object($linha)) {
+                    $linha = json_encode($linha);
+                }
                 fputcsv($fp, $linha);
             }
             fclose($fp);
