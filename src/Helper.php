@@ -643,13 +643,16 @@ class Helper {
             $keys = array_keys($array[0]);
             fputcsv($fp, $keys);
 
-            // Gravar dados
+             // Gravar dados
             foreach ($array as $linha) {
-                if (is_array($linha) || is_object($linha)) {
-                    $linha = json_encode($linha);
+                foreach ($linha as $key => $val) {
+                    if (is_array($val) || is_object($val)) {
+                        $linha[$key] = json_encode($val);
+                    }
                 }
                 fputcsv($fp, $linha);
             }
+
             fclose($fp);
             return file_exists($filepath);
         } else {
