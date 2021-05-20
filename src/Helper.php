@@ -647,7 +647,7 @@ class Helper {
             foreach ($array as $linha) {
                 foreach ($linha as $key => $val) {
                     if (is_array($val) || is_object($val)) {
-                        $linha[$key] = json_encode($val);
+                        $linha[$key] = json_encode($val, JSON_HEX_QUOT | JSON_HEX_APOS);
                     }
                 }
                 fputcsv($fp, $linha);
