@@ -795,4 +795,19 @@ class Helper {
         return $out;
     }
 
+    /**
+     * 
+     * @param type $texto String completa a ser alterada
+     * @param type $search termo a procurar e realçar
+     */
+    public static function highlightText($texto, $search) {
+        $searchsan = self::sanitize($search);
+        $textosan = self::sanitize($texto);
+        $inicio = stripos($textosan, $searchsan);
+        if ($inicio >= 0) {
+            $trecho = \mb_substr($texto, $inicio, strlen($search));
+            $texto = \str_replace($trecho, '<span class="ns-highlight-text">' . $trecho . '</span>', $texto);
+        }
+    }
+
 }
