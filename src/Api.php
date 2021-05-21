@@ -10,6 +10,7 @@ class Api {
     private $eficiencia;
     private $responseCode = 200;
     private $config = [];
+    private $router;
 
     public function __construct() {
         // Obtenção dos headers
@@ -28,6 +29,7 @@ class Api {
 
         // Config para aplicação
         $router = new Router('');
+        $this->router = $router;
         $this->config = [
             'headers' => $this->getHeaders(),
             'rota' => $router->getAllParam(1) . (($router->getAllParam(2)) ? '/' . $router->getAllParam(2) : ''), // '/' . $router->getAllParam(2),
@@ -163,8 +165,12 @@ class Api {
         return $this->headers;
     }
 
-    public function getConfig() {
+    public function getConfigData() {
         return $this->config;
+    }
+
+    public function getRouter(): Router {
+        return $this->router;
     }
 
     /**
