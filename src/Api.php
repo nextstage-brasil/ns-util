@@ -13,7 +13,7 @@ class Api {
     private $router;
 
     public function __construct() {
-        // Obtenção dos headers
+        // Obtenção dos headers. Chaves sempre minusculas
         $this->headers = $this->getAllHeaders();
 
         // Obtenção do body
@@ -161,7 +161,13 @@ class Api {
      * Retorna o headers da requisição
      * @return type
      */
-    function getHeaders() {
+    function getHeaders($keysToLower = false) {
+        if ($keysToLower) {
+            foreach ($this->headers as $key => $val) {
+                unset($this->headers[$key]);
+                $this->headers[mb_strtolower($key)] = $val;
+            }
+        }
         return $this->headers;
     }
 
