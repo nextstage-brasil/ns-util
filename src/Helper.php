@@ -314,7 +314,7 @@ class Helper {
             CURLOPT_TIMEOUT => 30, // timeout on response
             CURLOPT_MAXREDIRS => 10, // stop after 10 redirects
             CURLOPT_SSL_VERIFYPEER => $ssl,
-            CURLOPT_HEADER => false,
+            CURLOPT_HEADER => true,
             CURLOPT_VERBOSE => false,
         ];
         $options[CURLOPT_HTTPHEADER] = $header;
@@ -331,15 +331,35 @@ class Helper {
         }
         $ch = curl_init();
         curl_setopt_array($ch, $options);
-        $content = curl_exec($ch);
+        $output = curl_exec($ch);
         //echo curl_getinfo($ch, CURLINFO_EFFECTIVE_URL).'<br/>';
         //echo 'error: ' . curl_errno($ch);
+        // headers
+        $header_size = curl_getinfo($ch, CURLINFO_HEADER_SIZE);
+        $body = substr($output, $header_size);
+
+        $headers = [];
+        $output = rtrim($output);
+        $data = explode("\n", $output);
+        $headers['status'] = $data[0];
+        array_shift($data);
+        foreach ($data as $part) {
+            //some headers will contain ":" character (Location for example), and the part after ":" will be lost, Thanks to @Emanuele
+            $middle = explode(":", $part, 2);
+            //Supress warning message if $middle[1] does not exist, Thanks to @crayons
+            if (!isset($middle[1])) {
+                $middle[1] = null;
+            }
+            $headers[trim($middle[0])] = trim($middle[1]);
+        }
+
         $ret = (object) [
-                    'content' => $content,
+                    'content' => $body,
                     'errorCode' => curl_errno($ch),
                     'error' => ((curl_error($ch)) ? curl_error($ch) : curl_errno($ch)),
                     'status' => curl_getinfo($ch)['http_code'],
-                    'http_code' => curl_getinfo($ch)['http_code']
+                    'http_code' => curl_getinfo($ch)['http_code'],
+                    'headers' => $headers
         ];
         //Log::error(json_encode($ret));
         //echo json_encode($content);
@@ -355,7 +375,7 @@ class Helper {
      * @param type $enclosure
      * @return boolean
      */
-    public static function myFGetsCsv($handle, $explode = ';', $blockSize = 1000, $enclosure = '"') {
+    public static function myFGetsCsv($handle, $explode = ';', $blockSize = 0, $enclosure = '"') {
         $data = fgetcsv($handle, $blockSize, $explode, $enclosure);
         if ($data === false || $data === null) {
             return false;
@@ -643,7 +663,7 @@ class Helper {
             $keys = array_keys($array[0]);
             fputcsv($fp, $keys);
 
-             // Gravar dados
+            // Gravar dados
             foreach ($array as $linha) {
                 foreach ($linha as $key => $val) {
                     if (is_array($val) || is_object($val)) {
