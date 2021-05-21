@@ -41,12 +41,11 @@ class PgLoadCSV {
         $this->consoleTable instanceof ConsoleTable;
         return $this->consoleTable;
     }
-    
+
     public function getCsv() {
         return $this->csv;
     }
 
-    
     private function consoleTableAddLine($qtdeLinhas, $filesize, $message) {
         $this->csv[$this->file] = [$this->run->schema, $this->run->table, $qtdeLinhas, $filesize, $message];
         $this->consoleTable->addRow([$this->run->schema, $this->run->table, $qtdeLinhas, $message]);
@@ -128,16 +127,23 @@ class PgLoadCSV {
         if (stripos($data[0], "\t") > 0) {
             $this->run->explode = "\t";
         }
-        
+
         // Remover BOM
-        $data[0] = str_replace("\xEF\xBB\xBF",'', $data[0]);
-        
-        
+        $data[0] = str_replace("\xEF\xBB\xBF", '', $data[0]);
+
+
         $head = explode($this->run->explode, $data[0]);
         $this->run->fields = $cpos = $control = [];
 
         foreach ($head as $key => $val) {
             $val = $this->sanitizeField($val);
+            
+            // termos exclusivos do postgres
+            $termosReservados = ['references', 'if', 'else', 'case'];
+            if (array_search($val, $termosReservados) !== false) {
+                $val = '_' . $val;
+            }
+
             if (strlen($val) === 0) {
                 continue;
             }
