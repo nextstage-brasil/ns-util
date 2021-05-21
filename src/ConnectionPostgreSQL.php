@@ -126,12 +126,15 @@ class ConnectionPostgreSQL {
      * @param type $log
      * @return type
      */
-    public function execQueryAndReturn($query, $log = true) {
+    public function execQueryAndReturn($query, $log = true, $keyCamelCaseFormat = true) {
         $this->open();
         $out = [];
         $this->executeQuery($query, $log);
         while ($dd = $this->next()) {
-            $out[] = Helper::name2CamelCase($dd);
+            if ($keyCamelCaseFormat) {
+                $dd = Helper::name2CamelCase($dd);
+            }
+            $out[] = $dd;
         }
         return $out;
     }
