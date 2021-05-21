@@ -163,6 +163,10 @@ class Api {
         return $this->headers;
     }
 
+    public function getConfig() {
+        return $this->config;
+    }
+
     /**
      * Estaticamente, cria uma instancia da API e responde o body com o código citado
      * @param type $code
