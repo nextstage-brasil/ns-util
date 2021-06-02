@@ -52,6 +52,15 @@ class PgLoadCSV {
     }
 
     /**
+     * Define o que será utilizado em nullas ao executar o insertByCopy
+     * @param type $nullas
+     */
+    public function setNullAs($nullas = '') {
+        $this->run->con->setNullAs($nullas);
+        return $this;
+    }
+
+    /**
      * 
      * @param string $file_or_dir Diretorio ou CSV que deve ser ingerido
      * @param string $tablename - Caso false, será utilizado o nome do arquivo CSV sanitizado
@@ -137,9 +146,9 @@ class PgLoadCSV {
 
         foreach ($head as $key => $val) {
             $val = $this->sanitizeField($val);
-            
+
             // termos exclusivos do postgres
-            $termosReservados = ['references', 'if', 'else', 'case'];
+            $termosReservados = ['references', 'if', 'else', 'case', 'desc', 'asc'];
             if (array_search($val, $termosReservados) !== false) {
                 $val = '_' . $val;
             }

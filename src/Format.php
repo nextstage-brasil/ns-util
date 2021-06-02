@@ -15,7 +15,7 @@ class Format {
         $this->timezone = $timezone;
         $this->string = $string;
     }
-    
+
     public function setString($string) {
         $this->string = $string;
         return $this;
@@ -79,6 +79,10 @@ class Format {
                 } else {
                     $out = $date->format('d/m/Y');
                 }
+                break;
+            case 'iso8601':
+            case 'c':
+                $out = $date->format('c');
                 break;
             case 'extenso':
                 $out = strftime('%d de %B de %Y', $date->getTimestamp());

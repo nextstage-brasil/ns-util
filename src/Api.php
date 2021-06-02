@@ -109,7 +109,7 @@ class Api {
      * @param array $response
      * @param int $responseCode
      */
-    public function response(array $response = [], int $responseCode = 0) {
+    public function response(array $response = [], int $responseCode = 0, $type = 'json') {
         // Setar o codigo final de saida
         if ($responseCode > 0) {
             $this->responseCode = $responseCode;
@@ -135,6 +135,9 @@ class Api {
 
         // Saida
         http_response_code($this->responseCode);
+        if ($type === 'json') {
+            header('Content-Type:application/json');
+        }
         echo json_encode($this->responseData);
         die();
     }
@@ -184,9 +187,9 @@ class Api {
      * @param type $code
      * @param type $response
      */
-    public static function result($code, $response) {
+    public static function result($code, $response, $type='json') {
         $api = new Api();
-        $api->response($response, $code);
+        $api->response($response, $code, $type);
     }
 
     /**

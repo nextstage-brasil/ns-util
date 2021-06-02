@@ -100,12 +100,11 @@ class Helper {
     }
 
     public static function arrayOrderBy(&$array, $element, $sort = 'ASC') {
-        usort($array, function($a, $b) {
-            global $element, $sort;
+        usort($array, function($a, $b) use ($element, $sort) {
             if ($sort === 'ASC') {
-                return $a[$element] < $b[$element];
-            } else {
                 return $a[$element] > $b[$element];
+            } else {
+                return $a[$element] < $b[$element];
             }
         });
     }
@@ -145,7 +144,7 @@ class Helper {
 
         $string = str_replace('_', ' ', $string);
         $out = str_replace(' ', '', ucwords($string));
-        $out{0} = mb_strtolower($out{0});
+        $out[0] = mb_strtolower($out[0]);
         return $out;
     }
 
@@ -382,7 +381,7 @@ class Helper {
         }
 
         $line = implode('|M|', $data);
-        $line = str_replace(['|EN|', '\\', ';', "'", "\n", "\t", "\r\n", "0x0d"], [$explode, '', ' ', '', '', ' ', ' ', ' '], trim($line));
+        $line = str_replace(['|EN|', ';', "'", '\\n', "\t", "\r\n", "0x0d", '\\'], [$explode, ' ', '', chr(13), ' ', ' ', ' ', ''], trim($line));
         $line = mb_convert_encoding($line, "UTF-8");
         $data = explode('|M|', $line);
         return $data;
@@ -667,7 +666,7 @@ class Helper {
             foreach ($array as $linha) {
                 foreach ($linha as $key => $val) {
                     if (is_array($val) || is_object($val)) {
-                        $linha[$key] = json_encode($val, JSON_HEX_QUOT | JSON_HEX_APOS);
+                        $linha[$key] = json_encode($val, JSON_HEX_QUOT | JSON_HEX_APOS | JSON_UNESCAPED_UNICODE);
                     }
                 }
                 fputcsv($fp, $linha);

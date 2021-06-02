@@ -18,6 +18,7 @@ class ConnectionPostgreSQL {
     public $dd;
     public $lastInsertId;
     private static $transaction_in_progress;
+    private $nullas = '';
 
     public function __construct($host, $user, $pass, $port, $database) {
         $this->config = new stdClass();
@@ -140,6 +141,14 @@ class ConnectionPostgreSQL {
     }
 
     /**
+     * Define o que será utilizado em nullas ao executar o insertByCopy
+     * @param type $nullas
+     */
+    public function setNullAs($nullAs = '') {
+        $this->nullas = $nullAs;
+    }
+
+    /**
      *
      * @param Connection $db
      * @param string $this->tableName
@@ -149,7 +158,8 @@ class ConnectionPostgreSQL {
      */
     public function insertByCopy($toTable, array $fields, array $records) {
         $this->open();
-        static $delimiter = "\t", $nullAs = '';
+        static $delimiter = "\t";
+        $nullAs = $this->nullas;
         $rows = [];
         foreach ($records as $record) {
             $row = [];

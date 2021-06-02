@@ -266,35 +266,8 @@ class Gitlab {
                 'description' => $item['description'],
             ];
 
-            // Milestone?
-            if (\NsUtil\Helper::compareString($item['list_name'], 'milestones')) {
-                $title = $item['title'];
-                $description = $item['description'];
-                $this->milestoneAdd($title, $description);
-                continue;
-            }
-
-            continue;
-
-            // Criar issue
-            $issue_iid = 0;
-            $card = $this->issueAdd($item['title'], $params);
-            if ($card['iid']) {
-                $issue_iid = $card['iid'];
-            } else {
-                $error[] = "Erro ao criar issue: " . $item['title'];
-                continue;
-            }
-
-            // tempo
-            if ((int) $item[$timeEstimatedName] > 0) {
-                $this->setEstimate($issue_iid, $item[$timeEstimatedName]);
-            }
-            if ((int) $item[$timeSpendName] > 0) {
-                $this->setSpend($issue_iid, $item[$timeSpendName]);
-            }
-
             // comentarios
+            $coments = [];
             $checklists = [];
             foreach ($actions as $action) {
                 $dataActions = $action['text'];
@@ -333,7 +306,8 @@ class Gitlab {
                             . "* \n\n"
                             . $this->trelloSetMarkdown($text);
                     $createdAt = $action['date'];
-                    $this->addComments($issue_iid, $body, $createdAt);
+                    $coments[] = ['body' => $body, 'createAt' => $createdAt, 'text' => $text, 'type' => 'comments'];
+                    //$this->addComments($issue_iid, $body, $createdAt);
                 }
             }
 
@@ -354,13 +328,53 @@ class Gitlab {
                         . $text
                 ;
                 $createdAt = $checklist['date'];
-                $this->addComments($issue_iid, $body, $createdAt);
+                $coments[] = ['body' => $body, 'createAt' => $createdAt, 'text' => $text, 'type' => 'checklist'];
+                //$this->addComments($issue_iid, $body, $createdAt);
             }
 
-            // Se o estado for closed, encerrar e corrigir labels
-            if ($item['state'] === 'closed') {
-                $update['state_event'] = 'close';
-                $this->issueEdit($issue_iid, $update);
+            // Milestone?
+            die('Faltando definidir milestone. Parando para resolver qmanager');
+            if (\NsUtil\Helper::compareString($item['list_name'], 'milestones')) {
+                $title = $item['title'];
+                $description = [];
+                $description[] = $item['description'];
+                foreach ($coments as $coment) {
+                    if ($coment['type'] === 'checklist') {
+                        $description[] = $coment['body'];
+                    }
+                }
+                $this->milestoneAdd($title, $description);
+            }
+            // Issues
+            else {
+                // Criar issue
+                $issue_iid = 0;
+                $card = $this->issueAdd($item['title'], $params);
+                if ($card['iid']) {
+                    $issue_iid = $card['iid'];
+                } else {
+                    $error[] = "Erro ao criar issue: " . $item['title'];
+                    continue;
+                }
+
+                // tempo
+                if ((int) $item[$timeEstimatedName] > 0) {
+                    $this->setEstimate($issue_iid, $item[$timeEstimatedName]);
+                }
+                if ((int) $item[$timeSpendName] > 0) {
+                    $this->setSpend($issue_iid, $item[$timeSpendName]);
+                }
+
+                // coments
+                foreach ($coments as $coment) {
+                    $this->addComments($issue_iid, $coment['body'], $coment['createdAt']);
+                }
+
+                // Se o estado for closed, encerrar e corrigir labels
+                if ($item['state'] === 'closed') {
+                    $update['state_event'] = 'close';
+                    $this->issueEdit($issue_iid, $update);
+                }
             }
 
             $loader->done($chaveItem + 1);
