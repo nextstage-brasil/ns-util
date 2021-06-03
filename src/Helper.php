@@ -380,10 +380,16 @@ class Helper {
             return false;
         }
 
+        $from = ['|EN|'  , "\n", "\t", '\r\n', "0x0d", '\\', ';', "'"];
+        $to =   [$explode, ''  , ' ' , ' '   , ' '   , ''  , ' ', ''];
+
         $line = implode('|M|', $data);
-        $line = str_replace(['|EN|', ';', "'", '\\n', "\t", "\r\n", "0x0d", '\\'], [$explode, ' ', '', chr(13), ' ', ' ', ' ', ''], trim($line));
+        //$line = str_replace(['|EN|', ';', "'", '\\n', "\t", "\r\n", "0x0d", '\\'], [$explode, ' ', '', chr(13), ' ', ' ', ' ', ''], trim($line));
+        //$line = str_replace(['|EN|', "\n", "\t", "\r\n", "0x0d", '\\', ';', "'"], [$explode, '', ' ', ' ', ' ', '', ' ', ''], trim($line));
+        $line = str_replace($from, $to, trim($line));
         $line = mb_convert_encoding($line, "UTF-8");
         $data = explode('|M|', $line);
+        
         return $data;
     }
 
