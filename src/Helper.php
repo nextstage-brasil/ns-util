@@ -380,8 +380,8 @@ class Helper {
             return false;
         }
 
-        $from = ['|EN|'  , "\n", "\t", '\r\n', "0x0d", '\\', ';', "'"];
-        $to =   [$explode, ''  , ' ' , ' '   , ' '   , ''  , ' ', ''];
+        $from = ['|EN|', "\n", "\t", '\r\n', "0x0d", '\\', ';', "'"];
+        $to = [$explode, '', ' ', ' ', ' ', '', ' ', ''];
 
         $line = implode('|M|', $data);
         //$line = str_replace(['|EN|', ';', "'", '\\n', "\t", "\r\n", "0x0d", '\\'], [$explode, ' ', '', chr(13), ' ', ' ', ' ', ''], trim($line));
@@ -389,7 +389,7 @@ class Helper {
         $line = str_replace($from, $to, trim($line));
         $line = mb_convert_encoding($line, "UTF-8");
         $data = explode('|M|', $line);
-        
+
         return $data;
     }
 
@@ -657,6 +657,7 @@ class Helper {
      * @return type
      */
     public static function array2csv(array $array, $filepath = false, bool $withBom = true) {
+        $delimiter = ';';
         if ($filepath) {
             $fp = fopen($filepath, 'w');
             // BOM
@@ -666,7 +667,7 @@ class Helper {
 
             // Gravar o cabeçalho
             $keys = array_keys($array[0]);
-            fputcsv($fp, $keys);
+            fputcsv($fp, $keys, $delimiter);
 
             // Gravar dados
             foreach ($array as $linha) {
@@ -675,7 +676,7 @@ class Helper {
                         $linha[$key] = json_encode($val, JSON_HEX_QUOT | JSON_HEX_APOS | JSON_UNESCAPED_UNICODE);
                     }
                 }
-                fputcsv($fp, $linha);
+                fputcsv($fp, $linha, $delimiter);
             }
 
             fclose($fp);
@@ -683,7 +684,7 @@ class Helper {
         } else {
             $handle = fopen('php://temp', 'r+');
             foreach ($array as $line) {
-                fputcsv($handle, $line, ';', '"');
+                fputcsv($handle, $line, $delimiter, '"');
             }
             rewind($handle);
             while (!feof($handle)) {
