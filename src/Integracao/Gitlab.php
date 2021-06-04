@@ -34,12 +34,8 @@ class Gitlab {
     }
 
     public function projectRead() {
-        $this->project = $this->fetch('projects/' . $this->getIdProject());
+        $this->project = $this->fetch('projects/' . $this->getIdProject())->content;
         return $this->project;
-    }
-
-    private function dateFormatToIso8601($date) {
-        return (new \NsUtil\Format())->setString($date)->date('iso8601');
     }
 
     /**
@@ -55,13 +51,16 @@ class Gitlab {
                 . $resource
                 . ((count($data) > 0) ? '?' . http_build_query($data) : '')
         ;
-        //echo $url . PHP_EOL;
+        //echo $url . PHP_EOL; 
         $ret = \NsUtil\Helper::curlCall($url, [], $method, $header);
         if ($ret->status >= 203) {
             throw new \Exception(PHP_EOL .
                             'Chamada ao recurso ' . $resource . ' com status ' . $ret->status
                             . PHP_EOL
                             . 'URL: ' . $url
+                            . PHP_EOL
+                            . PHP_EOL
+                            . var_export($ret, true)
                             . PHP_EOL);
         } else {
             $ret->content = json_decode($ret->content, true);
@@ -116,8 +115,13 @@ class Gitlab {
         $resource = $this->config->get('rProject') . '/issues';
         $data['title'] = $title;
         $method = 'POST';
-        $ret = $this->fetch($resource, $data, $method);
-        return $ret->content;
+        try {
+            $ret = $this->fetch($resource, $data, $method);
+            return $ret->content;
+        } catch (\Exception $ex) {
+            echo PHP_EOL . $ex->getMessage() . PHP_EOL;
+            return [];
+        }
     }
 
     public function issueEdit($issue_iid, array $data) {
@@ -155,7 +159,12 @@ class Gitlab {
         $data = ['body' => $body, 'created_at' => $createdAt];
         $this->issueSetDateFormat($data);
         $method = 'POST';
-        $ret = $this->fetch($resource, $data, $method);
+        try {
+            $ret = $this->fetch($resource, $data, $method);
+        } catch (\Exception $ex) {
+            echo $ex->getMessage();
+        }
+
         return $ret->content;
     }
 
@@ -197,16 +206,20 @@ class Gitlab {
         // Carregar JSON
         $trello = Trello::readJson($fileJson, []);
         $data = $trello['data'];
+
+        // Ordenar os cards pela posicao no trello
+        foreach ($trello as $key => $val) {
+            if (isset($val[0]['pos'])) {
+                \NsUtil\Helper::arrayOrderBy($trello[$key], 'pos');
+            }
+        }
+
         $format = new \NsUtil\Format();
         $loader = new \NsUtil\StatusLoader(count($data['cards']), 'Gitlab from Trello');
         $loader->setShowQtde(true);
+        $milestonePrefix = 1;
+        $tarefasPadrao = [];
         foreach ($data['cards'] as $chaveItem => $item) {
-            /*
-              //if ($item['id'] !== '6040f61560221b2bf16efefa' && $item['id'] !== '6040f6077c25ee58f9950a23' && $item['id'] !== '6040f632dafee87ec6242e09') {
-              if ($item['id'] !== '6070b014d183ea466a31d537') {
-              continue;
-              }
-              /* */
 
             // Ignorar as listas do trello arquivadas...
             if ($ignoreClosedList && ($item['list_state'] !== 'opened' || $item['card_state'] !== 'opened')) {
@@ -222,7 +235,7 @@ class Gitlab {
             }
             \NsUtil\Helper::arrayOrderBy($actions, 'date', 'ASC');
 
-            // Obter o createttime. Obterá o mais antigo entre criação e update. POr causa da limitação de 10000 registros do trello
+            // Obter o createtime. Obterá o mais antigo entre criação e update. POr causa da limitação de 10000 registros do trello
             $created = ['date' => $format->setString(date('Y-m-d H:i:s'))->date('iso8601')];
             foreach ($actions as $v) {
                 $actionDate = (int) $format->setString($v['date'])->date('timestamp');
@@ -281,18 +294,6 @@ class Gitlab {
                                 . ((isset($dataActions['attachment']['url'])) ? 'URL: ' . $dataActions['attachment']['url'] : '')
                         ;
                         break;
-                    case 'removeChecklistFromCard':
-                        unset($checklists[$dataActions['checklist']['name']]);
-                        continue;
-                        break;
-                    case 'updateCheckItemStateOnCard':
-                        $checklistName = $dataActions['checklist']['name'];
-                        if (!isset($checklists[$checklistName])) {
-                            $checklists[$checklistName] = ['name' => $checklistName, 'date' => $action['date'], 'assigned' => $action['id_member']];
-                        }
-                        $checklists[$checklistName]['items'][$dataActions['checkItem']['id']] = $dataActions['checkItem'];
-                        continue;
-                        break;
                     default:
                         $text = false;
                         break;
@@ -307,35 +308,48 @@ class Gitlab {
                             . $this->trelloSetMarkdown($text);
                     $createdAt = $action['date'];
                     $coments[] = ['body' => $body, 'createAt' => $createdAt, 'text' => $text, 'type' => 'comments'];
-                    //$this->addComments($issue_iid, $body, $createdAt);
                 }
             }
 
-            // checklists
+            // checklists - obter os checlists do card
+            $checklists = array_filter($data['checklists'], function($v) use ($item) {
+                return $item['id'] === $v['idCard'];
+            });
             foreach ($checklists as $checklist) {
-                $text = '';
+                $checklist['items'] = array_filter($data['checklists_items'], function($v) use ($checklist) {
+                    //var_export($v);
+                    return $v['idChecklist'] === $checklist['id'];
+                });
+                \NsUtil\Helper::arrayOrderBy($checklist['items'], 'pos');
+                $text = "";
                 // Criar comentário com o checklist
                 foreach ($checklist['items'] as $check) {
                     $state = (($check['state'] === 'complete') ? 'x' : ' ');
-                    $text .= "- [$state] " . $check['name'] . "\n";
+                    $text .= "- [$state] " . $check['name'] . "\r\n";
+
+                    // Geração das tarefas basicas das milestones
+                    if (stripos($item['list_name'], 'milestone') !== false) {
+                        $tarefasPadrao[] = ['issue_name' => $check['name'], 'project_name' => $trello['name'], 'milestone_name' => $item['title']];
+                    }
                 }
                 $nomeUsuario = \NsUtil\Helper::arraySearchByKey($data['members'], 'id', $checklist['items'][0]['id_member'])['name'];
                 $body = "*Importado do Trello. "
                         . "Criador: " . $nomeUsuario
-                        . " em " . $format->setString($checklist['date'])->date('mostrar', true)
-                        . "* \n\n"
-                        . "## " . $checklist['name'] . "\n\n"
+                        . "* \r\n"
+                        . "### " . $checklist['name'] . "\r\n"
                         . $text
                 ;
                 $createdAt = $checklist['date'];
                 $coments[] = ['body' => $body, 'createAt' => $createdAt, 'text' => $text, 'type' => 'checklist'];
-                //$this->addComments($issue_iid, $body, $createdAt);
             }
 
-            // Milestone?
-            die('Faltando definidir milestone. Parando para resolver qmanager');
-            if (\NsUtil\Helper::compareString($item['list_name'], 'milestones')) {
-                $title = $item['title'];
+            continue; /* @rever */
+
+            // Esta na lista de Milestone?
+            if (stripos($item['list_name'], 'milestone') !== false) {
+                $prefix = str_pad((string) $milestonePrefix, 3, "0", STR_PAD_LEFT);
+                $milestonePrefix++;
+                $title = $prefix . ' - ' . $item['title'];
                 $description = [];
                 $description[] = $item['description'];
                 foreach ($coments as $coment) {
@@ -343,7 +357,7 @@ class Gitlab {
                         $description[] = $coment['body'];
                     }
                 }
-                $this->milestoneAdd($title, $description);
+                $out['milestones'][] = $this->milestoneAdd($title, implode("\n\n", $description));
             }
             // Issues
             else {
@@ -380,12 +394,24 @@ class Gitlab {
             $loader->done($chaveItem + 1);
         }
 
-        return $error;
+        return [
+            'cronograma' => $tarefasPadrao,
+            'error' => $error
+        ];
     }
 
-    public function milestoneAdd($title, $description = '', $startDate = '', $dueDate = '') {
-        $this->projectRead();
-        $resource = '/groups/' . $this->project['namespace']['id'] . '/milestones';
+    public function milestoneAdd($title, $description = '', $local = 'projects', $startDate = '', $dueDate = '') {
+        switch ($local) {
+            case 'projects':
+                $resource = 'projects/' . $this->getIdProject() . '/milestones';
+                break;
+            case 'groups':
+                $this->projectRead();
+                $resource = 'groups/' . $this->project['namespace']['id'] . '/milestones';
+                break;
+            default:
+                die('Tipo de local não permitido: ' . $local);
+        }
         $data = [
             'title' => $title,
             'description' => $description,
@@ -394,8 +420,13 @@ class Gitlab {
         ];
         $this->issueSetDateFormat($data);
         $method = 'POST';
-        $ret = $this->fetch($resource, $data, $method);
-        return $ret->content;
+        try {
+            $ret = $this->fetch($resource, $data, $method);
+            return $ret->content;
+        } catch (\Exception $ex) {
+            //echo "Erro ao criar milestone: " . $title;
+            return [];
+        }
     }
 
 }
