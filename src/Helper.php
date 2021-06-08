@@ -179,7 +179,7 @@ class Helper {
         return (object) ['path' => $dir, 'name' => $file];
     }
 
-    public static function saveFile($filename, $name = false, $template = '<?=php Header("Location:/")', $mode = "w+") {
+    public static function saveFile($filename, $name = false, $template = '<?php Header("Location:/");', $mode = "w+") {
         $filename = $filename . (($name) ? '/' . $name : '');
         $file = self::createTreeDir($filename);
         if (file_exists($filename) && $mode !== 'SOBREPOR') {

@@ -102,7 +102,8 @@ class Trello {
                 'labels' => $labels, // implode(',', $labels),
                 'date_last_activity' => $card['dateLastActivity'],
                 'id_assigned' => $card['idMembers'][0],
-                'assigned' => self::getFromDePara('dim_members', $card['idMembers'][0])
+                'assigned' => self::getFromDePara('dim_members', $card['idMembers'][0]), 
+                'pos' => $card['pos']
             ];
 
             // custom fields
