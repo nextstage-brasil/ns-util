@@ -816,4 +816,11 @@ class Helper {
         }
     }
 
+    public static function getPsr4Name($dir = '') {
+        $dir = ((strlen($dir)) ? $dir : Helper::getPathApp());
+        $composer = file_get_contents(Helper::fileSearchRecursive('composer.json', $dir));
+        $composer = json_decode($composer, true);
+        return str_replace('\\', '', key($composer['autoload']['psr-4']));
+    }
+
 }
