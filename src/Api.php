@@ -11,6 +11,7 @@ class Api {
     private $responseCode = 200;
     private $config = [];
     private $router;
+    private $simpleReturn = false; // Utilizado para deinfir se aapenas retornar o conteudo ou encerrar a aplicação
 
     public function __construct() {
         // Obtenção dos headers. Chaves sempre minusculas
@@ -105,6 +106,14 @@ class Api {
     }
 
     /**
+     * Irá retornar o body em array ao inves de imrprimr e encerrar
+     * @return type
+     */
+    public function getResponse() {
+        return $this->response([], 0, false, true);
+    }
+
+    /**
      * Responde a requisição, encerrando o script
      * @param array $response
      * @param int $responseCode
@@ -115,29 +124,25 @@ class Api {
             $this->responseCode = $responseCode;
         }
 
-        // caso content não venha nada, vou  colocar por padrão
-        if ($response['content'] === null) {
-            $response['content'] = false;
+        if (count($response) > 0) {
+            // caso content não venha nada, vou  colocar por padrão
+            if ($response['content'] === null && !isset($this->responseData['content'])) {
+                $response['content'] = false;
+            }
+
+            // Adicionar parametros default
+            $this->responseMerge($response);
         }
 
-        // Adicionar parametros default
-        $this->responseMerge($response);
-        $this->responseMerge([
-            'status' => $this->responseCode,
-            'timeElapsed' => $this->eficiencia->end()->time,
-        ]);
-
-        // Sanitização
-        $this->responseData['error'] = (($this->responseData['error']) ? $this->responseData['error'] : false);
-        if ($this->responseData['error'] !== false || ($this->responseCode > 401 && stripos($this->responseData, 'SQLSTATE') === false)) {
-            $this->responseData = ['error' => $this->responseData['error'], 'content' => []];
-        }
+        // Prepara os dados de forma padrão a ser entregue
+        $this->getResponseData();
 
         // Saida
         http_response_code($this->responseCode);
         if ($type === 'json') {
             header('Content-Type:application/json');
         }
+
         echo json_encode($this->responseData);
         die();
     }
@@ -187,7 +192,7 @@ class Api {
      * @param type $code
      * @param type $response
      */
-    public static function result($code, $response, $type='json') {
+    public static function result($code, $response, $type = 'json') {
         $api = new Api();
         $api->response($response, $code, $type);
     }
@@ -234,6 +239,33 @@ class Api {
      */
     public function getTokenFromAuthorizationHeaders(): string {
         return (string) substr($this->getHeaders()['Authorization'], 6);
+    }
+
+    function getResponseData() {
+        // Preparar saida padrão
+        if (!isset($this->responseData['content'])) {
+            $this->responseData['content'] = [];
+        }
+        $this->responseMerge([
+            'status' => $this->responseCode,
+            'timeElapsed' => $this->eficiencia->end()->time,
+        ]);
+
+        // Sanitização
+        $this->responseData['error'] = (($this->responseData['error'] !== false) ? $this->responseData['error'] : false);
+        if ($this->responseData['error'] !== false || ($this->responseCode > 401 && stripos($this->responseData, 'SQLSTATE') === false)) {
+            $this->responseData = ['error' => $this->responseData['error'], 'content' => []];
+        }
+        return $this->responseData;
+    }
+
+    function getResponseCode() {
+        return $this->responseCode;
+    }
+
+    function setResponseCode(int $responseCode) {
+        $this->responseCode = (int) $responseCode;
+        return $this;
     }
 
 }
