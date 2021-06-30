@@ -867,5 +867,4 @@ class Helper {
         }
     }
 
-;
 }
