@@ -127,7 +127,7 @@ class Api {
         if (count($response) > 0) {
             // caso content não venha nada, vou  colocar por padrão
             if ($response['content'] === null && !isset($this->responseData['content'])) {
-                $response['content'] = false;
+                //$response['content'] = false;
             }
 
             // Adicionar parametros default

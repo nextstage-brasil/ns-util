@@ -699,8 +699,22 @@ class Helper {
         return mb_strtolower(explode(' ', php_uname())[0]);
     }
 
+    /**
+     * Remove all characters is not a number
+     * @param type $var
+     * @return type
+     */
     public static function parseInt($var) {
         return preg_replace("/[^0-9]/", "", $var);
+    }
+
+    /**
+     * json_dceo com tratamento de alguns carateres que causam sujeira
+     * @param type $json
+     * @return type
+     */
+    public static function jsonToArrayFromView($json) {
+        return json_decode(str_replace('&#34;', '"', $json), true);
     }
 
     /**
@@ -823,4 +837,35 @@ class Helper {
         return str_replace('\\', '', key($composer['autoload']['psr-4']));
     }
 
+    public static function getPhpUser() {
+        $uid = posix_getuid();
+        $userinfo = posix_getpwuid($uid);
+        return $userinfo;
+    }
+
+    // Define uma função que poderá ser usada para validar e-mails usando regexp
+    public static function validaEmail($email) {
+        //return
+        $er = "/^(([0-9a-zA-Z]+[-._+&])*[0-9a-zA-Z]+@([-0-9a-zA-Z]+[.])+[a-zA-Z]{2,6}){0,1}$/";
+        if (preg_match($er, $email)) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    /**
+     * Verifica se a string é uma base64_encoded valida
+     * @param type $data
+     * @return boolean
+     */
+    public static function isBase64Encoded($string) {
+        if (preg_match('%^[a-zA-Z0-9/+]*={0,2}$%', $string)) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+;
 }
