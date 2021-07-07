@@ -55,7 +55,7 @@ class Gitlab {
         $ret = \NsUtil\Helper::curlCall($url, [], $method, $header);
         if ($ret->status >= 203) {
             throw new \Exception(PHP_EOL .
-                            'Chamada ao recurso ' . $resource . ' com status ' . $ret->status
+                            'ERROR: Chamada ao recurso ' . $resource . ' com status ' . $ret->status
                             . PHP_EOL
                             . 'URL: ' . $url
                             . PHP_EOL
@@ -106,14 +106,14 @@ class Gitlab {
             $data['created_at'] = $format->setString($data['created_at'])->date('iso8601');
         }
         if (isset($data['start_date'])) {
-            $data['start_date'] = $format->setString($data['start_date'])->date('iso8601');
+            $data['start_date'] = $format->setString($data['start_date'])->date('arrumar', false, true);
         }
     }
 
     public function issueAdd($title, array $data = []) {
         $this->issueSetDateFormat($data);
         $resource = $this->config->get('rProject') . '/issues';
-        $data['title'] = $title;
+        $data['title'] = substr($title, 0, 255);
         $method = 'POST';
         try {
             $ret = $this->fetch($resource, $data, $method);
@@ -193,6 +193,7 @@ class Gitlab {
         if (!file_exists($fileJson)) {
             return 'Arquivo não localizado: ' . $fileJson;
         }
+        $out = [];
 
         // Todos as labels com projeto marcado devem ser anuladas e não importadas
         foreach ($depara['projectByLabel'] as $key => $val) {
@@ -217,9 +218,17 @@ class Gitlab {
         $format = new \NsUtil\Format();
         $loader = new \NsUtil\StatusLoader(count($data['cards']), 'Gitlab from Trello');
         $loader->setShowQtde(true);
-        $milestonePrefix = 1;
+        //$milestonePrefix = 1;
         $tarefasPadrao = [];
         foreach ($data['cards'] as $chaveItem => $item) {
+
+            /*
+              // @rever
+              if ($item['list_name'] !== 'Versão 2.11.11') {
+              //echo $item['list_name'] . PHP_EOL;
+              continue;
+              }
+              /* */
 
             // Ignorar as listas do trello arquivadas...
             if ($ignoreClosedList && ($item['list_state'] !== 'opened' || $item['card_state'] !== 'opened')) {
@@ -268,7 +277,7 @@ class Gitlab {
                     unset($item['labels'][$key]);
                 }
             }
-            $item['labels'][] = 'Importado do Trello (' . $trello['name'] . ')';
+            $item['labels'][] = 'From Trello (' . $trello['name'] . ')';
 
             // params
             $params = [
@@ -343,54 +352,54 @@ class Gitlab {
                 $coments[] = ['body' => $body, 'createAt' => $createdAt, 'text' => $text, 'type' => 'checklist'];
             }
 
-            continue; /* @rever */
+            // Label para possível Milestone
+            if (stripos($item['list_name'], $depara['milestones']['prefixList']) !== false) {
+                $titleMilestone = trim(str_ireplace(['versão', 'milestone'], [], $item['list_name']));
+                $item['labels'][] = 'Milestone: ' . $titleMilestone;
 
-            // Esta na lista de Milestone?
-            if (stripos($item['list_name'], 'milestone') !== false) {
-                $prefix = str_pad((string) $milestonePrefix, 3, "0", STR_PAD_LEFT);
-                $milestonePrefix++;
-                $title = $prefix . ' - ' . $item['title'];
-                $description = [];
-                $description[] = $item['description'];
-                foreach ($coments as $coment) {
-                    if ($coment['type'] === 'checklist') {
-                        $description[] = $coment['body'];
-                    }
+                // Criar milestone se não existir
+                $msID = md5($titleMilestone);
+                if (!$out['milestones'][$msID]) {
+                    $ms = $this->milestoneAdd($titleMilestone, '', $depara['milestones']['createOn'], $params['due_date'], $params['due_date']);
+                    $out['milestones'][$msID] = $ms['id'];
                 }
-                $out['milestones'][] = $this->milestoneAdd($title, implode("\n\n", $description));
+                $params['milestone_id'] = $out['milestones'][$msID];
             }
-            // Issues
-            else {
-                // Criar issue
-                $issue_iid = 0;
-                $card = $this->issueAdd($item['title'], $params);
-                if ($card['iid']) {
-                    $issue_iid = $card['iid'];
-                } else {
-                    $error[] = "Erro ao criar issue: " . $item['title'];
-                    continue;
-                }
 
-                // tempo
-                if ((int) $item[$timeEstimatedName] > 0) {
-                    $this->setEstimate($issue_iid, $item[$timeEstimatedName]);
-                }
-                if ((int) $item[$timeSpendName] > 0) {
-                    $this->setSpend($issue_iid, $item[$timeSpendName]);
-                }
+            // Criar issue
+            $issue_iid = 0;
+            $card = $this->issueAdd($item['title'], $params);
+            if ($card['iid']) {
+                $issue_iid = $card['iid'];
+            } else {
+                $error[] = "Erro ao criar issue: " . $item['title'];
+                continue;
+            }
 
-                // coments
-                foreach ($coments as $coment) {
-                    $this->addComments($issue_iid, $coment['body'], $coment['createdAt']);
-                }
-
-                // Se o estado for closed, encerrar e corrigir labels
-                if ($item['state'] === 'closed') {
-                    $update['state_event'] = 'close';
-                    $this->issueEdit($issue_iid, $update);
+            // tempo
+            if ((int) $item[$timeEstimatedName] > 0) {
+                $this->setEstimate($issue_iid, $item[$timeEstimatedName]);
+            }
+            if ((int) $item[$timeSpendName] > 0 || $item['state'] === 'closed' || $item['list_state'] !== 'opened') {
+                $spend = (((int) $item[$timeSpendName] > 0) ? $item[$timeSpendName] : $item[$timeEstimatedName]);
+                if ((int) $spend > 0) {
+                    $this->setSpend($issue_iid, $spend);
                 }
             }
 
+            // coments
+            foreach ($coments as $coment) {
+                $this->addComments($issue_iid, $coment['body'], $coment['createdAt']);
+            }
+
+            // Se o estado for closed, encerrar e corrigir labels
+            if ($item['state'] === 'closed') {
+                $update['state_event'] = 'close';
+                $this->issueEdit($issue_iid, $update);
+            }
+            /*
+              }
+             */
             $loader->done($chaveItem + 1);
         }
 
@@ -412,6 +421,11 @@ class Gitlab {
             default:
                 die('Tipo de local não permitido: ' . $local);
         }
+        if (strlen($startDate) > 0 && $startDate === $dueDate) {
+            // Acrescentar 1 dia
+            $dt = new \NsUtil\Format($dueDate);
+            $dueDate = $dt->setString($dt->date('timestamp') + (60 * 60 * 24))->date('arrumar');
+        }
         $data = [
             'title' => $title,
             'description' => $description,
@@ -424,7 +438,7 @@ class Gitlab {
             $ret = $this->fetch($resource, $data, $method);
             return $ret->content;
         } catch (\Exception $ex) {
-            //echo "Erro ao criar milestone: " . $title;
+            echo "Erro ao criar milestone: " . $ex->getMessage();
             return [];
         }
     }
