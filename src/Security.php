@@ -22,7 +22,7 @@ class Security {
         $dr = str_replace("\\", '/', realpath($_SERVER['DOCUMENT_ROOT']));
         $dir = str_replace("\\", '/', $filepath);
         $path = str_replace($dr, '', $dir);
-        return $protocol . $_SERVER['HTTP_HOST'] . '/' . $path;
+        return $protocol . $_SERVER['HTTP_HOST'] .  $path;
     }
 
     public static function includeJSFromUrl(array $js) {
