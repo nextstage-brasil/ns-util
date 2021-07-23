@@ -78,7 +78,7 @@ plink -batch -i %keyfile% %userhost% \"chmod +x %destino%/build/deploy.sh\"
 putty -ssh -i %keyfile% %userhost% -m \"" . $pathDeployer . "\deploy\sh\%deployname%-run.sh\" -t
 
 echo Concluido
-timeout /t 60";
+timeout /t 15";
                 \NsUtil\Helper::saveFile($deployerFile, false, $template, 'SOBREPOR');
             }
         }

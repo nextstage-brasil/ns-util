@@ -32,7 +32,6 @@ fi
 if [ ! -d "$DIR/app" ]; then
     sudo mkdir "$DIR/app"
     sudo chmod 0777 -R "$DIR/app"
-    sudo mkdir "$DIR/app/.tmp"
 fi
 if [ ! -d "$DIR/.trash" ]; then
     sudo mkdir "$DIR/.trash"
@@ -46,8 +45,10 @@ fi
 
 
 # clear
-rm -R "$DIR/app/.tmp"
-sudo mkdir "$DIR/app/.tmp"
+sudo rm -R "$DIR/app/.tmp"
+sudo rm -R "$DIR/app/file"
+sudo rm -R "$DIR/app/cookie.txt"
+
 
 # Criando diretorio do release
 sudo mkdir ${RELEASE};
@@ -75,7 +76,7 @@ sudo ln -nfs "$RELEASE" "$DIR/www"
 sudo chmod -R 0775 "$RELEASE/cron"
 sudo chown -R "${OWNER}:www-data" "$RELEASES_DIR"
 sudo chown "${OWNER}:www-data" "$DIR/app"
-sudo chmod 0775 "$DIR/app" -R
+sudo chmod 0777 "$DIR/app" -R
 
 # Licenciamento e config
 # cp ${DIR}/cs_licence ${RELEASE}/.cs_licence.bkp
