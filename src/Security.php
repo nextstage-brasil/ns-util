@@ -19,7 +19,7 @@ class Security {
 
     public static function getUrlOfFileInDisc($filepath) {
         $protocol = 'https://'; //stripos($_SERVER['SERVER_PROTOCOL'], 'https') === 0 ? 'https://' : 'http://';
-        $dr = str_replace("\\", '/', $_SERVER['DOCUMENT_ROOT']);
+        $dr = str_replace("\\", '/', realpath($_SERVER['DOCUMENT_ROOT']));
         $dir = str_replace("\\", '/', $filepath);
         $path = str_replace($dr, '', $dir);
         return $protocol . $_SERVER['HTTP_HOST'] . '/' . $path;
@@ -46,7 +46,7 @@ class Security {
         ]);
         $iv = substr(hash('md5', $chave . '_IV'), 0, 16);
         $js = ""
-                . "var _NSCHAVE= '$chave';"
+                . "var _NSC118= '$chave';"
                 . "var _NSIV = '$iv';"
                 //. "console.log('$chave'); console.log('$iv');"
                 . file_get_contents(__DIR__ . '/lib/js/fingerprint.js')

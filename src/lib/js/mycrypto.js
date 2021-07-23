@@ -1,13 +1,13 @@
 /* global CryptoJS */
 
 function nsCrypto(content) {
-    return CryptoJS.AES.encrypt(JSON.stringify(content), _NSCHAVE, {format: CryptoJSAesJson}).toString();
+    return CryptoJS.AES.encrypt(JSON.stringify(content), _NSC118, {format: CryptoJSAesJson}).toString();
 
 }
 
 function nsDecrypto(content) {
     try {
-        return JSON.parse(CryptoJS.AES.decrypt(content, _NSCHAVE, {format: CryptoJSAesJson}).toString(CryptoJS.enc.Utf8));
+        return JSON.parse(CryptoJS.AES.decrypt(content, _NSC118, {format: CryptoJSAesJson}).toString(CryptoJS.enc.Utf8));
     } catch (exception) {
         return {};
     }
