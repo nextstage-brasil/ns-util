@@ -331,7 +331,7 @@ class Helper {
         $ch = curl_init();
         curl_setopt_array($ch, $options);
         $output = curl_exec($ch);
-        //echo curl_getinfo($ch, CURLINFO_EFFECTIVE_URL).'<br/>';
+        $urlInfo = curl_getinfo($ch, CURLINFO_EFFECTIVE_URL) . '<br/>';
         //echo 'error: ' . curl_errno($ch);
         // headers
         $header_size = curl_getinfo($ch, CURLINFO_HEADER_SIZE);
@@ -358,7 +358,8 @@ class Helper {
                     'error' => ((curl_error($ch)) ? curl_error($ch) : curl_errno($ch)),
                     'status' => curl_getinfo($ch)['http_code'],
                     'http_code' => curl_getinfo($ch)['http_code'],
-                    'headers' => $headers
+                    'headers' => $headers,
+                    'url' => $urlInfo
         ];
         //Log::error(json_encode($ret));
         //echo json_encode($content);

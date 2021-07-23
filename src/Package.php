@@ -179,6 +179,8 @@ class Package {
 
         echo "\n Version '$versao' criada com sucesso!  \n";
         echo "------------- \n";
+        
+        return $projectName;
     }
 
 }
