@@ -18,10 +18,10 @@ RELEASE="$RELEASES_DIR/$RELEASE_NAME"
 PACKAGE="$DIR/build/$FILENAME"
 
 
-echo -e "### Deployer APP: $APPNAME ###\n\n"
+echo "### Deployer APP: $APPNAME ###\n\n"
 # validar se existe o build aqui
 if [ ! -f $PACKAGE ]; then
-    echo -e "Instalação abortada. Pacote não localizado!"
+    echo "Instalação abortada. Pacote não localizado!"
     exit
 fi
 
@@ -54,19 +54,19 @@ sudo rm -R "$DIR/app/cookie.txt"
 sudo mkdir ${RELEASE};
 
 # deploy
-echo -e "- Copiar arquivos"
+echo "- Copiar arquivos"
 sudo unzip -o "$PACKAGE" -d "$RELEASE" > /dev/null
 sudo mv "$RELEASE/.htaccess-server" "$RELEASE/.htaccess"
 sudo rm "$PACKAGE"
 
 # versionando o release
-echo -e "- Versionar release"
+echo "- Versionar release"
 RELEASE_NAME=$(cat "$RELEASE/version") 
 sudo mv $RELEASE "$RELEASES_DIR/$RELEASE_NAME"
 RELEASE="$RELEASES_DIR/$RELEASE_NAME" 
 
 # links simbolicos
-echo -e "- Criar links"
+echo "- Criar links"
 sudo ln -nfs "$DIR/app" "$RELEASE/app"
 sudo ln -nfs "$DIR/storage" "$RELEASE/storage"
 # ln -nfs "$DIR/.env" "$RELEASE/.env"
@@ -83,19 +83,20 @@ sudo chmod 0777 "$DIR/app" -R
 # cp ${DIR}/cscfg ${RELEASE}/.cscfg.bkp
 
 # crontab
-sudo crontab -l -u $OWNER | echo -e "" | sudo crontab -u $OWNER -
-sudo crontab -l -u $OWNER | cat - "$DIR/www/cron/crontab" | sudo crontab -u $OWNER -
+echo "- Instalar crontab"
+sudo crontab -l -u ${OWNER} | echo "" | sudo crontab -u ${OWNER} -
+sudo crontab -l -u ${OWNER} | cat - "$DIR/www/cron/crontab" | sudo crontab -u ${OWNER} -
 
 # Manter somente as 5 ultimas versoes
-echo -e "- Remover releases anteriores"
+echo "- Remover releases anteriores"
 cd "$RELEASES_DIR"
 sudo ls -dt ${RELEASES_DIR}/* | tail -n +6 | xargs -d "\n" sudo rm -rf;
 
 # finalizar
-echo -e "- Reiniciar serviços"
+echo "- Reiniciar serviços"
 sudo service apache2 restart > /dev/null
 sudo service php7.2-fpm restart > /dev/null
 
 # clear
-echo -e "\n### Versão $RELEASE_NAME instalada com sucesso!\n"
+echo "\n### Versão $RELEASE_NAME instalada com sucesso!\n"
 exit
