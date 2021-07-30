@@ -39,6 +39,12 @@ class DeployerGenerator {
             $val['php7.2-fpm'] = 'php' . $phpVersion . '-fpm';
             $template = str_replace(array_keys($val), array_values($val), $this->configs['deployTemplate']);
 
+            // Validar se eh em producao
+            $confirm = 'y';
+            if (stripos($val['cliente'], 'producao') !== false) {
+                $confirm = 'Sim, producao';
+            }
+
             \NsUtil\Helper::saveFile($pathDeployer . '/deploy/sh/' . $val['cliente'] . '.sh', false, $template, 'SOBREPOR');
 
             // Runner
@@ -61,12 +67,12 @@ set keyfile=$val[key]
 set userhost=$val[userhost]
 set destino=$val[path]
 
-rem Não é necessário alterar aqui para baxio
+rem Não é necessário alterar aqui para baixo
 
 echo ### %deployname% ###
 
-SET /P AREYOUSURE=Continuar com deploy em %userhost% (%deployname%)? (y/[n])?
-IF /I \"%AREYOUSURE%\" NEQ \"Y\" GOTO END
+SET /P AREYOUSURE=Continuar com deploy em %userhost% (%deployname%)? ($confirm/[n])?
+IF /I \"%AREYOUSURE%\" NEQ \"$confirm\" GOTO END
 
 php " . $pathDeployer . "\builder.php
 

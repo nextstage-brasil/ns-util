@@ -56,7 +56,7 @@ sudo mkdir ${RELEASE};
 # deploy
 echo "- Copiar arquivos"
 sudo unzip -o "$PACKAGE" -d "$RELEASE" > /dev/null
-sudo mv "$RELEASE/.htaccess-server" "$RELEASE/.htaccess"
+# sudo mv "$RELEASE/.htaccess-server" "$RELEASE/.htaccess"
 sudo rm "$PACKAGE"
 
 # versionando o release
