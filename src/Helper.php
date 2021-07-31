@@ -868,4 +868,12 @@ class Helper {
         }
     }
 
+    public static function decimalFormat($var) {
+        if (stripos($var, ',') > -1) { // se achar virgula, veio da view, com formato. da base, nao vem virgula
+            $var = self::parseInt($var);
+            $var = substr($var, 0, strlen($var) - 2) . "." . substr($var, strlen($var) - 2, 2);
+        }
+        return $var;
+    }
+
 }
