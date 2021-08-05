@@ -73,7 +73,6 @@ sudo ln -nfs "$DIR/storage" "$RELEASE/storage"
 sudo ln -nfs "$RELEASE" "$DIR/www"
 
 # Permissoes de pastas
-sudo chmod -R 0775 "$RELEASE/cron"
 sudo chown -R "${OWNER}:www-data" "$RELEASES_DIR"
 sudo chown "${OWNER}:www-data" "$DIR/app"
 sudo chmod 0777 "$DIR/app" -R
@@ -83,9 +82,12 @@ sudo chmod 0777 "$DIR/app" -R
 # cp ${DIR}/cscfg ${RELEASE}/.cscfg.bkp
 
 # crontab
-echo "- Instalar crontab"
-sudo crontab -l -u ${OWNER} | echo "" | sudo crontab -u ${OWNER} -
-sudo crontab -l -u ${OWNER} | cat - "$DIR/www/cron/crontab" | sudo crontab -u ${OWNER} -
+if [ -f "$DIR/www/cron/crontab" ]; then
+    echo "- Atualizar crontab"
+    sudo chmod -R 0775 "$RELEASE/cron"
+    sudo crontab -l -u ${OWNER} | echo "" | sudo crontab -u ${OWNER} -
+    sudo crontab -l -u ${OWNER} | cat - "$DIR/www/cron/crontab" | sudo crontab -u ${OWNER} -
+fi
 
 # Manter somente as 5 ultimas versoes
 echo "- Remover releases anteriores"

@@ -4,6 +4,8 @@ namespace NsUtil;
 
 class Package {
 
+    static $zipExcluded = '';
+
     public function __construct() {
         
     }
@@ -134,14 +136,23 @@ class Package {
             'app/',
             'test/'
                 ], $excluded_x);
-
+        $ex = $exCI = '';
         $command = '"' . $patch7zip . '"' . ' a ' . $zip . ' ' . $fontes . '\* ';
         foreach ($excluded_xr as $item) {
             $ex .= " -xr!$item";
+            $exCI .= ' -x "' . $item . '"';
         }
         foreach ($excluded_x as $item) {
             $ex .= " -x!$item";
+            $exCI .= ' -x "' . $item . '*"';
         }
+
+        // Salvar o comando para gerar o ZIP limpo tbem no CI
+        self::$zipExcluded = (object) [
+                    'zipCi' => 'zip -r $CI_COMMIT_SHA.zip . ' . $exCI,
+                    'ex' => $exCI
+        ];
+        Helper::saveFile("$origem/$build/install/deploy/zip/geraZipFile.sh", false, self::$zipExcluded->zipCi, 'SOBREPOR');
 
         // salvar o comand para o pos ioncube
         echo "\n - Criado arquivo post encode para ioncube ...";
@@ -179,8 +190,12 @@ class Package {
 
         echo "\n Version '$versao' criada com sucesso!  \n";
         echo "------------- \n";
-        
+
         return $projectName;
+    }
+
+    static function getZipExcluded() {
+        return self::$zipExcluded;
     }
 
 }
