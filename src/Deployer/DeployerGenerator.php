@@ -21,7 +21,7 @@ class DeployerGenerator {
 image: bogkonstantin/php-7.4-node-12-debug:latest
 
 stages:
-    - build
+    #- build
     - deploy
   
 # Set any variables we need
@@ -29,14 +29,14 @@ variables:
   PACKAGE_NAME: ' . $packageName . '
   SSH_USER: deployer
    
-build:
-    stage: build
-    artifacts:
-        paths:
-            - ./
-    script:
-        - curl -sS https://getcomposer.org/installer | php
-        - php composer.phar install
+#build:
+#    stage: build
+#    artifacts:
+#        paths:
+#            - ./
+#    script:
+#        - curl -sS https://getcomposer.org/installer | php
+#        - php composer.phar install
 ';
     }
 
