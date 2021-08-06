@@ -152,7 +152,7 @@ class Package {
                     'zipCi' => 'zip -r $CI_COMMIT_SHA.zip . ' . $exCI,
                     'ex' => $exCI
         ];
-        Helper::saveFile("$origem/$build/install/deploy/zip/geraZipFile.sh", false, self::$zipExcluded->zipCi, 'SOBREPOR');
+        Helper::saveFile("$origem/$build/install/deploy/zip/zipCommandToCI.sh", false, self::$zipExcluded->zipCi, 'SOBREPOR');
 
         // salvar o comand para o pos ioncube
         echo "\n - Criado arquivo post encode para ioncube ...";

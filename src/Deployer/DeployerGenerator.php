@@ -5,6 +5,7 @@ namespace NsUtil\Deployer;
 class DeployerGenerator {
 
     private $configs = [];
+    private $gitlabCI = [];
 
     public function __construct($packageName, $packagePath, $templateShInstallPath = false) {
         $this->configs['packageName'] = $packageName;
@@ -14,15 +15,39 @@ class DeployerGenerator {
             $templateFile = $templateShInstallPath;
         }
         $this->configs['deployTemplate'] = file_get_contents($templateFile);
+
+        // gitlabCI template init
+        $this->gitlabCI[] = '# Select image from https://hub.docker.com/_/php/
+image: bogkonstantin/php-7.4-node-12-debug:latest
+
+stages:
+    - build
+    - deploy
+  
+# Set any variables we need
+variables:
+  PACKAGE_NAME: ' . $packageName . '
+  SSH_USER: deployer
+   
+build:
+    stage: build
+    artifacts:
+        paths:
+            - ./
+    script:
+        - curl -sS https://getcomposer.org/installer | php
+        - php composer.phar install
+';
     }
 
     public function addConfig($clientName, $pathOnServer, $ownerOnServer, $pathToKeySSH, $userDeployer, $host) {
         $this->configs['deployers'][] = [
-            'cliente' => \NsUtil\Helper::sanitize($clientName),
+            'cliente' => str_replace(' ', '_', $clientName), // \NsUtil\Helper::sanitize($clientName),
             'path' => $pathOnServer,
             'usuario' => $ownerOnServer,
             'key' => $pathToKeySSH,
-            'userhost' => $userDeployer . '@' . $host
+            'userhost' => $userDeployer . '@' . $host,
+            'host' => $host
         ];
         return $this;
     }
@@ -32,7 +57,7 @@ class DeployerGenerator {
      * @param type $pathDeployer: Deve ser o mesmo diretório onde se encontra o "builder.php"
      */
     public function run($pathDeployer, $phpVersion = '7.2') {
-
+        $this->configs['pathDeployer'] = $pathDeployer;
         foreach ($this->configs['deployers'] as $key => $val) {
             // Deployer default
             $val['packageName'] = $this->configs['packageName'];
@@ -41,11 +66,20 @@ class DeployerGenerator {
 
             // Validar se eh em producao
             $confirm = 'y';
-            if (stripos($val['cliente'], 'producao') !== false) {
+            if (stripos($val['cliente'], 'producao') !== false || stripos($val['cliente'], 'master') !== false) {
                 $confirm = 'Sim, producao';
             }
 
+            // Save DeployerFile
             \NsUtil\Helper::saveFile($pathDeployer . '/deploy/sh/' . $val['cliente'] . '.sh', false, $template, 'SOBREPOR');
+
+            // Add stage do gitlabCI
+            $branchName = explode('_', $val['cliente'])[1];
+            $geraZipCommand = '';
+            $sshHost = $val['host'];
+            $sshPath = $val['path'];
+            $sshDeployerFilename = '_build/install/deploy/sh/' . $val['cliente'] . '.sh';
+            $this->gitLabCI_AddStage($branchName, $sshHost, $sshPath, $sshDeployerFilename);
 
             // Runner
             $template = "cd " . $val['path'] . "/build;
@@ -88,6 +122,43 @@ timeout /t 15";
                 \NsUtil\Helper::saveFile($deployerFile, false, $template, 'SOBREPOR');
             }
         }
+
+        // Gerar o CI File
+        \NsUtil\Helper::saveFile($this->configs['pathDeployer'] . '/../../.gitlab-ci.yml', false, implode("\n", $this->gitlabCI), 'SOBREPOR');
     }
 
+    private function gitLabCI_AddStage($branchName, $sshHost, $sshPath, $sshDeployerFilename) {
+        // Gerado pelo Package
+        $zipCommand = file_get_contents($this->configs['pathDeployer'] . '/deploy/zip/zipCommandToCI.sh');
+
+        // Template
+        $this->gitlabCI[] = 'deploy_' . $branchName . ':
+    stage: deploy
+    only:
+        - ' . $branchName . '
+    before_script:
+        - \'which ssh-agent || ( apt-get update -y && apt-get install openssh-client zip -y )\'
+        - eval $(ssh-agent -s)
+        - echo "$SSH_PRIVATE_KEY" | tr -d \'\r\' | ssh-add -
+        - mkdir -p ~/.ssh
+        - chmod 700 ~/.ssh
+        - \'[[ -f /.dockerenv ]] && echo -e "Host *\n\tStrictHostKeyChecking no\n\n" >> ~/.ssh/config\'
+    script:
+        # Preparar pacote
+        #- cp ".env.prod.php" ".env.php"
+        - ' . $zipCommand . '
+
+        # Enviar arquivos
+        - scp -p $CI_COMMIT_SHA.zip $SSH_USER@' . $sshHost . ':' . $sshPath . '/build/$PACKAGE_NAME
+        - scp -p ' . $sshDeployerFilename . ' $SSH_USER@' . $sshHost . ':' . $sshPath . '/build/deploy.sh
+        - ssh $SSH_USER@' . $sshHost . ' "sudo chmod +x ' . $sshPath . '/build/deploy.sh"
+
+        # Executar instalação
+        - ssh $SSH_USER@' . $sshHost . ' "sudo sh ' . $sshPath . '/build/deploy.sh"
+        
+        # limpeza da instalação
+        - ssh $SSH_USER@' . $sshHost . ' "sudo composer install -q --prefer-dist --optimize-autoloader --no-dev --working-dir=' . $sshPath . '/www"
+        # - ssh $SSH_USER@' . $sshHost . ' "sudo ln -nfs ' . $sshPath . '/www /var/www/html/util"
+';
+    }
 }
