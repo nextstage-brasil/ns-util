@@ -97,7 +97,7 @@ sudo ls -dt ${RELEASES_DIR}/* | tail -n +6 | xargs -d "\n" sudo rm -rf;
 # finalizar
 echo "- Reiniciar serviços"
 sudo service apache2 restart > /dev/null
-sudo service php7.2-fpm restart > /dev/null
+sudo service php7.*-fpm restart > /dev/null
 
 # clear
 echo "\n### Versão $RELEASE_NAME instalada com sucesso!\n"

@@ -29,4 +29,16 @@ class Ioncube {
         }
     }
 
+    public function encode($pathToEncoderBatFile, $pathToPostEncoderBatFile) {
+        // Acionar ioncube
+        echo "\nCodificado arquivos PHP";
+        $cmd = 'call ' . $pathToEncoderBatFile;
+        shell_exec($cmd);
+
+        // Gerando build
+        echo "\nGerando build";
+        $cmd = 'call ' . $pathToPostEncoderBatFile;
+        shell_exec($cmd);
+    }
+
 }

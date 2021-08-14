@@ -149,7 +149,7 @@ class Package {
 
         // Salvar o comando para gerar o ZIP limpo tbem no CI
         self::$zipExcluded = (object) [
-                    'zipCi' => 'zip -r $CI_COMMIT_SHA.zip . ' . $exCI,
+                    'zipCi' => 'zip -qr $CI_COMMIT_SHA.zip . ' . $exCI,
                     'ex' => $exCI
         ];
         Helper::saveFile("$origem/$build/install/deploy/zip/zipCommandToCI.sh", false, self::$zipExcluded->zipCi, 'SOBREPOR');

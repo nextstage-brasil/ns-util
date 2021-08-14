@@ -17,38 +17,33 @@ class DeployerGenerator {
         $this->configs['deployTemplate'] = file_get_contents($templateFile);
 
         // gitlabCI template init
-        $this->gitlabCI[] = '# Select image from https://hub.docker.com/_/php/
-image: bogkonstantin/php-7.4-node-12-debug:latest
+        $this->gitlabCI[0] = '
+image: ubuntu:latest
 
 stages:
-    #- build
     - deploy
   
-# Set any variables we need
 variables:
-  PACKAGE_NAME: ' . $packageName . '
-  SSH_USER: deployer
-   
-#build:
-#    stage: build
-#    artifacts:
-#        paths:
-#            - ./
-#    script:
-#        - curl -sS https://getcomposer.org/installer | php
-#        - php composer.phar install
+   PACKAGE_NAME: ' . $packageName . '
+   SSH_USER: deployer
 ';
     }
 
     public function addConfig($clientName, $pathOnServer, $ownerOnServer, $pathToKeySSH, $userDeployer, $host) {
+        $name = str_replace(' ', '_', $clientName);
         $this->configs['deployers'][] = [
-            'cliente' => str_replace(' ', '_', $clientName), // \NsUtil\Helper::sanitize($clientName),
+            'cliente' => $name,
             'path' => $pathOnServer,
             'usuario' => $ownerOnServer,
             'key' => $pathToKeySSH,
             'userhost' => $userDeployer . '@' . $host,
             'host' => $host
         ];
+        $this->gitlabCI[0] .= '
+   # Configs to ' . $name . '
+   SSH_HOST_' . $name . ': ' . $host . '
+   SSH_PATH_' . $name . ': ' . $pathOnServer . '
+';
         return $this;
     }
 
@@ -76,8 +71,8 @@ variables:
             // Add stage do gitlabCI
             $branchName = explode('_', $val['cliente'])[1];
             $geraZipCommand = '';
-            $sshHost = $val['host'];
-            $sshPath = $val['path'];
+            $sshHost = '$SSH_HOST_' . $val['cliente'];// . ': $val['host'];
+            $sshPath = '$SSH_PATH_' . $val['cliente'];//$val['path'];
             $sshDeployerFilename = '_build/install/deploy/sh/' . $val['cliente'] . '.sh';
             $this->gitLabCI_AddStage($branchName, $sshHost, $sshPath, $sshDeployerFilename);
 
@@ -161,4 +156,5 @@ timeout /t 15";
         # - ssh $SSH_USER@' . $sshHost . ' "sudo ln -nfs ' . $sshPath . '/www /var/www/html/util"
 ';
     }
+
 }
