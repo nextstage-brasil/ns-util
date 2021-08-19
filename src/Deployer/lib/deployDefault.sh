@@ -89,6 +89,12 @@ if [ -f "$DIR/www/cron/crontab" ]; then
     sudo crontab -l -u ${OWNER} | cat - "$DIR/www/cron/crontab" | sudo crontab -u ${OWNER} -
 fi
 
+# Composer
+if [ -f "$DIR/www/composer.json" ]; then
+    echo "- Atualizar pacotes via composer"
+    sudo composer install -q --prefer-dist --optimize-autoloader --no-dev --working-dir="$DIR/www"
+fi
+
 # Manter somente as 5 ultimas versoes
 echo "- Remover releases anteriores"
 cd "$RELEASES_DIR"
