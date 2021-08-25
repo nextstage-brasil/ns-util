@@ -52,6 +52,8 @@ sudo rm -R "$DIR/app/cookie.txt"
 
 # Criando diretorio do release
 sudo mkdir ${RELEASE};
+sudo mkdir "$DIR/app/.tmp"
+sudo mkdir "$DIR/app/file"
 
 # deploy
 echo "- Copiar arquivos"
