@@ -134,7 +134,8 @@ class Package {
             'st/',
             '_app/',
             'app/',
-            'test/'
+            'test/', 
+            '.gitlab/'
                 ], $excluded_x);
         $ex = $exCI = '';
         $command = '"' . $patch7zip . '"' . ' a ' . $zip . ' ' . $fontes . '\* ';
