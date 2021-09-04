@@ -18,7 +18,7 @@ class DeployerGenerator {
 
         // gitlabCI template init
         $this->gitlabCI[0] = '
-image: ubuntu:latest
+image: alpine:latest
 
 stages:
     - deploy
@@ -37,12 +37,14 @@ variables:
             'usuario' => $ownerOnServer,
             'key' => $pathToKeySSH,
             'userhost' => $userDeployer . '@' . $host,
-            'host' => $host
+            'host' => $host,
+            'userDeployer' => $userDeployer
         ];
         $this->gitlabCI[0] .= '
    # Configs to ' . $name . '
    SSH_HOST_' . $name . ': ' . $host . '
    SSH_PATH_' . $name . ': ' . $pathOnServer . '
+   SSH_USER_' . $name . ': ' . $userDeployer . '
 ';
         return $this;
     }
@@ -71,10 +73,11 @@ variables:
             // Add stage do gitlabCI
             $branchName = explode('_', $val['cliente'])[1];
             $geraZipCommand = '';
-            $sshHost = '$SSH_HOST_' . $val['cliente'];// . ': $val['host'];
-            $sshPath = '$SSH_PATH_' . $val['cliente'];//$val['path'];
+            $sshHost = '$SSH_HOST_' . $val['cliente']; // . ': $val['host'];
+            $sshPath = '$SSH_PATH_' . $val['cliente']; //$val['path'];
             $sshDeployerFilename = '_build/install/deploy/sh/' . $val['cliente'] . '.sh';
-            $this->gitLabCI_AddStage($branchName, $sshHost, $sshPath, $sshDeployerFilename);
+            $sshUserDeployer = '$SSH_USER_' . $val['cliente'];
+            $this->gitLabCI_AddStage($branchName, $sshHost, $sshPath, $sshDeployerFilename, $sshUserDeployer);
 
             // Runner
             $template = "cd " . $val['path'] . "/build;
@@ -110,7 +113,11 @@ pscp -P 22 -i %keyfile% " . $this->configs['packagePath'] . "\\" . $this->config
 pscp -P 22 -i %keyfile% " . $pathDeployer . "\deploy\sh\%deployname%.sh %userhost%:%destino%/build/deploy.sh
 plink -batch -i %keyfile% %userhost% \"chmod +x %destino%/build/deploy.sh\"
 
+rem Sudo com senha: Ira abrir o SSH terminal e executar o arquivo local no servidor
 putty -ssh -i %keyfile% %userhost% -m \"" . $pathDeployer . "\deploy\sh\%deployname%-run.sh\" -t
+    
+rem Sudo sem senha: Executa direto o comando no servidor, sem a necessidade de abrir um terminal
+rem plink -batch -i %keyfile% %userhost%  \"sudo sh ' . $sshPath . '/build/deploy.sh\"
 
 echo Concluido
 timeout /t 15";
@@ -122,7 +129,7 @@ timeout /t 15";
         \NsUtil\Helper::saveFile($this->configs['pathDeployer'] . '/../../.gitlab-ci.yml', false, implode("\n", $this->gitlabCI), 'SOBREPOR');
     }
 
-    private function gitLabCI_AddStage($branchName, $sshHost, $sshPath, $sshDeployerFilename) {
+    private function gitLabCI_AddStage($branchName, $sshHost, $sshPath, $sshDeployerFilename, $sshUserDeployer) {
         // Gerado pelo Package
         $zipCommand = file_get_contents($this->configs['pathDeployer'] . '/deploy/zip/zipCommandToCI.sh');
 
@@ -132,28 +139,28 @@ timeout /t 15";
     only:
         - ' . $branchName . '
     before_script:
-        - \'which ssh-agent || ( apt-get update -y && apt-get install openssh-client zip -y )\'
-        - eval $(ssh-agent -s)
-        - echo "$SSH_PRIVATE_KEY" | tr -d \'\r\' | ssh-add -
+        - apk update && apk add zip openssh-client
         - mkdir -p ~/.ssh
         - chmod 700 ~/.ssh
-        - \'[[ -f /.dockerenv ]] && echo -e "Host *\n\tStrictHostKeyChecking no\n\n" >> ~/.ssh/config\'
+        - echo -e "Host *\n\tStrictHostKeyChecking no\n\n" > ~/.ssh/config
+        - echo "$SSH_PRIVATE_KEY" > ~/.ssh/id_rsa
+        - chmod 600 ~/.ssh/id_rsa
     script:
         # Preparar pacote
         #- cp ".env.prod.php" ".env.php"
         - ' . $zipCommand . '
 
         # Enviar arquivos
-        - scp -p $CI_COMMIT_SHA.zip $SSH_USER@' . $sshHost . ':' . $sshPath . '/build/$PACKAGE_NAME
-        - scp -p ' . $sshDeployerFilename . ' $SSH_USER@' . $sshHost . ':' . $sshPath . '/build/deploy.sh
-        - ssh $SSH_USER@' . $sshHost . ' "sudo chmod +x ' . $sshPath . '/build/deploy.sh"
+        - scp -p $CI_COMMIT_SHA.zip ' . $sshUserDeployer . '@' . $sshHost . ':' . $sshPath . '/build/$PACKAGE_NAME
+        - scp -p ' . $sshDeployerFilename . ' ' . $sshUserDeployer . '@' . $sshHost . ':' . $sshPath . '/build/deploy.sh
+        - ssh ' . $sshUserDeployer . '@' . $sshHost . ' "sudo chmod +x ' . $sshPath . '/build/deploy.sh"
 
         # Executar instalação
-        - ssh $SSH_USER@' . $sshHost . ' "sudo sh ' . $sshPath . '/build/deploy.sh"
+        - ssh ' . $sshUserDeployer . '@' . $sshHost . ' "sudo sh ' . $sshPath . '/build/deploy.sh"
         
         # limpeza da instalação
-        - ssh $SSH_USER@' . $sshHost . ' "sudo composer install -q --prefer-dist --optimize-autoloader --no-dev --working-dir=' . $sshPath . '/www"
-        # - ssh $SSH_USER@' . $sshHost . ' "sudo ln -nfs ' . $sshPath . '/www /var/www/html/util"
+        # JA ESTA NO .SH - ssh ' . $sshUserDeployer . '@' . $sshHost . ' "sudo composer install -q --prefer-dist --optimize-autoloader --no-dev --working-dir=' . $sshPath . '/www"
+        # - ssh ' . $sshUserDeployer . '@' . $sshHost . ' "sudo ln -nfs ' . $sshPath . '/www /var/www/html/util"
 ';
     }
 
