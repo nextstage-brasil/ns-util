@@ -14,7 +14,11 @@ class Crypto {
             throw new Exception('NsCrypto: Atenção: chave com menos de 16 caracteres considerada insegura');
         }
         $this->chave = $chave;
-        
+
+        if (!in_array('sodium', get_loaded_extensions())) {
+            echo 'NSUTIL ERROR: Libsodium IS NOT installed (CR19)';
+            die();
+        }
     }
 
     public function encrypt($string, $chaveExtra = '') {

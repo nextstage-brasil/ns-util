@@ -74,7 +74,7 @@ ln -nfs "$DIR/storage" "$RELEASE/storage"
 ln -nfs "$RELEASE" "$DIR/www"
 
 # Permissoes de pastas
-chown -R "${OWNER}:www-data" "$RELEASES_DIR"
+chown -R "${OWNER}:www-data" "$RELEASE"
 chown "${OWNER}:www-data" "$DIR/app"
 chmod 0777 "$DIR/app" -R
 
@@ -96,6 +96,15 @@ if [ -f "$DIR/www/composer.json" ]; then
     composer install -q --prefer-dist --optimize-autoloader --no-dev --working-dir="$RELEASE"
     composer update -q --prefer-dist --optimize-autoloader --no-dev --working-dir="$RELEASE"
 fi
+
+# NPM
+if [ -f "$DIR/www/package.json" ]; then
+    echo "- Atualizar pacotes via NPM"
+    cd "$DIR/www"
+    npm install > /dev/null
+    cd $DIR
+fi
+
 
 # Manter somente as 5 ultimas versoes
 echo "- Remover releases anteriores"

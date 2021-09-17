@@ -17,8 +17,7 @@ class DeployerGenerator {
         $this->configs['deployTemplate'] = file_get_contents($templateFile);
 
         // gitlabCI template init
-        $this->gitlabCI[0] = '
-image: alpine:latest
+        $this->gitlabCI[0] = 'image: alpine:latest
 
 stages:
     - deploy
@@ -29,7 +28,7 @@ variables:
 ';
     }
 
-    public function addConfig($clientName, $pathOnServer, $ownerOnServer, $pathToKeySSH, $userDeployer, $host) {
+    public function addConfig($clientName, $pathOnServer, $ownerOnServer, $pathToKeySSH, $userDeployer, $host, $sudoRequire = true) {
         $name = str_replace(' ', '_', $clientName);
         $this->configs['deployers'][] = [
             'cliente' => $name,
@@ -38,7 +37,8 @@ variables:
             'key' => $pathToKeySSH,
             'userhost' => $userDeployer . '@' . $host,
             'host' => $host,
-            'userDeployer' => $userDeployer
+            'userDeployer' => $userDeployer,
+            'sudo' => (($sudoRequire) ? 'sudo ' : '')
         ];
         $this->gitlabCI[0] .= '
    # Configs to ' . $name . '
@@ -77,7 +77,7 @@ variables:
             $sshPath = '$SSH_PATH_' . $val['cliente']; //$val['path'];
             $sshDeployerFilename = '_build/install/deploy/sh/' . $val['cliente'] . '.sh';
             $sshUserDeployer = '$SSH_USER_' . $val['cliente'];
-            $this->gitLabCI_AddStage($branchName, $sshHost, $sshPath, $sshDeployerFilename, $sshUserDeployer);
+            $this->gitLabCI_AddStage($branchName, $sshHost, $sshPath, $sshDeployerFilename, $sshUserDeployer, $val);
 
             // Runner
             $template = "cd " . $val['path'] . "/build;
@@ -113,11 +113,11 @@ pscp -P 22 -i %keyfile% " . $this->configs['packagePath'] . "\\" . $this->config
 pscp -P 22 -i %keyfile% " . $pathDeployer . "\deploy\sh\%deployname%.sh %userhost%:%destino%/build/deploy.sh
 plink -batch -i %keyfile% %userhost% \"chmod +x %destino%/build/deploy.sh\"
 
-rem Sudo com senha: Ira abrir o SSH terminal e executar o arquivo local no servidor
-putty -ssh -i %keyfile% %userhost% -m \"" . $pathDeployer . "\deploy\sh\%deployname%-run.sh\" -t
+rem V1: Quando sudo precisa de senha. Ira abrir o SSH terminal e executar o arquivo local no servidor
+rem putty -ssh -i %keyfile% %userhost% -m \"" . $pathDeployer . "\deploy\sh\%deployname%-run.sh\" -t
     
-rem Sudo sem senha: Executa direto o comando no servidor, sem a necessidade de abrir um terminal
-rem plink -batch -i %keyfile% %userhost%  \"sudo sh ' . $sshPath . '/build/deploy.sh\"
+rem V2: Quando sudo é liberado sem senha. Igual ao CI Executa direto o comando no servidor, sem a necessidade de abrir um terminal
+plink -batch -i %keyfile% %userhost%  \"" . $val['sudo'] . "sh %destino%/build/deploy.sh\"
 
 echo Concluido
 timeout /t 15";
@@ -126,14 +126,17 @@ timeout /t 15";
         }
 
         // Gerar o CI File
-        \NsUtil\Helper::saveFile($this->configs['pathDeployer'] . '/../../.gitlab-ci.yml', false, implode("\n", $this->gitlabCI), 'SOBREPOR');
+        $CIFILE = $this->configs['pathDeployer'] . '/../../.gitlab-ci.yml';
+        if (!file_exists($CIFILE)) {
+            \NsUtil\Helper::saveFile($CIFILE, false, implode("\n", $this->gitlabCI), 'SOBREPOR');
+        }
     }
 
-    private function gitLabCI_AddStage($branchName, $sshHost, $sshPath, $sshDeployerFilename, $sshUserDeployer) {
+    private function gitLabCI_AddStage($branchName, $sshHost, $sshPath, $sshDeployerFilename, $sshUserDeployer, $item) {
         // Gerado pelo Package
         $zipCommand = file_get_contents($this->configs['pathDeployer'] . '/deploy/zip/zipCommandToCI.sh');
 
-        // Template
+        // Template to VM
         $this->gitlabCI[] = 'deploy_' . $branchName . ':
     stage: deploy
     only:
@@ -145,23 +148,22 @@ timeout /t 15";
         - echo -e "Host *\n\tStrictHostKeyChecking no\n\n" > ~/.ssh/config
         - echo "$SSH_PRIVATE_KEY" > ~/.ssh/id_rsa
         - chmod 600 ~/.ssh/id_rsa
+        ## Instacao AWS Cli e configuracoes
+        #- apk add --no-cache python3 py3-pip && pip3 install --upgrade pip && pip3 install awscli
+        #- rm -rf /var/cache/apk/*
+        #- mkdir -p ~/.aws && chmod 700 ~/.aws
+        #- echo -e "[default]\naws_access_key_id=$AWS_KEY\naws_secret_access_key=$AWS_SECRET" > ~/.aws/credentials
     script:
         # Preparar pacote
-        #- cp ".env.prod.php" ".env.php"
         - ' . $zipCommand . '
-
         # Enviar arquivos
         - scp -p $CI_COMMIT_SHA.zip ' . $sshUserDeployer . '@' . $sshHost . ':' . $sshPath . '/build/$PACKAGE_NAME
         - scp -p ' . $sshDeployerFilename . ' ' . $sshUserDeployer . '@' . $sshHost . ':' . $sshPath . '/build/deploy.sh
-        - ssh ' . $sshUserDeployer . '@' . $sshHost . ' "sudo chmod +x ' . $sshPath . '/build/deploy.sh"
-
+        - ssh ' . $sshUserDeployer . '@' . $sshHost . ' "' . $item['sudo'] . 'chmod +x ' . $sshPath . '/build/deploy.sh"
         # Executar instalação
-        - ssh ' . $sshUserDeployer . '@' . $sshHost . ' "sudo sh ' . $sshPath . '/build/deploy.sh"
-        
-        # limpeza da instalação
-        # JA ESTA NO .SH - ssh ' . $sshUserDeployer . '@' . $sshHost . ' "sudo composer install -q --prefer-dist --optimize-autoloader --no-dev --working-dir=' . $sshPath . '/www"
-        # - ssh ' . $sshUserDeployer . '@' . $sshHost . ' "sudo ln -nfs ' . $sshPath . '/www /var/www/html/util"
+        - ssh ' . $sshUserDeployer . '@' . $sshHost . ' "' . $item['sudo'] . 'sh ' . $sshPath . '/build/deploy.sh"        
 ';
+        
     }
 
 }
