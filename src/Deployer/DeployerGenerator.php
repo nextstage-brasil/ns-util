@@ -19,6 +19,7 @@ class DeployerGenerator {
         // gitlabCI template init
         $this->gitlabCI[0] = 'image: alpine:latest
 
+
 stages:
     - deploy
   
@@ -29,6 +30,7 @@ variables:
     }
 
     public function addConfig($clientName, $pathOnServer, $ownerOnServer, $pathToKeySSH, $userDeployer, $host, $sudoRequire = true) {
+       // version
         $name = str_replace(' ', '_', $clientName);
         $this->configs['deployers'][] = [
             'cliente' => $name,
