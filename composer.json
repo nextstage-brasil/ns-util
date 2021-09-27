@@ -3,9 +3,9 @@
     "description": "Metodos e classes de utilidades diversas",
     "require": {
         "php": "^7.2",
-        "guzzlehttp/guzzle": "^6.5.4",
         "league/flysystem-aws-s3-v3": "^1.0",
-        "nelexa/zip": "^3.3"
+        "nelexa/zip": "^3.3", 
+        "smottt/wideimage": "^1.1"
     },
     "license": "Apache-2.0",
     "autoload": {

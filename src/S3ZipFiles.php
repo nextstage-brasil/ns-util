@@ -26,9 +26,9 @@ class S3ZipFiles {
     public function __construct(string $filenameSave, array $itens) {
         $this->filename = str_replace('.zip', '', Helper::sanitize($filenameSave)) . '.zip';
         $this->itens = $itens;
-        $this->config = [
-            'tmpdir' => '/tmp'
-        ];
+        $this->config = [];
+        $path = ((strtoupper(substr(PHP_OS, 0, 3)) === 'WIN') ? 'c:\\tmp' : '/tmp');
+        $this->setTempPath($path);
     }
 
     public function setCredentials($key, $secret, $bucket, $bucket_public, $region, $version) {
@@ -41,6 +41,13 @@ class S3ZipFiles {
             'version' => $version
         ];
         return $this;
+    }
+
+    public function setTempPath($path) {
+        if (!is_dir($path)) {
+            throw new Exception('s3ZipFiles ERROR: Temp path is not a dir');
+        }
+        $this->config['tmpdir'] = $path;
     }
 
     /**
@@ -77,7 +84,7 @@ class S3ZipFiles {
             $resize = new ResizeImage('', '');
             foreach ($this->itens as $item) {
 
-                
+
                 if (!$s3->getFs()->has($item['file'])) {
                     continue;
                 }
@@ -90,14 +97,13 @@ class S3ZipFiles {
                 file_put_contents($path, $ctt);
                 unset($ctt);
 
-
                 if ($item['resolucao']) {
                     // resize imagem
                     $resize->setFile($path)
                             ->setResolucao($item['resolucao'])
                             ->reduz();
                 }
-                
+
                 $content = file_get_contents($path);
                 $zipFile->addFromString('/pacote-' . $this->filename . '/' . $item['nome'], $content);
                 // Adicionar ao ZIP

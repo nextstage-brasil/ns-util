@@ -58,6 +58,29 @@ class DirectoryManipulation {
         return $out;
     }
 
+    public static function recurseCopy($src, $dst) {
+        $dir = opendir($src);
+        while (false !== ( $file = readdir($dir))) {
+            if (( $file != '.' ) && ( $file != '..' )) {
+                if (is_dir($src . '/' . $file)) {
+                    self::recurseCopy($src . '/' . $file, $dst . '/' . $file);
+                } else {
+                    Helper::createTreeDir($dst . '/' . $file);
+                    $origem = $src . '/' . $file;
+                    $destino = $dst . '/' . $file;
+                    Helper::directorySeparator($origem);
+                    Helper::directorySeparator($destino);
+                    if (!file_exists($origem)) {
+                        echo "File $origem not found \n";
+                    } else {
+                        copy($origem, $destino);
+                    }
+                }
+            }
+        }
+        closedir($dir);
+    }
+
 }
 
 /** Exemplode uso: 

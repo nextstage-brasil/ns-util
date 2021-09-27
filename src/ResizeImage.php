@@ -2,7 +2,7 @@
 
 namespace NsUtil;
 
-require_once __DIR__ . '/lib/wideimage/WideImage.php';
+//require_once __DIR__ . '/lib/wideimage/WideImage.php';
 
 class ResizeImage {
 
@@ -28,7 +28,7 @@ class ResizeImage {
      * @param type $fixed Define que obrigatoriamente deve ser redimensionada. Se false, somente ira redimensionar se o arquivo atual foi maior que a resolução escolhida, ou seja, reduzir.
      */
     public function run() {
-        $wide = \WideImage::load($this->file);
+        $wide = \WideImage\WideImage::load($this->file);
         list($largura_original, $altura_original) = getimagesize($this->file);
         if ($largura_original > $altura_original) {
             $wide->resize((int) $this->resolucao, null, 'outside', 'down')->saveToFile($this->file);
@@ -41,7 +41,7 @@ class ResizeImage {
         list($largura_original, $altura_original) = getimagesize($this->file);
         $ladoMaior = (($largura_original > $altura_original) ? $largura_original : $altura_original);
         if ($ladoMaior > $this->resolucao) {
-            $wide = \WideImage::load($this->file);
+            $wide = \WideImage\WideImage::load($this->file);
             if ($largura_original > $altura_original) {
                 $wide->resize((int) $this->resolucao, null, 'outside', 'down')->saveToFile($this->file);
             } else {
