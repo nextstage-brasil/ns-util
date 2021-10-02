@@ -119,7 +119,7 @@ class S3ZipFiles {
         // Salvar em S3 e gerar o link 
         $fp = fopen($tmpZip, 'r');
         $s3->setBucket($fs['bucket-public']);
-        $s3->getFs()->put($pathZip, $fp);
+        $s3->getFs()->write($pathZip, $fp);
         $s3->getFs()->setVisibility($pathZip, AdapterInterface::VISIBILITY_PUBLIC);
         fclose($fp);
 
