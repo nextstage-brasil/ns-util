@@ -17,12 +17,15 @@ class Package {
      * @param string $dirOutput Path onde devo salvar o .zip de saida
      * @param string $ioncube_post Path para salvar o .bat de post-encoded para ioncube
      * @param string $patch7zip Path para o aplicativo de ZIP
+     * @param string $urlLocalApplication URL local da aplicação (Completo, ex.: http://localhost:5088). Default: https://localhost/{PATH_APP}
      */
     public static function run(string $origem,
             array $excluded_x,
             string $dirOutput,
             string $ioncube_post,
-            string $patch7zip = 'C:\Program Files\7-Zip\7z.exe') {
+            string $patch7zip = 'C:\Program Files\7-Zip\7z.exe', 
+            string $urlLocalApplication = false
+            ) {
         if (Helper::getSO() !== 'windows') {
             die('ERROR: Este método é exclusivo para uso em ambiente Windows');
         }
@@ -72,11 +75,19 @@ class Package {
                 $build = 'build';
                 break;
             default:
-                die('Diretorio build não definido');
+                die('Build directory not found!');
                 break;
         }
+        
+        // Definição do URL da aplicação
+        if ($urlLocalApplication === false)   {
+            $urlLocalApplication = "https://localhost/$projectName";
+        }
+        
+        
+        
         echo "\n - Construindo aplicacao ... ";
-        $ret = Helper::curlCall("https://localhost/$projectName/$build/builder.php?pack=true", [], 'GET', [], false);
+        $ret = Helper::curlCall("$urlLocalApplication/$build/builder.php?pack=true", [], 'GET', [], false);
         echo $ret->status;
         if ((int) $ret->status !== 200) {
             var_export($ret);
@@ -84,7 +95,7 @@ class Package {
         }
 
         echo "\n - Construindo JS e Componentes ...";
-        $ret = Helper::curlCall("https://localhost/$projectName/$build/compile.php?pack=true&compileToBuild=YES&recompile=ALL", [], 'GET', [], false);
+        $ret = Helper::curlCall("$urlLocalApplication/$build/compile.php?pack=true&compileToBuild=YES&recompile=ALL", [], 'GET', [], false);
         echo $ret->status;
         if ((int) $ret->status !== 200) {
             var_export($ret);
