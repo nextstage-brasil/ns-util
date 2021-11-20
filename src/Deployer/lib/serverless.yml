@@ -1,0 +1,42 @@
+service: {servicename}
+
+provider:
+    name: aws
+    region: us-east-2
+    runtime: provided.al2
+    profile: {profile}
+    lambdaHashingVersion: 20201221
+
+plugins:
+    - ./vendor/bref/bref
+    - ./vendor/bref/extra-php-extensions
+
+functions:
+    api:
+        handler: api/index.php
+        description: ''
+        memorySize: 256
+        timeout: 30 # in seconds (API Gateway has a timeout of 29 seconds)
+        layers:
+            - ${bref:layer.php-74-fpm}
+            - ${bref-extra:gd-php-74}
+        events:
+                - http: 'ANY /{proxy+}'
+
+# Exclude files from deployment
+package:
+    patterns:
+        - '!_build/**'
+        - '!app/**'
+        - '!cron/**'
+        - '!nbproject/**'
+        - '!node_modules/**'
+        - '!test/**'
+        - '!view/audio/**'
+        - '!view/checkout/**'
+        - '!view/css/**'
+        - '!view/fontes/**'
+        - '!view/fonts/**'
+        - '!view/js/**'
+        - '!auto/components/**'
+        - 'view/fontes/images/watermark.jpg'
