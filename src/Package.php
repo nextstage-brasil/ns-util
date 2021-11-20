@@ -5,9 +5,19 @@ namespace NsUtil;
 class Package {
 
     static $zipExcluded = '';
+    private static $urlLocalApplication = '';
 
     public function __construct() {
         
+    }
+
+    /**
+     * 
+     * @param string $urlLocalApplication URL local da aplicação (Completo, ex.: http://localhost:5088). Default: https://localhost/{PATH_APP}
+     * @return void
+     */
+    public static function setUrlLocalApplication(string $urlLocalApplication = ''): void {
+        self::$urlLocalApplication = $urlLocalApplication;
     }
 
     /**
@@ -17,15 +27,13 @@ class Package {
      * @param string $dirOutput Path onde devo salvar o .zip de saida
      * @param string $ioncube_post Path para salvar o .bat de post-encoded para ioncube
      * @param string $patch7zip Path para o aplicativo de ZIP
-     * @param string $urlLocalApplication URL local da aplicação (Completo, ex.: http://localhost:5088). Default: https://localhost/{PATH_APP}
      */
     public static function run(string $origem,
             array $excluded_x,
             string $dirOutput,
             string $ioncube_post,
-            string $patch7zip = 'C:\Program Files\7-Zip\7z.exe', 
-            string $urlLocalApplication = false
-            ) {
+            string $patch7zip = 'C:\Program Files\7-Zip\7z.exe'
+    ) {
         if (Helper::getSO() !== 'windows') {
             die('ERROR: Este método é exclusivo para uso em ambiente Windows');
         }
@@ -78,14 +86,15 @@ class Package {
                 die('Build directory not found!');
                 break;
         }
-        
+
         // Definição do URL da aplicação
-        if ($urlLocalApplication === false)   {
+        $urlLocalApplication = self::$urlLocalApplication;
+        if ($urlLocalApplication === '') {
             $urlLocalApplication = "https://localhost/$projectName";
         }
-        
-        
-        
+
+
+
         echo "\n - Construindo aplicacao ... ";
         $ret = Helper::curlCall("$urlLocalApplication/$build/builder.php?pack=true", [], 'GET', [], false);
         echo $ret->status;
@@ -145,7 +154,7 @@ class Package {
             'st/',
             '_app/',
             'app/',
-            'test/', 
+            'test/',
             '.gitlab/'
                 ], $excluded_x);
         $ex = $exCI = '';
@@ -200,7 +209,7 @@ class Package {
         array_pop($zipdir);
         //shell_exec("explorer " . implode(DIRECTORY_SEPARATOR, $zipdir));
 
-        echo "\n Version '$versao' criada com sucesso!  \n";
+        echo "\n Versao '$versao' criada com sucesso!  \n";
         echo "------------- \n";
 
         return $projectName;
