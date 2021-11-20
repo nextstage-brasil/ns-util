@@ -17,12 +17,28 @@ class Api {
         // Obtenção dos headers. Chaves sempre minusculas
         $this->headers = $this->getAllHeaders();
 
-        // Obtenção do body
-        $this->body = $_POST;
-        $dd = json_decode(file_get_contents('php://input'), true);
-        if (is_array($dd)) {
-            $this->body = array_merge($_POST, $dd);
+        // Obtenção do verbo
+        $metodo = $_SERVER['REQUEST_METHOD'];
+        $recurso = explode("/", substr(@$_SERVER['PATH_INFO'], 1));
+        $this->body = [];
+
+        switch ($metodo) {
+            case 'PUT':
+            case 'POST':
+                // Obtenção do body
+                $this->body = $_POST;
+                $dd = json_decode(file_get_contents('php://input'), true);
+                if (is_array($dd)) {
+                    $this->body = array_merge($_POST, $dd);
+                }
+                break;
+            case 'GET':
+                $this->body = $_GET;
+                break;
+            default:
         }
+
+
 
         Helper::recebeDadosFromView($this->body);
 
@@ -31,7 +47,14 @@ class Api {
         // Config para aplicação
         $router = new Router('');
         $this->router = $router;
+
+        // Variaveis adicionadas
         $this->config = [
+            'rest' => [
+                'method' => $metodo,
+                'id' => (int) $router->getAllParam(2),
+                'resource' => $router->getAllParam(1)
+            ],
             'headers' => $this->getHeaders(),
             'rota' => $router->getAllParam(1) . (($router->getAllParam(2)) ? '/' . $router->getAllParam(2) : ''), // '/' . $router->getAllParam(2),
             'acao' => 'ws_' . $router->getAllParam(2),
