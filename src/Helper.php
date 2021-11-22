@@ -100,7 +100,7 @@ class Helper {
     }
 
     public static function arrayOrderBy(&$array, $element, $sort = 'ASC') {
-        usort($array, function($a, $b) use ($element, $sort) {
+        usort($array, function ($a, $b) use ($element, $sort) {
             if ($sort === 'ASC') {
                 return $a[$element] > $b[$element];
             } else {
@@ -874,6 +874,22 @@ class Helper {
             $var = substr($var, 0, strlen($var) - 2) . "." . substr($var, strlen($var) - 2, 2);
         }
         return $var;
+    }
+
+    /**
+     * Retorna um array com as variaveis para paginação de resultados
+     * @param int $page Pagina atual
+     * @param int $limitPerPage limite por página
+     * @param int $totalRegs total de registros do request
+     * @return array
+     */
+    public static function pagination(int $atualPage, int $limitPerPage, int $totalRegs): array {
+        $ret = [];
+        $ret['atualPage'] = $atualPage;
+        $ret['nextPage'] = ((($limitPerPage * ($atualPage + 1)) < $totalRegs) ? ($atualPage + 1) : false);
+        $ret['prevPage'] = (($atualPage > 0) ? $atualPage - 1 : false);
+        $ret['totalPages'] = ceil(($totalRegs / $limitPerPage));
+        return $ret;
     }
 
 }
