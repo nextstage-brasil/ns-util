@@ -103,26 +103,31 @@ set destino=$val[path]
 
 rem Não é necessário alterar aqui para baixo
 
-echo ### %deployname% ###
-
 SET /P AREYOUSURE=Continuar com deploy em %userhost% (%deployname%)? ($confirm/[n])?
 IF /I \"%AREYOUSURE%\" NEQ \"$confirm\" GOTO END
+    
+rem Password to KeyFile SSH
+SET /p KEYFILE_PWD= Passphrase for key \"imported-openssh-key\":
+cls
+echo ### %deployname% ###
 
 php " . $pathDeployer . "\builder.php
 
 echo Enviar para servidor: %deployname%
-pscp -P 22 -i %keyfile% " . $this->configs['packagePath'] . "\\" . $this->configs['packageName'] . " %userhost%:%destino%/build
-pscp -P 22 -i %keyfile% " . $pathDeployer . "\deploy\sh\%deployname%.sh %userhost%:%destino%/build/deploy.sh
-plink -batch -i %keyfile% %userhost% \"chmod +x %destino%/build/deploy.sh\"
+pscp -P 22 -i %keyfile% -pw \"%KEYFILE_PWD%\" " . $this->configs['packagePath'] . "\\" . $this->configs['packageName'] . " %userhost%:%destino%/build
+pscp -P 22 -i %keyfile% -pw \"%KEYFILE_PWD%\" " . $pathDeployer . "\deploy\sh\%deployname%.sh %userhost%:%destino%/build/deploy.sh
+plink -batch -i %keyfile% -pw \"%KEYFILE_PWD%\" %userhost% \"chmod +x %destino%/build/deploy.sh\"
 
 rem V1: Quando sudo precisa de senha. Ira abrir o SSH terminal e executar o arquivo local no servidor
-rem putty -ssh -i %keyfile% %userhost% -m \"" . $pathDeployer . "\deploy\sh\%deployname%-run.sh\" -t
+rem putty -ssh -i %keyfile% -pw \"%KEYFILE_PWD%\" %userhost% -m \"" . $pathDeployer . "\deploy\sh\%deployname%-run.sh\" -t
     
 rem V2: Quando sudo é liberado sem senha. Igual ao CI Executa direto o comando no servidor, sem a necessidade de abrir um terminal
-plink -batch -i %keyfile% %userhost%  \"" . $val['sudo'] . "sh %destino%/build/deploy.sh\"
+plink -batch -i %keyfile% -pw \"%KEYFILE_PWD%\" %userhost%  \"" . $val['sudo'] . "sh %destino%/build/deploy.sh\"
 
 echo Concluido
 timeout /t 15";
+                
+                
                 \NsUtil\Helper::saveFile($deployerFile, false, $template, 'SOBREPOR');
             }
         }
