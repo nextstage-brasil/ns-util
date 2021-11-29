@@ -5,6 +5,7 @@ DIR="path"
 OWNER="usuario"
 FILENAME="packageName"
 APPNAME="cliente"
+INSTALL_CRONTAB="decideinstallCrontab"
 
 # Sudo para pedir senha caso precise
 cd $DIR
@@ -68,10 +69,9 @@ RELEASE="$RELEASES_DIR/$RELEASE_NAME"
 
 # links simbolicos
 echo "- Criar links"
-ln -nfs "$DIR/app" "$RELEASE/app"
-ln -nfs "$DIR/storage" "$RELEASE/storage"
-# ln -nfs "$DIR/.env" "$RELEASE/.env"
-ln -nfs "$RELEASE" "$DIR/www"
+ln -nfs "../../app" "$RELEASE/app"
+ln -nfs "../../storage" "$RELEASE/storage"
+ln -nfs "./releases/$RELEASE_NAME" "$DIR/www"
 
 # Permissoes de pastas
 chown -R "${OWNER}:www-data" "$RELEASE"
@@ -83,7 +83,7 @@ chmod 0777 "$DIR/app" -R
 # cp ${DIR}/cscfg ${RELEASE}/.cscfg.bkp
 
 # crontab
-if [ -f "$DIR/www/cron/crontab" ]; then
+if [ -f "$DIR/www/cron/crontab"] && [ "${INSTALL_CRONTAB}" = "yes"]; then
     echo "- Atualizar crontab"
     chmod -R 0775 "$RELEASE/cron"
     crontab -l -u ${OWNER} | echo "" | crontab -u ${OWNER} -
