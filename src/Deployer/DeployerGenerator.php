@@ -29,8 +29,21 @@ variables:
 ';
     }
 
-    public function addConfig($clientName, $pathOnServer, $ownerOnServer, $pathToKeySSH, $userDeployer, $host, $sudoRequire = true) {
-       // version
+    /**
+     * 
+     * @param type $clientName Prefixo + nome da branch a ser processada no CI
+     * @param type $pathOnServer caminho absoluto noservidor antes da pasta build, ex.: /var/www/nome_app (build esta em /var/www/nome_app/build)
+     * @param type $ownerOnServer Dono dos arquivos no servidor (Ex.: ubuntu, debian, usuario especifico)
+     * @param type $pathToKeySSH Caminho do arquivo para o SSH quando deploy for feito localmente
+     * @param type $userDeployer Ususario que executará o deploy. Não necessáriamente precisa ser o proprietario. Ex.: deployer
+     * @param type $host host para instalação ex.: www.meuapp.com.br, ou 172.0.0.1
+     * @param bool $installCrontab default false, decide se deve instalar o arquivo em /cron/crontab para este deploy. Não deve ser utilizado para homologações. 
+     * ATENÇÃO: Será instalado para o usuario dono dos arquivos. ex.: se for ubuntu e tiver varios apps, apagara os demais crontabs.
+     * @param bool $sudoRequire Se true (default), sera aplicado sudo antes das instalaçãoes. Pode pedir senha caso usuario não tenha acesso ao sudo sem senha.
+     * @return $this
+     */
+    public function addConfig($clientName, $pathOnServer, $ownerOnServer, $pathToKeySSH, $userDeployer, $host, bool $installCrontab = false, bool $sudoRequire = true) {
+        // version
         $name = str_replace(' ', '_', $clientName);
         $this->configs['deployers'][] = [
             'cliente' => $name,
@@ -40,7 +53,8 @@ variables:
             'userhost' => $userDeployer . '@' . $host,
             'host' => $host,
             'userDeployer' => $userDeployer,
-            'sudo' => (($sudoRequire) ? 'sudo ' : '')
+            'sudo' => (($sudoRequire) ? 'sudo ' : ''),
+            'decideinstallCrontab' => (($installCrontab) ? 'yes' : 'no')
         ];
         $this->gitlabCI[0] .= '
    # Configs to ' . $name . '
@@ -126,8 +140,7 @@ plink -batch -i %keyfile% -pw \"%KEYFILE_PWD%\" %userhost%  \"" . $val['sudo'] .
 
 echo Concluido
 timeout /t 15";
-                
-                
+
                 \NsUtil\Helper::saveFile($deployerFile, false, $template, 'SOBREPOR');
             }
         }
@@ -170,7 +183,6 @@ timeout /t 15";
         # Executar instalação
         - ssh ' . $sshUserDeployer . '@' . $sshHost . ' "' . $item['sudo'] . 'sh ' . $sshPath . '/build/deploy.sh"        
 ';
-        
     }
 
 }
