@@ -796,8 +796,8 @@ class Helper {
         return $out;
     }
 
-    public static function formatDate($date, $escolha = 'arrumar', $datahora = false, $alterarTimeZone = false) {
-        return (new Format($date))->date($escolha, $datahora, $alterarTimeZone);
+    public static function formatDate($date, $escolha = 'arrumar', $datahora = false, $alterarTimeZone = false, $timezone = 'America/Sao_Paulo') {
+        return (new Format($date, $timezone))->date($escolha, $datahora, $alterarTimeZone);
     }
 
     public static function formatCep($cep) {
