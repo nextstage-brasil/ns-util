@@ -51,9 +51,10 @@ class Api {
         // Variaveis adicionadas
         $this->config = [
             'rest' => [
-                'method' => $metodo,
+                'method' => (string) $metodo,
                 'id' => (int) $router->getAllParam(2),
-                'resource' => $router->getAllParam(1)
+                'resource' => (string) $router->getAllParam(1),
+                'action' => (string) $router->getAllParam(3),
             ],
             'headers' => $this->getHeaders(),
             'rota' => $router->getAllParam(1) . (($router->getAllParam(2)) ? '/' . $router->getAllParam(2) : ''), // '/' . $router->getAllParam(2),
