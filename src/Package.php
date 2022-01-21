@@ -53,8 +53,8 @@ class Package {
             . "cd $pathNew &&"
             . "git add .  &&"
             . "git commit -m \"$message\" && "
-            . "git tag -a $X.$Y.$Z HEAD &&"
-            . "git push --tags &&"
+//            . "git tag -a $X.$Y.$Z HEAD &&"
+//            . "git push --tags &&"
             . "timeout /t 10"
             ,
             'git' => [
@@ -71,9 +71,9 @@ class Package {
 
     public static function git($file, $message = 'version/version', $major = 0, $minor = 0, $path = 0) {
         $ret = self::setVersion($file, $message, $major, $minor, $path);
-        $template = implode(PHP_EOL, $ret['git']);
-        $filegit = $ret['path'] . '/__git.bat';
-        Helper::saveFile($filegit, false, $template, 'SOBREPOR');
+//        $template = implode(PHP_EOL, $ret['git']);
+//        $filegit = $ret['path'] . '/__git.bat';
+//        Helper::saveFile($filegit, false, $template, 'SOBREPOR');
         shell_exec($ret['bat']);
     }
 
