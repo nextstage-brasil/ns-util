@@ -20,6 +20,20 @@ class Package {
         self::$urlLocalApplication = $urlLocalApplication;
     }
 
+    public static function setVersion($file) {
+        if (!file_exists($file)) {
+            file_put_contents($file, '1.0.0');
+        }
+        $v = explode('.', file_get_contents($file));
+        $X = filter_var($v[0], FILTER_SANITIZE_NUMBER_INT);
+        $Y = $v[1];
+        $Z = (int) $v[2] + 1;
+        $Z = (int) $v[2];
+        $D = date('c');
+        $versao = "$X.$Y.$Z." . date('YmdHi');
+        file_put_contents($file, $versao);
+    }
+
     /**
      * 
      * @param string $origem Path de origem dos arquivos a ser empacotados. 
@@ -53,22 +67,23 @@ class Package {
         // versao
         //X é a versão Maior, Y é a versão Menor, e Z é a versão de Correção.
         $file = $fontes . '/version';
-        if (!file_exists($file)) {
-            file_put_contents($file, '1.0.0');
-        }
-        $v = explode('.', file_get_contents($file));
-        $X = filter_var($v[0], FILTER_SANITIZE_NUMBER_INT);
-        $Y = $v[1];
-        $Z = (int) $v[2] + 1;
-        $Z = (int) $v[2];
-        $D = date('c');
-        $versao = "$X.$Y.$Z." . date('YmdHi');
-        file_put_contents($file, $versao);
+        self::setVersion($file);
+//        if (!file_exists($file)) {
+//            file_put_contents($file, '1.0.0');
+//        }
+//        $v = explode('.', file_get_contents($file));
+//        $X = filter_var($v[0], FILTER_SANITIZE_NUMBER_INT);
+//        $Y = $v[1];
+//        $Z = (int) $v[2] + 1;
+//        $Z = (int) $v[2];
+//        $D = date('c');
+//        $versao = "$X.$Y.$Z." . date('YmdHi');
+//        file_put_contents($file, $versao);
 
         // composer
         if (file_exists($origem . '/composer.json')) {
             echo " - Atualizando pacotes via composer ...";
-            shell_exec('composer install -q --prefer-dist --optimize-autoloader --no-dev --working-dir="' . $origem . '"');
+            shell_exec('composer update -q --prefer-dist --optimize-autoloader --no-dev --working-dir="' . $origem . '"');
         }
 
         // builder and compile
