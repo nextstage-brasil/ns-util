@@ -20,18 +20,35 @@ class Package {
         self::$urlLocalApplication = $urlLocalApplication;
     }
 
-    public static function setVersion($file) {
+    public static function setVersion($file, $message = 'version/version', $major = 0, $minor = 0, $path = 0) {
         if (!file_exists($file)) {
             file_put_contents($file, '1.0.0');
         }
         $v = explode('.', file_get_contents($file));
-        $X = filter_var($v[0], FILTER_SANITIZE_NUMBER_INT);
-        $Y = $v[1];
-        $Z = (int) $v[2] + 1;
-        $Z = (int) $v[2];
-        $D = date('c');
+        $X = filter_var($v[0], FILTER_SANITIZE_NUMBER_INT) + $major;
+        $Y = $v[1] + $minor;
+        $Z = (int) $v[2] + $path;
+
         $versao = "$X.$Y.$Z." . date('YmdHi');
         file_put_contents($file, $versao);
+
+        // GIT
+        $path = $file;
+        Helper::directorySeparator($path);
+        $itens = explode(DIRECTORY_SEPARATOR, $path);
+        array_pop($itens);
+        $pathNew = implode(DIRECTORY_SEPARATOR, $itens);
+
+        return [
+            'version' => "$X.$Y.$Z",
+            'version_full' => $versao,
+            'git' => [
+                'add' => "cd $pathNew && git add .",
+                'commit' => "cd $pathNew && git commit -m \"$message\" ",
+                'tag' => "cd $pathNew && git tag -a $X.$Y.$Z HEAD",
+                'push' => "cd $pathNew && git push --tags"
+            ]
+        ];
     }
 
     /**
@@ -79,7 +96,6 @@ class Package {
 //        $D = date('c');
 //        $versao = "$X.$Y.$Z." . date('YmdHi');
 //        file_put_contents($file, $versao);
-
         // composer
         if (file_exists($origem . '/composer.json')) {
             echo " - Atualizando pacotes via composer ...";
