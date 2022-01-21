@@ -43,10 +43,10 @@ class Package {
             'version' => "$X.$Y.$Z",
             'version_full' => $versao,
             'git' => [
-                'add' => "cd $pathNew && git add .",
-                'commit' => "cd $pathNew && git commit -m \"$message\" ",
-                'tag' => "cd $pathNew && git tag -a $X.$Y.$Z HEAD",
-                'push' => "cd $pathNew && git push --tags"
+                'add' => "cd $pathNew && git add .  2>&1",
+                'commit' => "cd $pathNew && git commit -m \"$message\" 2>&1 ",
+                'tag' => "cd $pathNew && git tag -a $X.$Y.$Z HEAD 2>&1",
+                'push' => "cd $pathNew && git push --tags 2>&1"
             ]
         ];
     }
