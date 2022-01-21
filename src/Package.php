@@ -38,17 +38,27 @@ class Package {
         $itens = explode(DIRECTORY_SEPARATOR, $path);
         array_pop($itens);
         $pathNew = implode(DIRECTORY_SEPARATOR, $itens);
-        
-        if (Helper::getSO()==='windows')   {
-            $init = substr($pathNew, 0,2);
+
+        if (Helper::getSO() === 'windows') {
+            $init = substr($pathNew, 0, 2);
         }
 
         return [
             'version' => "$X.$Y.$Z",
             'version_full' => $versao,
             'path' => $pathNew,
+            'init' => $init,
+            'bat' => ""
+            . "$init &&"
+            . "cd $pathNew &&"
+            . "git add .  &&"
+            . "git commit -m \"$message\" && "
+            . "git tag -a $X.$Y.$Z HEAD &&"
+            . "git push --tags &&"
+            . "timeout /t 10"
+            ,
             'git' => [
-                'local' => $init, 
+                'local' => $init,
                 'cd' => "cd $pathNew",
                 'add' => "git add . ",
                 'commit' => "git commit -m \"$message\" ",
@@ -64,7 +74,7 @@ class Package {
         $template = implode(PHP_EOL, $ret['git']);
         $filegit = $ret['path'] . '/__git.bat';
         Helper::saveFile($filegit, false, $template, 'SOBREPOR');
-        shell_exec("$filegit");
+        shell_exec($ret['bat']);
     }
 
     /**
