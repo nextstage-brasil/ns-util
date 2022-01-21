@@ -47,9 +47,9 @@ class Package {
             'version' => "$X.$Y.$Z",
             'version_full' => $versao,
             'path' => $pathNew,
-            'init' => $init,
+            'init' => (($init) ? $init . " &&" : ""),
             'bat' => ""
-            . "$init &&"
+            . (($init) ? $init . " &&" : "")
             . "cd $pathNew &&"
             . "git add .  &&"
             . "git commit -m \"$message\" && "
