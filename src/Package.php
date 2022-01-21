@@ -51,7 +51,7 @@ class Package {
                 'local' => $init, 
                 'cd' => "cd $pathNew",
                 'add' => "git add . ",
-                'commit' => "git commit -m '$message' ",
+                'commit' => "git commit -m \"$message\" ",
                 'tag' => "git tag -a $X.$Y.$Z HEAD",
                 'push' => "git push --tags",
                 'timeout' => 'timeout /t 10'
