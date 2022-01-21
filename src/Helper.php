@@ -297,7 +297,7 @@ class Helper {
      * @param string $method
      * @return Array
      */
-    public static function curlCall($url, $params = [], $method = 'GET', $header = ['Content-Type:application/json'], $ssl = true) {
+    public static function curlCall($url, $params = [], $method = 'GET', $header = ['Content-Type:application/json'], $ssl = true, int $timeout = 30) {
         $options = [
             CURLOPT_URL => trim($url),
             CURLOPT_CUSTOMREQUEST => $method,
@@ -310,7 +310,7 @@ class Helper {
             CURLOPT_ENCODING => "", // handle all encodings
             CURLOPT_AUTOREFERER => true, // set referer on redirect
             CURLOPT_CONNECTTIMEOUT => 30, // timeout on connect
-            CURLOPT_TIMEOUT => 30, // timeout on response
+            CURLOPT_TIMEOUT => (int) $timeout, // timeout on response
             CURLOPT_MAXREDIRS => 10, // stop after 10 redirects
             CURLOPT_SSL_VERIFYPEER => $ssl,
             CURLOPT_HEADER => true,
