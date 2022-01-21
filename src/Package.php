@@ -54,7 +54,8 @@ class Package {
             . "git add .  &&"
             . "git commit -m \"$message\" && "
             . "git tag $X.$Y.$Z HEAD &&"
-            . "git push --tags &&"
+//            . "git push --tags &&"
+            . "echo VERSAO CRIADA E COMMITADA. TAG CRIADA."
             . "timeout /t 10"
             ,
             'git' => [
