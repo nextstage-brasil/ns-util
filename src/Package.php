@@ -50,11 +50,11 @@ class Package {
             'init' => (($init) ? $init . " &&" : ""),
             'bat' => ""
             . (($init) ? $init . " &&" : "")
-            . "cd $pathNew &&"
-            . "git add .  &&"
-            . "git commit -m \"$message\" && "
-            . "git tag $X.$Y.$Z HEAD &&"
-//            . "git push --tags &&"
+            . " cd $pathNew &&"
+            . " git add .  &&"
+            . " git commit -m \"$message\" && "
+            . " git tag $X.$Y.$Z HEAD &&"
+//            . " git push --tags &&"
 //            . "echo \"VERSAO CRIADA E COMMITADA. TAG CRIADA.\""
             . "timeout /t 10"
             ,
