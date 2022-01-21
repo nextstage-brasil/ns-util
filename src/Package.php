@@ -53,7 +53,7 @@ class Package {
             . "cd $pathNew &&"
             . "git add .  &&"
             . "git commit -m \"$message\" && "
-            . "git tag -a \"$X.$Y.$Z\" HEAD &&"
+            . "git tag $X.$Y.$Z HEAD &&"
 //            . "git push --tags &&"
             . "timeout /t 10"
             ,
