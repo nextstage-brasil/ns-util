@@ -3,14 +3,16 @@
 namespace NsUtil;
 
 // Helper funcionrs
-class Helper {
+class Helper
+{
 
     /**
      * 
      * @param type $configName
      * @param type $dirArquivoSample
      */
-    public static function nsIncludeConfigFile($dirArquivoSample) {
+    public static function nsIncludeConfigFile($dirArquivoSample)
+    {
         $dirArquivoSample = realpath($dirArquivoSample);
         $temp = explode(DIRECTORY_SEPARATOR, $dirArquivoSample);
         $configName = array_pop($temp);
@@ -36,7 +38,8 @@ class Helper {
         return $$var;
     }
 
-    public static function sanitize($str) {
+    public static function sanitize($str)
+    {
         $from = "áàãâéêíóôõúüçÁÀÃÂÉÊÍÓÔÕÚÜÇ";
         $to = "aaaaeeiooouucAAAAEEIOOOUUC";
         $keys = array();
@@ -51,13 +54,15 @@ class Helper {
         //return str_replace(" ", "_", preg_replace("/&([a-z])[a-z]+;/i", "$1", htmlentities(trim($str))));
     }
 
-    public static function mkdir($path, $perm = 0777) {
+    public static function mkdir($path, $perm = 0777)
+    {
         if (!is_dir(!$path)) {
             @mkdir($path, $perm, true);
         }
     }
 
-    public static function convertAscii($string) {
+    public static function convertAscii($string)
+    {
         // Replace Single Curly Quotes
         $search[] = chr(226) . chr(128) . chr(152);
         $replace[] = "'";
@@ -90,7 +95,8 @@ class Helper {
         return $string;
     }
 
-    public static function formatTextAllLowerFirstUpper($str) {
+    public static function formatTextAllLowerFirstUpper($str)
+    {
         $sempreMinusculas = ['a', 'ao', 'da', 'de', 'do', 'dos', 'das', 'ante', 'até', 'após', 'desde', 'em', 'entre', 'com', 'contra', 'para', 'por', 'perante', 'sem', 'sobe', 'sob'];
         $string = ucwords(mb_strtolower($str));
         foreach ($sempreMinusculas as $value) {
@@ -99,7 +105,8 @@ class Helper {
         return $string;
     }
 
-    public static function arrayOrderBy(&$array, $element, $sort = 'ASC') {
+    public static function arrayOrderBy(&$array, $element, $sort = 'ASC')
+    {
         usort($array, function ($a, $b) use ($element, $sort) {
             if ($sort === 'ASC') {
                 return $a[$element] > $b[$element];
@@ -114,7 +121,8 @@ class Helper {
      * @param type $array
      * @param type $chave
      */
-    public static function arraySearchByKey(&$array, $chave, $valor): array {
+    public static function arraySearchByKey(&$array, $chave, $valor): array
+    {
         if (!is_array($array)) {
             throw new Exception('NSUtil (NSH120): Variavel não é um array');
         }
@@ -128,7 +136,8 @@ class Helper {
      * @param array $prefixo
      * @return type string
      */
-    public static function name2CamelCase($string, $prefixo = false) {
+    public static function name2CamelCase($string, $prefixo = false)
+    {
         $prefixo = array('mem_', 'sis_', 'anz_', 'aux_', 'app_');
         if (is_array($string)) {
             foreach ($string as $key => $value) {
@@ -153,7 +162,8 @@ class Helper {
      * @param type $string
      * @return type string
      */
-    public static function reverteName2CamelCase($string): string {
+    public static function reverteName2CamelCase($string): string
+    {
         $out = '';
         for ($i = 0; $i < strlen($string); $i++) {
             if ($string[$i] === mb_strtoupper($string[$i]) && $string[$i] !== '.') {
@@ -170,7 +180,8 @@ class Helper {
      * @param type $filename
      * @return type
      */
-    public static function createTreeDir($filename) {
+    public static function createTreeDir($filename)
+    {
         $path = str_replace('/', DIRECTORY_SEPARATOR, $filename);
         $parts = explode(DIRECTORY_SEPARATOR, $path);
         $file = array_pop($parts);
@@ -179,7 +190,8 @@ class Helper {
         return (object) ['path' => $dir, 'name' => $file];
     }
 
-    public static function saveFile($filename, $name = false, $template = '<?php Header("Location:/");', $mode = "w+") {
+    public static function saveFile($filename, $name = false, $template = '<?php Header("Location:/");', $mode = "w+")
+    {
         $filename = $filename . (($name) ? '/' . $name : '');
         $file = self::createTreeDir($filename);
         if (file_exists($filename) && $mode !== 'SOBREPOR') {
@@ -191,30 +203,34 @@ class Helper {
         return file_exists($save);
     }
 
-    public static function eficiencia_init() {
+    public static function eficiencia_init()
+    {
         list($usec, $sec) = explode(' ', microtime());
         $ef = new Helper();
         $ef->start = (float) $sec + (float) $usec;
         return $ef;
     }
 
-    public function endEficiencia() {
+    public function endEficiencia()
+    {
         // Terminamos o "contador" e exibimos
         list($usec, $sec) = explode(' ', microtime());
         $script_end = (float) $sec + (float) $usec;
         $elapsed_time = round($script_end - $this->start, 2);
-        $minutos = (int) number_format((double) $elapsed_time / 60, 0);
+        $minutos = (int) number_format((float) $elapsed_time / 60, 0);
 
         return 'Elapsed '
-                . gmdate("H:i:s", (int) $elapsed_time)
-                . ' with ' . round(((memory_get_peak_usage(true) / 1024) / 1024), 2) . 'Mb';
+            . gmdate("H:i:s", (int) $elapsed_time)
+            . ' with ' . round(((memory_get_peak_usage(true) / 1024) / 1024), 2) . 'Mb';
     }
 
-    public static function directorySeparator(&$var) {
+    public static function directorySeparator(&$var)
+    {
         $var = str_replace('/', DIRECTORY_SEPARATOR, $var);
     }
 
-    public static function deleteDir($pasta) {
+    public static function deleteDir($pasta)
+    {
         self::directorySeparator($pasta);
         if (!is_dir($pasta)) {
             return true;
@@ -247,7 +263,8 @@ class Helper {
      * @param type $trash
      * @return boolean
      */
-    public static function deleteFile($filepath, $apagarDiretorio = false, $trash = false) {
+    public static function deleteFile($filepath, $apagarDiretorio = false, $trash = false)
+    {
         ///echo $filename;
         $filename = str_replace('/', DIRECTORY_SEPARATOR, $filepath);
 
@@ -277,7 +294,8 @@ class Helper {
      * @param type $url
      * @return type
      */
-    public static function myFileGetContents($url) {
+    public static function myFileGetContents($url)
+    {
         $config = array(
             "ssl" => array(
                 "verify_peer" => false,
@@ -297,7 +315,8 @@ class Helper {
      * @param string $method
      * @return Array
      */
-    public static function curlCall($url, $params = [], $method = 'GET', $header = ['Content-Type:application/json'], $ssl = true, int $timeout = 30) {
+    public static function curlCall($url, $params = [], $method = 'GET', $header = ['Content-Type:application/json'], $ssl = true, int $timeout = 30)
+    {
         $options = [
             CURLOPT_URL => trim($url),
             CURLOPT_CUSTOMREQUEST => $method,
@@ -353,13 +372,13 @@ class Helper {
         }
 
         $ret = (object) [
-                    'content' => $body,
-                    'errorCode' => curl_errno($ch),
-                    'error' => ((curl_error($ch)) ? curl_error($ch) : curl_errno($ch)),
-                    'status' => curl_getinfo($ch)['http_code'],
-                    'http_code' => curl_getinfo($ch)['http_code'],
-                    'headers' => $headers,
-                    'url' => $urlInfo
+            'content' => $body,
+            'errorCode' => curl_errno($ch),
+            'error' => ((curl_error($ch)) ? curl_error($ch) : curl_errno($ch)),
+            'status' => curl_getinfo($ch)['http_code'],
+            'http_code' => curl_getinfo($ch)['http_code'],
+            'headers' => $headers,
+            'url' => $urlInfo
         ];
         //Log::error(json_encode($ret));
         //echo json_encode($content);
@@ -375,7 +394,8 @@ class Helper {
      * @param type $enclosure
      * @return boolean
      */
-    public static function myFGetsCsv($handle, $explode = ';', $blockSize = 0, $enclosure = '"') {
+    public static function myFGetsCsv($handle, $explode = ';', $blockSize = 0, $enclosure = '"')
+    {
         $data = fgetcsv($handle, $blockSize, $explode, $enclosure);
         if ($data === false || $data === null) {
             return false;
@@ -399,7 +419,8 @@ class Helper {
      * @param type $file
      * @return int
      */
-    public static function linhasEmArquivo($file) {
+    public static function linhasEmArquivo($file)
+    {
         $l = 0;
         if ($f = fopen($file, "r")) {
             while ($d = fgets($f, 1000)) {
@@ -416,7 +437,8 @@ class Helper {
      * @param type $dados
      * @return boolean
      */
-    public static function recebeDadosFromView(&$dados) {
+    public static function recebeDadosFromView(&$dados)
+    {
         if (!is_array($dados)) {
             return false;
         }
@@ -439,7 +461,8 @@ class Helper {
         }
     }
 
-    public static function depara(array $depara, array $dados, $retornaSomenteDepara = true) {
+    public static function depara(array $depara, array $dados, $retornaSomenteDepara = true)
+    {
         if ($retornaSomenteDepara) {
             $out = [];
         } else {
@@ -451,7 +474,8 @@ class Helper {
         return $out;
     }
 
-    public static function compareString($str1, $str2, $case = false) {
+    public static function compareString($str1, $str2, $case = false)
+    {
         if (!$case) {
             return (mb_strtoupper($str1) === mb_strtoupper($str2));
         } else {
@@ -459,7 +483,8 @@ class Helper {
         }
     }
 
-    public static function fileGetEncoding($filename) {
+    public static function fileGetEncoding($filename)
+    {
         $so = php_uname();
         if (stripos($so, 'linux') > -1) {
             $cmd = 'file -bi ' . $filename . ' | sed -e "s/.*[ ]charset=//"';
@@ -470,7 +495,8 @@ class Helper {
         return trim($cod);
     }
 
-    public static function fileConvertToUtf8($filepath, $output = false) {
+    public static function fileConvertToUtf8($filepath, $output = false)
+    {
         if (file_exists($filepath)) {
             $enc = self::fileGetEncoding($filepath);
             if ($enc !== 'utf-8' && stripos($enc, 'ascii') === false) {
@@ -487,7 +513,8 @@ class Helper {
         }
     }
 
-    public static function fileSearchRecursive($file_name, $dir_init, $deep = 10) {
+    public static function fileSearchRecursive($file_name, $dir_init, $deep = 10)
+    {
         $dirarray = explode(DIRECTORY_SEPARATOR, $dir_init);
         $filename = implode(DIRECTORY_SEPARATOR, $dirarray) . DIRECTORY_SEPARATOR . $file_name;
         $count = 0;
@@ -504,7 +531,8 @@ class Helper {
         }
     }
 
-    public static function packerAndPrintJS($js) {
+    public static function packerAndPrintJS($js)
+    {
         $packer = new Packer($js, 'Normal', true, false, true);
         $packed_js = $packer->pack();
         echo "<script>$packed_js</script>";
@@ -514,7 +542,8 @@ class Helper {
      * Verifica se o dados existe, se o conteudo é diferente de '' ou null ou false
      * @param type $value
      */
-    public static function hasContent($value, $type = 'string') {
+    public static function hasContent($value, $type = 'string')
+    {
         if (is_array($value)) {
             foreach ($value as $item) {
                 if (!self::hasContent($item, $type)) {
@@ -540,7 +569,8 @@ class Helper {
      * Retorna um array com errors
      * @param array $dadosObrigatorios Array contendo array: ['value' => $dados['idCurso'], 'msg' => 'Informe a data inicial', 'type' => 'int'],
      */
-    public static function validarCamposObrigatorios($dadosObrigatorios) {
+    public static function validarCamposObrigatorios($dadosObrigatorios)
+    {
         $error = [];
         foreach ($dadosObrigatorios as $item) {
             $has = self::hasContent($item['value'], (($item['type']) ? $item['type'] : 'string'));
@@ -556,7 +586,8 @@ class Helper {
         return $error;
     }
 
-    public static function base64_to_jpeg($base64_string, $output_file) {
+    public static function base64_to_jpeg($base64_string, $output_file)
+    {
         // open the output file for writing
         $ifp = fopen($output_file, 'wb');
 
@@ -574,7 +605,8 @@ class Helper {
         return $output_file;
     }
 
-    public static function gzReader($filename) {
+    public static function gzReader($filename)
+    {
         $out = '';
         // Raising this value may increase performance
         $buffer_size = 4096; // read 4kb at a time
@@ -591,7 +623,8 @@ class Helper {
         return $out;
     }
 
-    public static function extractDataAtributesFromHtml($html) {
+    public static function extractDataAtributesFromHtml($html)
+    {
         $list = explode("data-", $html);
         unset($list[0]);
         $out = [];
@@ -606,7 +639,8 @@ class Helper {
      * Detecta se a chamada foi feita de um dispositivo mobile
      * @return boolean
      */
-    public static function isMobile() {
+    public static function isMobile()
+    {
         return preg_match("/(android|avantgo|blackberry|bolt|boost|cricket|docomo|fone|hiptop|mini|mobi|palm|phone|pie|tablet|up\.browser|up\.link|webos|wos)/i", $_SERVER["HTTP_USER_AGENT"]);
         /*
           $useragent = $_SERVER['HTTP_USER_AGENT'];
@@ -618,7 +652,8 @@ class Helper {
          */
     }
 
-    public static function getIP() {
+    public static function getIP()
+    {
         $var = (($_SERVER['HTTP_X_FORWARDED_FOR']) ? 'HTTP_X_FORWARDED_FOR' : 'REMOTE_ADDR');
         return filter_input(INPUT_SERVER, $var, FILTER_SANITIZE_STRING);
     }
@@ -628,7 +663,8 @@ class Helper {
      * @param type $var
      * @return type
      */
-    public static function filterSanitize($var) {
+    public static function filterSanitize($var)
+    {
         if (is_array($var)) {
             foreach ($var as $key => $value) {
                 if (is_array($value)) {
@@ -657,13 +693,14 @@ class Helper {
      * @param type $withBom
      * @return type
      */
-    public static function array2csv(array $array, $filepath = false, bool $withBom = true) {
+    public static function array2csv(array $array, $filepath = false, bool $withBom = true)
+    {
         $delimiter = ';';
         if ($filepath) {
             $fp = fopen($filepath, 'w');
             // BOM
             if ($withBom) {
-                fputs($fp, $bom = ( chr(0xEF) . chr(0xBB) . chr(0xBF) ));
+                fputs($fp, $bom = (chr(0xEF) . chr(0xBB) . chr(0xBF)));
             }
 
             // Gravar o cabeçalho
@@ -696,7 +733,8 @@ class Helper {
         }
     }
 
-    public static function getSO() {
+    public static function getSO()
+    {
         return mb_strtolower(explode(' ', php_uname())[0]);
     }
 
@@ -705,7 +743,8 @@ class Helper {
      * @param type $var
      * @return type
      */
-    public static function parseInt($var) {
+    public static function parseInt($var)
+    {
         return preg_replace("/[^0-9]/", "", $var);
     }
 
@@ -714,7 +753,8 @@ class Helper {
      * @param type $json
      * @return type
      */
-    public static function jsonToArrayFromView($json) {
+    public static function jsonToArrayFromView($json)
+    {
         return json_decode(str_replace('&#34;', '"', $json), true);
     }
 
@@ -724,7 +764,8 @@ class Helper {
      * @param type $date formato yyyy-mm-dd
      * @return array {"isDiaUtil":true,"proxDiaUtil":"2021-03-19","ultDiaUtil":"2021-03-17"}
      */
-    public static function feriado($date) {
+    public static function feriado($date)
+    {
         $url = 'https://syncpay.usenextstep.com.br/api/util/feriado/' . self::parseInt($date);
         $ret = self::curlCall($url)->content;
         $ret1 = json_decode($ret, true);
@@ -737,7 +778,8 @@ class Helper {
      * @param type $prazo Prazo em 
      * @return type String, no formato yyyy-mm-dd
      */
-    public static function calculaVencimentoUtil($vencimento, $prazo = 0) {
+    public static function calculaVencimentoUtil($vencimento, $prazo = 0)
+    {
         if ($prazo > 0) {
             // rotina para varrer somente dias úteis
             $count = 0;
@@ -755,7 +797,8 @@ class Helper {
      * @param array $origem
      * @param array $chaves
      */
-    public static function arrayReduceKeys(array $origem, array $chaves) {
+    public static function arrayReduceKeys(array $origem, array $chaves)
+    {
         $out = [];
         foreach ($chaves as $val) {
             $out[$val] = $origem[$val];
@@ -766,7 +809,8 @@ class Helper {
     /**
      * Ira buscar o path da aplicação, antes da pasta /vendor
      */
-    public static function getPathApp() {
+    public static function getPathApp()
+    {
         return str_replace(DIRECTORY_SEPARATOR . 'vendor' . DIRECTORY_SEPARATOR . 'nextstage-brasil' . DIRECTORY_SEPARATOR . 'ns-util' . DIRECTORY_SEPARATOR . 'src', '', __DIR__);
     }
 
@@ -775,7 +819,8 @@ class Helper {
      * @param type $string
      * @param type $type
      */
-    public static function getValByType($string, $type) {
+    public static function getValByType($string, $type)
+    {
         switch ($type) {
             case 'int':
                 $out = filter_var($string, FILTER_VALIDATE_INT);
@@ -796,15 +841,18 @@ class Helper {
         return $out;
     }
 
-    public static function formatDate($date, $escolha = 'arrumar', $datahora = false, $alterarTimeZone = false, $timezone = 'America/Sao_Paulo') {
+    public static function formatDate($date, $escolha = 'arrumar', $datahora = false, $alterarTimeZone = false, $timezone = 'America/Sao_Paulo')
+    {
         return (new Format($date, $timezone))->date($escolha, $datahora, $alterarTimeZone);
     }
 
-    public static function formatCep($cep) {
+    public static function formatCep($cep)
+    {
         return (new Format($cep))->cep();
     }
 
-    public static function formatCpfCnpj($var) {
+    public static function formatCpfCnpj($var)
+    {
         $var = self::parseInt($var);
         if (strlen($var) === 11) { // cpf
             $out = substr($var, 0, 3) . '.' . substr($var, 3, 3) . '.' . substr($var, 6, 3) . '-' . substr($var, 9, 2);
@@ -821,7 +869,8 @@ class Helper {
      * @param type $texto String completa a ser alterada
      * @param type $search termo a procurar e realçar
      */
-    public static function highlightText($texto, $search) {
+    public static function highlightText($texto, $search)
+    {
         $searchsan = self::sanitize($search);
         $textosan = self::sanitize($texto);
         $inicio = stripos($textosan, $searchsan);
@@ -831,21 +880,24 @@ class Helper {
         }
     }
 
-    public static function getPsr4Name($dir = '') {
+    public static function getPsr4Name($dir = '')
+    {
         $dir = ((strlen($dir)) ? $dir : Helper::getPathApp());
         $composer = file_get_contents(Helper::fileSearchRecursive('composer.json', $dir));
         $composer = json_decode($composer, true);
         return str_replace('\\', '', key($composer['autoload']['psr-4']));
     }
 
-    public static function getPhpUser() {
+    public static function getPhpUser()
+    {
         $uid = posix_getuid();
         $userinfo = posix_getpwuid($uid);
         return $userinfo;
     }
 
     // Define uma função que poderá ser usada para validar e-mails usando regexp
-    public static function validaEmail($email) {
+    public static function validaEmail($email)
+    {
         //return
         $er = "/^(([0-9a-zA-Z]+[-._+&])*[0-9a-zA-Z]+@([-0-9a-zA-Z]+[.])+[a-zA-Z]{2,6}){0,1}$/";
         if (preg_match($er, $email)) {
@@ -860,7 +912,8 @@ class Helper {
      * @param type $data
      * @return boolean
      */
-    public static function isBase64Encoded($string) {
+    public static function isBase64Encoded($string)
+    {
         if (preg_match('%^[a-zA-Z0-9/+]*={0,2}$%', $string)) {
             return true;
         } else {
@@ -868,7 +921,8 @@ class Helper {
         }
     }
 
-    public static function decimalFormat($var) {
+    public static function decimalFormat($var)
+    {
         if (stripos($var, ',') > -1) { // se achar virgula, veio da view, com formato. da base, nao vem virgula
             $var = self::parseInt($var);
             $var = substr($var, 0, strlen($var) - 2) . "." . substr($var, strlen($var) - 2, 2);
@@ -883,7 +937,8 @@ class Helper {
      * @param int $totalRegs total de registros do request
      * @return array
      */
-    public static function pagination(int $atualPage, int $limitPerPage, int $totalRegs): array {
+    public static function pagination(int $atualPage, int $limitPerPage, int $totalRegs): array
+    {
         $ret = [];
         $ret['atualPage'] = $atualPage;
         $ret['nextPage'] = ((($limitPerPage * ($atualPage + 1)) < $totalRegs) ? ($atualPage + 1) : false);
@@ -892,4 +947,28 @@ class Helper {
         return $ret;
     }
 
+    /**
+     * Método que converte um array php para o formato ".env" files
+     *
+     * @param array $config
+     * @return array
+     */
+    public static function array2env(array $config)
+    {
+
+        $out = [];
+        foreach ($config as $key => $value) {
+
+            if (is_array($value)) {
+                $out[] = "\n[$key]";
+                $temp = self::array2env($value);
+                $out[] = implode("\t\n", $temp);
+                $out[] = "\n";
+            }
+
+            $out[] = "$key=\"$value\"";
+        }
+
+        return $out;
+    }
 }
