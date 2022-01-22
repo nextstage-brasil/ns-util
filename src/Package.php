@@ -2,13 +2,14 @@
 
 namespace NsUtil;
 
-class Package {
+class Package
+{
 
     static $zipExcluded = '';
     private static $urlLocalApplication = '';
 
-    public function __construct() {
-        
+    public function __construct()
+    {
     }
 
     /**
@@ -16,11 +17,13 @@ class Package {
      * @param string $urlLocalApplication URL local da aplicação (Completo, ex.: http://localhost:5088). Default: https://localhost/{PATH_APP}
      * @return void
      */
-    public static function setUrlLocalApplication(string $urlLocalApplication = ''): void {
+    public static function setUrlLocalApplication(string $urlLocalApplication = ''): void
+    {
         self::$urlLocalApplication = $urlLocalApplication;
     }
 
-    public static function setVersion($file, $message = 'version/version', $major = 0, $minor = 0, $path = 0) {
+    public static function setVersion($file, $message = 'version/version', $major = 0, $minor = 0, $path = 0)
+    {
         if (!file_exists($file)) {
             file_put_contents($file, '1.0.0');
         }
@@ -47,19 +50,18 @@ class Package {
             'version' => "$X.$Y.$Z",
             'version_full' => $versao,
             'path' => $pathNew,
-            'init' => (($init) ? $init . " &&" : ""),
+            'init' => (isset(($init)) ? $init . " &&" : ""),
             'bat' => ""
-            . (($init) ? $init . " &&" : "")
-            . " cd $pathNew &&"
-            . " git add .  &&"
-            . " git commit -m \"$message\" && "
-            . " git tag $X.$Y.$Z HEAD &&"
-//            . " git push --tags &&"
-//            . "echo \"VERSAO CRIADA E COMMITADA. TAG CRIADA.\""
-            . "timeout /t 10"
-            ,
+                . (isset(($init)) ? $init . " &&" : "")
+                . " cd $pathNew &&"
+                . " git add .  &&"
+                . " git commit -m \"$message\" && "
+                . " git tag $X.$Y.$Z HEAD &&"
+                //            . " git push --tags &&"
+                //            . "echo \"VERSAO CRIADA E COMMITADA. TAG CRIADA.\""
+                . "timeout /t 10",
             'git' => [
-                'local' => $init,
+                'local' => (isset(($init)) ? true : false),
                 'cd' => "cd $pathNew",
                 'add' => "git add . ",
                 'commit' => "git commit -m \"$message\" ",
@@ -70,11 +72,12 @@ class Package {
         ];
     }
 
-    public static function git($file, $message = 'version/version', $major = 0, $minor = 0, $path = 0) {
+    public static function git($file, $message = 'version/version', $major = 0, $minor = 0, $path = 0)
+    {
         $ret = self::setVersion($file, $message, $major, $minor, $path);
-//        $template = implode(PHP_EOL, $ret['git']);
-//        $filegit = $ret['path'] . '/__git.bat';
-//        Helper::saveFile($filegit, false, $template, 'SOBREPOR');
+        //        $template = implode(PHP_EOL, $ret['git']);
+        //        $filegit = $ret['path'] . '/__git.bat';
+        //        Helper::saveFile($filegit, false, $template, 'SOBREPOR');
         shell_exec($ret['bat']);
     }
 
@@ -86,11 +89,12 @@ class Package {
      * @param string $ioncube_post Path para salvar o .bat de post-encoded para ioncube
      * @param string $patch7zip Path para o aplicativo de ZIP
      */
-    public static function run(string $origem,
-            array $excluded_x,
-            string $dirOutput,
-            string $ioncube_post,
-            string $patch7zip = 'C:\Program Files\7-Zip\7z.exe'
+    public static function run(
+        string $origem,
+        array $excluded_x,
+        string $dirOutput,
+        string $ioncube_post,
+        string $patch7zip = 'C:\Program Files\7-Zip\7z.exe'
     ) {
         if (Helper::getSO() !== 'windows') {
             die('ERROR: Este método é exclusivo para uso em ambiente Windows');
@@ -111,18 +115,18 @@ class Package {
         // versao
         //X é a versão Maior, Y é a versão Menor, e Z é a versão de Correção.
         $file = $fontes . '/version';
-        self::setVersion($file);
-//        if (!file_exists($file)) {
-//            file_put_contents($file, '1.0.0');
-//        }
-//        $v = explode('.', file_get_contents($file));
-//        $X = filter_var($v[0], FILTER_SANITIZE_NUMBER_INT);
-//        $Y = $v[1];
-//        $Z = (int) $v[2] + 1;
-//        $Z = (int) $v[2];
-//        $D = date('c');
-//        $versao = "$X.$Y.$Z." . date('YmdHi');
-//        file_put_contents($file, $versao);
+        $versao = self::setVersion($file)['version_full'];
+        //        if (!file_exists($file)) {
+        //            file_put_contents($file, '1.0.0');
+        //        }
+        //        $v = explode('.', file_get_contents($file));
+        //        $X = filter_var($v[0], FILTER_SANITIZE_NUMBER_INT);
+        //        $Y = $v[1];
+        //        $Z = (int) $v[2] + 1;
+        //        $Z = (int) $v[2];
+        //        $D = date('c');
+        //        $versao = "$X.$Y.$Z." . date('YmdHi');
+        //        file_put_contents($file, $versao);
         // composer
         if (file_exists($origem . '/composer.json')) {
             echo " - Atualizando pacotes via composer ...";
@@ -214,7 +218,7 @@ class Package {
             'app/',
             'test/',
             '.gitlab/'
-                ], $excluded_x);
+        ], $excluded_x);
         $ex = $exCI = '';
         $command = '"' . $patch7zip . '"' . ' a ' . $zip . ' ' . $fontes . '\* ';
         foreach ($excluded_xr as $item) {
@@ -228,8 +232,8 @@ class Package {
 
         // Salvar o comando para gerar o ZIP limpo tbem no CI
         self::$zipExcluded = (object) [
-                    'zipCi' => 'zip -qr $CI_COMMIT_SHA.zip . ' . $exCI,
-                    'ex' => $exCI
+            'zipCi' => 'zip -qr $CI_COMMIT_SHA.zip . ' . $exCI,
+            'ex' => $exCI
         ];
         Helper::saveFile("$origem/$build/install/deploy/zip/zipCommandToCI.sh", false, self::$zipExcluded->zipCi, 'SOBREPOR');
 
@@ -273,8 +277,8 @@ class Package {
         return $projectName;
     }
 
-    static function getZipExcluded() {
+    static function getZipExcluded()
+    {
         return self::$zipExcluded;
     }
-
 }
