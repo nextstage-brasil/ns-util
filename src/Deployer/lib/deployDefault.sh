@@ -81,14 +81,14 @@ chmod 0777 "$DIR/app" -R
 # Licenciamento e config
 # cp ${DIR}/cs_licence ${RELEASE}/.cs_licence.bkp
 # cp ${DIR}/cscfg ${RELEASE}/.cscfg.bkp
-if [ -f "${DIR}/.env"]; then
+if [ -f "${DIR}/.env" ]; then
     echo "- Arquivo de configuração"
     cp ${DIR}/.env $RELEASE/.env
 fi
 
 
 # crontab
-if [ -f "$DIR/www/cron/crontab"] && [ "${INSTALL_CRONTAB}" = "yes"]; then
+if [ -f "$DIR/www/cron/crontab" ] && [ "${INSTALL_CRONTAB}" = "yes" ]; then
     echo "- Atualizar crontab"
     chmod -R 0775 "$RELEASE/cron"
     crontab -l -u ${OWNER} | echo "" | crontab -u ${OWNER} -
