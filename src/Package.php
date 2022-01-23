@@ -209,7 +209,8 @@ class Package
             'info.php',
             '*teste.php',
             '*composer.lock*',
-            '.env*'
+            '.env*', 
+            '*serverless*'
         ];
         $excluded_x = array_merge([
             'sch.php',
