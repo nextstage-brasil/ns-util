@@ -81,6 +81,10 @@ chmod 0777 "$DIR/app" -R
 # Licenciamento e config
 # cp ${DIR}/cs_licence ${RELEASE}/.cs_licence.bkp
 # cp ${DIR}/cscfg ${RELEASE}/.cscfg.bkp
+if [ -f "../../.env"]; then
+    ln -nfs "../../.env" "$RELEASE/.env"
+fi
+
 
 # crontab
 if [ -f "$DIR/www/cron/crontab"] && [ "${INSTALL_CRONTAB}" = "yes"]; then
