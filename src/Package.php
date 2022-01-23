@@ -199,6 +199,7 @@ class Package
             '*nbproject*',
             '*.gitignore*',
             '*XPTO*',
+            '*__NEW__*', 
             '*_OLD*',
             '*/samples/*',
             '*/docs/*',
@@ -208,6 +209,7 @@ class Package
             'info.php',
             '*teste.php',
             '*composer.lock*',
+            '.env*'
         ];
         $excluded_x = array_merge([
             'sch.php',

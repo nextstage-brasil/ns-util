@@ -81,8 +81,9 @@ chmod 0777 "$DIR/app" -R
 # Licenciamento e config
 # cp ${DIR}/cs_licence ${RELEASE}/.cs_licence.bkp
 # cp ${DIR}/cscfg ${RELEASE}/.cscfg.bkp
-if [ -f "../../.env"]; then
-    ln -nfs "../../.env" "$RELEASE/.env"
+if [ -f "${DIR}/.env"]; then
+    echo "- Arquivo de configuração"
+    cp ${DIR}/.env $RELEASE/.env
 fi
 
 
