@@ -33,13 +33,13 @@ class Package {
         $Z = (int) filter_var($v[2], FILTER_SANITIZE_NUMBER_INT);
 
         if ($exp[0] === 'version') {
-            $X += (($major_increment) ? $major_increment : 1);
+            $X += (($major_increment !== null) ? $major_increment : 1);
             $Y = $Z = 1;
         } else if (($exp[0] === 'feature' || $exp[0] === 'release')) {
-            $Y += (($minor_increment) ? $minor_increment : 1);
+            $Y += (($minor_increment !== null) ? $minor_increment : 1);
             $Z = 1;
         } else {
-            $Z += (($path_increment) ? $path_increment : 1);
+            $Z += (($path_increment !== null) ? $path_increment : 1);
         }
 
         $versao = "$X.$Y.$Z." . date('YmdHi');
