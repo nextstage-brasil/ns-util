@@ -2,14 +2,13 @@
 
 namespace NsUtil;
 
-class Package
-{
+class Package {
 
     static $zipExcluded = '';
     private static $urlLocalApplication = '';
 
-    public function __construct()
-    {
+    public function __construct() {
+        
     }
 
     /**
@@ -17,16 +16,21 @@ class Package
      * @param string $urlLocalApplication URL local da aplicação (Completo, ex.: http://localhost:5088). Default: https://localhost/{PATH_APP}
      * @return void
      */
-    public static function setUrlLocalApplication(string $urlLocalApplication = ''): void
-    {
+    public static function setUrlLocalApplication(string $urlLocalApplication = ''): void {
         self::$urlLocalApplication = $urlLocalApplication;
     }
 
-    public static function setVersion($file, $message = 'version/version', $major = 0, $minor = 0, $path = 0)
-    {
+    public static function setVersion($file, $message = 'default/Not defined', $major_increment = null, $minor_increment = null, $path_increment = null) {
         if (!file_exists($file)) {
             file_put_contents($file, '1.0.0');
         }
+
+        // $versionamento com base nas mensagens
+        $exp = explode('/', $message);
+        $major = (int) (($exp[0] === 'version' && is_null($major_increment)) ? 1 : $major_increment);
+        $minor = (int) (( ($exp[0] === 'feature' || $exp[0] === 'release') && is_null($minor_increment)) ? 1 : $minor_increment);
+        $path = (int) ((is_null($path_increment)) ? 1 : $path_increment);
+
         $v = explode('.', file_get_contents($file));
         $X = filter_var($v[0], FILTER_SANITIZE_NUMBER_INT) + $major;
         $Y = $v[1] + $minor;
@@ -36,33 +40,33 @@ class Package
         file_put_contents($file, $versao);
 
         // GIT
-        $path = $file;
-        Helper::directorySeparator($path);
-        $itens = explode(DIRECTORY_SEPARATOR, $path);
+        $path_version = $file;
+        Helper::directorySeparator($path_version);
+        $itens = explode(DIRECTORY_SEPARATOR, $path_version);
         array_pop($itens);
-        $pathNew = implode(DIRECTORY_SEPARATOR, $itens);
+        $path_versionNew = implode(DIRECTORY_SEPARATOR, $itens);
 
         if (Helper::getSO() === 'windows') {
-            $init = substr($pathNew, 0, 2);
+            $init = substr($path_versionNew, 0, 2);
         }
 
         return [
             'version' => "$X.$Y.$Z",
             'version_full' => $versao,
-            'path' => $pathNew,
+            'path' => $path_versionNew,
             'init' => (isset(($init)) ? $init . " &&" : ""),
             'bat' => ""
-                . (isset(($init)) ? $init . " &&" : "")
-                . " cd $pathNew &&"
-                . " git add .  &&"
-                . " git commit -m \"$message\" && "
-                . " git tag $X.$Y.$Z HEAD &&"
-                //            . " git push --tags &&"
-                //            . "echo \"VERSAO CRIADA E COMMITADA. TAG CRIADA.\""
-                . "timeout /t 10",
+            . (isset(($init)) ? $init . " &&" : "")
+            . " cd $path_versionNew &&"
+            . " git add .  &&"
+            . " git commit -m \"$message\" && "
+            . " git tag $X.$Y.$Z HEAD &&"
+            //            . " git push --tags &&"
+            //            . "echo \"VERSAO CRIADA E COMMITADA. TAG CRIADA.\""
+            . "timeout /t 10",
             'git' => [
                 'local' => (isset(($init)) ? true : false),
-                'cd' => "cd $pathNew",
+                'cd' => "cd $path_versionNew",
                 'add' => "git add . ",
                 'commit' => "git commit -m \"$message\" ",
                 'tag' => "git tag -a $X.$Y.$Z HEAD",
@@ -72,8 +76,7 @@ class Package
         ];
     }
 
-    public static function git($file, $message = 'version/version', $major = 0, $minor = 0, $path = 0)
-    {
+    public static function git($file, $message = 'default/Not defined', $major = null, $minor = null, $path = null) {
         $ret = self::setVersion($file, $message, $major, $minor, $path);
         //        $template = implode(PHP_EOL, $ret['git']);
         //        $filegit = $ret['path'] . '/__git.bat';
@@ -90,11 +93,11 @@ class Package
      * @param string $patch7zip Path para o aplicativo de ZIP
      */
     public static function run(
-        string $origem,
-        array $excluded_x,
-        string $dirOutput,
-        string $ioncube_post,
-        string $patch7zip = 'C:\Program Files\7-Zip\7z.exe'
+            string $origem,
+            array $excluded_x,
+            string $dirOutput,
+            string $ioncube_post,
+            string $patch7zip = 'C:\Program Files\7-Zip\7z.exe'
     ) {
         if (Helper::getSO() !== 'windows') {
             die('ERROR: Este método é exclusivo para uso em ambiente Windows');
@@ -112,21 +115,10 @@ class Package
         $t = explode(DIRECTORY_SEPARATOR, $fontes);
         $projectName = mb_strtolower(array_pop($t));
 
-        // versao
-        //X é a versão Maior, Y é a versão Menor, e Z é a versão de Correção.
+        // versao: nunca irá incrementar além da data e hora
         $file = $fontes . '/version';
-        $versao = self::setVersion($file)['version_full'];
-        //        if (!file_exists($file)) {
-        //            file_put_contents($file, '1.0.0');
-        //        }
-        //        $v = explode('.', file_get_contents($file));
-        //        $X = filter_var($v[0], FILTER_SANITIZE_NUMBER_INT);
-        //        $Y = $v[1];
-        //        $Z = (int) $v[2] + 1;
-        //        $Z = (int) $v[2];
-        //        $D = date('c');
-        //        $versao = "$X.$Y.$Z." . date('YmdHi');
-        //        file_put_contents($file, $versao);
+        $versao = self::setVersion($file, 'default/Package', 0, 0, 0)['version_full'];
+
         // composer
         if (file_exists($origem . '/composer.json')) {
             echo " - Atualizando pacotes via composer ...";
@@ -199,7 +191,7 @@ class Package
             '*nbproject*',
             '*.gitignore*',
             '*XPTO*',
-            '*__NEW__*', 
+            '*__NEW__*',
             '*_OLD*',
             '*/samples/*',
             '*/docs/*',
@@ -208,8 +200,8 @@ class Package
             '*/demo/*',
             'info.php',
             '*teste.php',
-            '*composer.lock*',
-            '.env*', 
+//            '*composer.lock*',
+            '*.env',
             '*serverless*'
         ];
         $excluded_x = array_merge([
@@ -221,7 +213,7 @@ class Package
             'app/',
             'test/',
             '.gitlab/'
-        ], $excluded_x);
+                ], $excluded_x);
         $ex = $exCI = '';
         $command = '"' . $patch7zip . '"' . ' a ' . $zip . ' ' . $fontes . '\* ';
         foreach ($excluded_xr as $item) {
@@ -235,8 +227,8 @@ class Package
 
         // Salvar o comando para gerar o ZIP limpo tbem no CI
         self::$zipExcluded = (object) [
-            'zipCi' => 'zip -qr $CI_COMMIT_SHA.zip . ' . $exCI,
-            'ex' => $exCI
+                    'zipCi' => 'zip -qr $CI_COMMIT_SHA.zip . ' . $exCI,
+                    'ex' => $exCI
         ];
         Helper::saveFile("$origem/$build/install/deploy/zip/zipCommandToCI.sh", false, self::$zipExcluded->zipCi, 'SOBREPOR');
 
@@ -280,8 +272,8 @@ class Package
         return $projectName;
     }
 
-    static function getZipExcluded()
-    {
+    static function getZipExcluded() {
         return self::$zipExcluded;
     }
+
 }
