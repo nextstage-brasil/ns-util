@@ -272,7 +272,7 @@ class Api {
         }
         $this->responseMerge([
             'status' => $this->responseCode,
-            'timeElapsed' => $this->eficiencia->end()->time,
+            'elapsedTime' => $this->eficiencia->end()->time,
         ]);
 
         // Sanitização
