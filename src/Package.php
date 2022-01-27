@@ -20,21 +20,27 @@ class Package {
         self::$urlLocalApplication = $urlLocalApplication;
     }
 
-    public static function setVersion($file, $message = 'default/Not defined', $major_increment = null, $minor_increment = null, $path_increment = null) {
+    public static function setVersion($file, $message = 'default/Not defined', int $major_increment = null, int $minor_increment = null, int $path_increment = null) {
         if (!file_exists($file)) {
             file_put_contents($file, '1.0.0');
         }
 
         // $versionamento com base nas mensagens
         $exp = explode('/', $message);
-        $major = (int) (($exp[0] === 'version' && is_null($major_increment)) ? 1 : $major_increment);
-        $minor = (int) (( ($exp[0] === 'feature' || $exp[0] === 'release') && is_null($minor_increment)) ? 1 : $minor_increment);
-        $path = (int) ((is_null($path_increment)) ? 1 : $path_increment);
-
         $v = explode('.', file_get_contents($file));
-        $X = filter_var($v[0], FILTER_SANITIZE_NUMBER_INT) + $major;
-        $Y = $v[1] + $minor;
-        $Z = (int) $v[2] + $path;
+        $X = (int) filter_var($v[0], FILTER_SANITIZE_NUMBER_INT);
+        $Y = (int) filter_var($v[1], FILTER_SANITIZE_NUMBER_INT);
+        $Z = (int) filter_var($v[2], FILTER_SANITIZE_NUMBER_INT);
+
+        if ($exp[0] === 'version') {
+            $X += (($major_increment) ? $major_increment : 1);
+            $Y = $Z = 1;
+        } else if (($exp[0] === 'feature' || $exp[0] === 'release')) {
+            $Y += (($minor_increment) ? $minor_increment : 1);
+            $Z = 1;
+        } else {
+            $Z += (($path_increment) ? $path_increment : 1);
+        }
 
         $versao = "$X.$Y.$Z." . date('YmdHi');
         file_put_contents($file, $versao);
