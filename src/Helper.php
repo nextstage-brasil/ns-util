@@ -356,8 +356,8 @@ class Helper {
                     'content' => $body,
                     'errorCode' => curl_errno($ch),
                     'error' => ((curl_error($ch)) ? curl_error($ch) : curl_errno($ch)),
-                    'status' => curl_getinfo($ch)['http_code'],
-                    'http_code' => curl_getinfo($ch)['http_code'],
+                    'status' => (int) curl_getinfo($ch)['http_code'],
+                    'http_code' => (int) curl_getinfo($ch)['http_code'],
                     'headers' => $headers,
                     'url' => $urlInfo
         ];
