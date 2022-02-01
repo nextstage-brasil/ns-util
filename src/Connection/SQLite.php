@@ -153,7 +153,7 @@ class SQLite {
      * @return boolean
      * @throws SistemaException
      */
-    public function insert($table, $array, $nomeCpoId, $onConflict = '') {
+    public function insert($table, $array, $nomeCpoId, $onConflict = null) {
         $preValues = $update = $valores = [];
         foreach ($array as $key => $value) {
             $keys[] = $key;
@@ -161,7 +161,7 @@ class SQLite {
             $valores[] = $value;
         }
         $query = "INSERT INTO $table (" . implode(',', $keys) . ") VALUES (" . implode(',', $preValues) . ")"
-        //. (($onConflict) ? " $onConflict " : "")
+        . ((isset($onConflict)) ? " $onConflict " : "")
         //. " returning $nomeCpoId as nsnovoid"
         ;
         $this->open();
