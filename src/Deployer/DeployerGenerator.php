@@ -181,7 +181,7 @@ timeout /t 15";
         - scp -p ' . $sshDeployerFilename . ' ' . $sshUserDeployer . '@' . $sshHost . ':' . $sshPath . '/build/deploy.sh
         - ssh ' . $sshUserDeployer . '@' . $sshHost . ' "' . $item['sudo'] . 'chmod +x ' . $sshPath . '/build/deploy.sh"
         # Executar instalação
-        - ssh ' . $sshUserDeployer . '@' . $sshHost . ' "' . $item['sudo'] . ' tr -d \'\r\' < ' . $sshPath . '/build/deploy.sh > ' . $sshPath . '/build/deploy.sh"
+        ### - ssh ' . $sshUserDeployer . '@' . $sshHost . ' "' . $item['sudo'] . ' tr -d \'\r\' < ' . $sshPath . '/build/deploy.sh > ' . $sshPath . '/build/deploy.sh"
         - ssh ' . $sshUserDeployer . '@' . $sshHost . ' "' . $item['sudo'] . 'sh ' . $sshPath . '/build/deploy.sh"        
 ';
     }
