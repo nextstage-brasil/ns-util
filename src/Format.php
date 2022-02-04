@@ -114,6 +114,10 @@ class Format {
         return substr($cep, 0, 5) . '-' . substr($cep, 5, 8);
     }
 
+    /**
+     * Retorna o valor ABS da string formatada em decimal americano
+     * @return string
+     */
     public function decimal() {
         $var = self::parseInt($this->string);
         $var = substr($var, 0, strlen($var) - 2) . "." . substr($var, strlen($var) - 2, 2);

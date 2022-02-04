@@ -167,7 +167,7 @@ class Api {
             header('Content-Type:application/json');
         }
 
-        echo json_encode($this->responseData);
+        echo json_encode($this->responseData, JSON_UNESCAPED_SLASHES);
         die();
     }
 
