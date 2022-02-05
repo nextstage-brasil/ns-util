@@ -18,8 +18,6 @@ class Api {
             header('Content-Type:application/json');
         }
         
-        
-        header('Content-Type:application/json');
         // Obtenção dos headers. Chaves sempre minusculas
         $this->headers = $this->getAllHeaders();
 
