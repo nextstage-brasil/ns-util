@@ -13,7 +13,13 @@ class Api {
     private $router;
     private $simpleReturn = false; // Utilizado para deinfir se aapenas retornar o conteudo ou encerrar a aplicação
 
-    public function __construct() {
+    public function __construct($typeOut = 'json') {
+        if ($type === 'json') {
+            header('Content-Type:application/json');
+        }
+        
+        
+        header('Content-Type:application/json');
         // Obtenção dos headers. Chaves sempre minusculas
         $this->headers = $this->getAllHeaders();
 
@@ -142,7 +148,7 @@ class Api {
      * @param array $response
      * @param int $responseCode
      */
-    public function response(array $response = [], int $responseCode = 0, $type = 'json') {
+    public function response(array $response = [], int $responseCode = 0) {
         // Setar o codigo final de saida
         if ($responseCode > 0) {
             $this->responseCode = $responseCode;
@@ -163,9 +169,9 @@ class Api {
 
         // Saida
         http_response_code($this->responseCode);
-        if ($type === 'json') {
-            header('Content-Type:application/json');
-        }
+//        if ($type === 'json') {
+//            header('Content-Type:application/json');
+//        }
 
         echo json_encode($this->responseData, JSON_UNESCAPED_SLASHES);
         die();
