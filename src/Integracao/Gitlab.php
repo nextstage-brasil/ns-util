@@ -222,13 +222,6 @@ class Gitlab {
         $tarefasPadrao = [];
         foreach ($data['cards'] as $chaveItem => $item) {
 
-            /*
-              // @rever
-              if ($item['list_name'] !== 'Versão 2.11.11') {
-              //echo $item['list_name'] . PHP_EOL;
-              continue;
-              }
-              /* */
 
             // Ignorar as listas do trello arquivadas...
             if ($ignoreClosedList && ($item['list_state'] !== 'opened' || $item['card_state'] !== 'opened')) {
