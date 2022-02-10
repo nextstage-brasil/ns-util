@@ -17,7 +17,7 @@ class Api {
         if ($type === 'json') {
             header('Content-Type:application/json');
         }
-        
+
         // Obtenção dos headers. Chaves sempre minusculas
         $this->headers = $this->getAllHeaders();
 
@@ -41,8 +41,6 @@ class Api {
                 break;
             default:
         }
-
-
 
         Helper::recebeDadosFromView($this->body);
 
@@ -70,6 +68,24 @@ class Api {
                 'idFromRoute' => (int) $router->getAllParam(3),
             ]),
         ];
+
+        // Definições API Rest
+        switch ($metodo) {
+            case 'GET':
+                if (!$this->config['rest']['action']) {
+                    $this->config['rest']['action'] = (($this->rest->id > 0) ? 'read' : 'list');
+                }
+                break;
+            case 'DELETE':
+                $this->config['rest']['action'] = 'delete';
+                break;
+            case 'PUT':
+            case 'POST':
+                $this->config['rest']['action'] = (($this->rest->id > 0) ? 'update' : 'save');
+                break;
+            default:
+                $this->config['rest']['action'] = 'METHOD_NOT_FOUND';
+        }
     }
 
     private function getAllHeaders() {
