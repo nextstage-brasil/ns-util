@@ -298,13 +298,15 @@ class Helper {
      * @return Array
      */
     public static function curlCall($url, $params = [], $method = 'GET', $header = ['Content-Type:application/json'], $ssl = true, int $timeout = 30) {
+        // Remover cookie em excesso
+        $cookiefile = "/tmp/" . md5(date('Ymd')) . '.txt';
         $options = [
             CURLOPT_URL => trim($url),
             CURLOPT_CUSTOMREQUEST => $method,
             CURLOPT_POST => false,
             CURLOPT_USERAGENT => 'Mozilla/5.0 (Windows NT 6.1; rv:8.0) Gecko/20100101 Firefox/8.0', //set user agent
-            CURLOPT_COOKIEFILE => "/tmp/nsutil-curl-cookie.txt",
-            CURLOPT_COOKIEJAR => "/tmp/nsutil-curl-cookiejar.txt", //set cookie 
+            CURLOPT_COOKIEFILE => $cookiefile,
+            CURLOPT_COOKIEJAR => $cookiefile,
             CURLOPT_RETURNTRANSFER => true, // return web page
             CURLOPT_FOLLOWLOCATION => true, // follow redirects
             CURLOPT_ENCODING => "", // handle all encodings
