@@ -73,7 +73,7 @@ class Api {
         switch ($metodo) {
             case 'GET':
                 if (!$this->config['rest']['action']) {
-                    $this->config['rest']['action'] = (($this->rest->id > 0) ? 'read' : 'list');
+                    $this->config['rest']['action'] = (($this->config['rest']['id'] > 0) ? 'read' : 'list');
                 }
                 break;
             case 'DELETE':
@@ -81,7 +81,7 @@ class Api {
                 break;
             case 'PUT':
             case 'POST':
-                $this->config['rest']['action'] = (($this->rest->id > 0) ? 'update' : 'save');
+                $this->config['rest']['action'] = (($this->config['rest']['id'] > 0) ? 'update' : 'save');
                 break;
             default:
                 $this->config['rest']['action'] = 'METHOD_NOT_FOUND';
