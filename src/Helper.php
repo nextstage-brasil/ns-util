@@ -274,19 +274,21 @@ class Helper {
 
     /**
      * Permite o uso em ambientes com SSL
+     * 
      * @param type $url
+     * @param bool $ssl Tru or false para validação de SSL. Default false
+     * @param int $timeout Timeout da chamada. Default 30 segundos
      * @return type
      */
-    public static function myFileGetContents($url) {
-        $config = array(
-            "ssl" => array(
-                "verify_peer" => false,
-                "verify_peer_name" => false,
-            ),
-        );
-
+    public static function myFileGetContents(string $url, bool $ssl = false, int $timeout = 30) {
+        $config = [
+            'timeout' => $timeout,
+            'ssl' => [
+                'verify_peer' => $ssl,
+                'verify_peer_name' => $ssl
+            ]
+        ];
         $context = stream_context_create($config);
-
         return file_get_contents($url, false, $context);
     }
 
