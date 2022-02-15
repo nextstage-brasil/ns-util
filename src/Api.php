@@ -41,7 +41,8 @@ class Api {
                 break;
             default:
         }
-
+        
+        $bodyOrigin = $this->body;
         Helper::recebeDadosFromView($this->body);
 
         $this->eficiencia = new \NsUtil\Eficiencia();
@@ -58,6 +59,7 @@ class Api {
                 'resource' => (string) $router->getAllParam(1),
                 'action' => (string) $router->getAllParam(3),
             ],
+            'bodyOrigin' => $bodyOrigin,
             'headers' => $this->getHeaders(),
             'rota' => $router->getAllParam(1) . (($router->getAllParam(2)) ? '/' . $router->getAllParam(2) : ''), // '/' . $router->getAllParam(2),
             'acao' => 'ws_' . $router->getAllParam(2),
