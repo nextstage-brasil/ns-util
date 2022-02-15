@@ -282,7 +282,9 @@ class Helper {
      */
     public static function myFileGetContents(string $url, bool $ssl = false, int $timeout = 30) {
         $config = [
-            'timeout' => $timeout,
+            'http' => [
+                'timeout' => $timeout
+            ],
             'ssl' => [
                 'verify_peer' => $ssl,
                 'verify_peer_name' => $ssl
