@@ -152,10 +152,18 @@ class Validate {
         foreach ($this->obrigatorios['list'] as $item) {
             $campos[] = ['key' => $item['key'], 'value' => $data[$item['key']], 'msg' => $item['msg'], 'type' => $item['type']];
         }
-        $error = \NsUtil\Helper::validarCamposObrigatorios($campos);
+        $error = $this->getValidadeAsArray($data);
         if (count($error) > 0) {
             $api->error($error);
         }
+    }
+    
+    public function getValidadeAsArray(array $data) : array   {
+         $campos = [];
+        foreach ($this->obrigatorios['list'] as $item) {
+            $campos[] = ['key' => $item['key'], 'value' => $data[$item['key']], 'msg' => $item['msg'], 'type' => $item['type']];
+        }
+        return \NsUtil\Helper::validarCamposObrigatorios($campos);
     }
 
 }
