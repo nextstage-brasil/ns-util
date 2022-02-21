@@ -143,10 +143,19 @@ class Gitlab {
         return $ret->content;
     }
 
+    public function clearSpentTime($issue_iid) {
+        $resource = $this->config->get('rProject') . '/issues/' . $issue_iid . '/reset_spent_time';
+        $data = [];
+        $method = 'POST';
+        $ret = $this->fetch($resource, $data, $method);
+        return $ret;
+    }
+
     public function setSpend($issue_iid, $spend) {
         if (strlen($spend) <= 0) {
             return;
         }
+        $this->clearSpentTime($issue_iid);
         $resource = $this->config->get('rProject') . '/issues/' . $issue_iid . '/add_spent_time';
         $data = ['duration' => $spend];
         $method = 'POST';
@@ -314,11 +323,11 @@ class Gitlab {
             }
 
             // checklists - obter os checlists do card
-            $checklists = array_filter($data['checklists'], function($v) use ($item) {
+            $checklists = array_filter($data['checklists'], function ($v) use ($item) {
                 return $item['id'] === $v['idCard'];
             });
             foreach ($checklists as $checklist) {
-                $checklist['items'] = array_filter($data['checklists_items'], function($v) use ($checklist) {
+                $checklist['items'] = array_filter($data['checklists_items'], function ($v) use ($checklist) {
                     //var_export($v);
                     return $v['idChecklist'] === $checklist['id'];
                 });
