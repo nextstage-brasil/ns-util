@@ -11,7 +11,12 @@ class LoadCSVToArray {
     public function __construct($filename) {
         $this->file = realpath($filename);
     }
+    
+    public function getFile() {
+        return $this->file;
+    }
 
+    
     /**
      * 
      * @param string $file_or_dir Diretorio ou CSV que deve ser ingerido
