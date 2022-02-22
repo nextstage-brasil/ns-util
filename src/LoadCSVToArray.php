@@ -2,6 +2,8 @@
 
 namespace NsUtil;
 
+use Exception;
+
 class LoadCSVToArray {
 
     private $file;
@@ -24,11 +26,12 @@ class LoadCSVToArray {
             if ($ext === 'xlsx') {
                 $ret = shell_exec('type xlsx2csv');
                 if (stripos($ret, 'not found') > -1) {
-                    die("### ATENÇÃO ### \nBiblioteca xlsx2csv não esta instalada. "
+                    $error = "### ATENÇÃO ### \nBiblioteca xlsx2csv não esta instalada. "
                             . "\nPara continuar, execute: 'sudo apt-get update && sudo apt-get install -y xlsx2csv'"
                             . "\n"
                             . "###############"
-                            . "\n\n\n");
+                            . "\n\n\n";
+                    throw new Exception($error);
                 }
                 $t = explode(DIRECTORY_SEPARATOR, $this->file);
                 $csv = '/tmp/' . str_replace('.xlsx', '.csv', array_pop($t));
