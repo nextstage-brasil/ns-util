@@ -25,7 +25,7 @@ class LoadCSVToArray {
             // Caso seja xlsx, converter para CSV usando lib python
             if ($ext === 'xlsx') {
                 $ret = shell_exec('type xlsx2csv');
-                if (stripos($ret, 'not found') > -1) {
+                if (stripos($ret, 'xlsx2csv is') === false) {
                     $error = "### ATENÇÃO ### \nBiblioteca xlsx2csv não esta instalada. "
                             . "\nPara continuar, execute: 'sudo apt-get update && sudo apt-get install -y xlsx2csv'"
                             . "\n"
@@ -45,11 +45,10 @@ class LoadCSVToArray {
         } else {
             throw new Exception('Tipo de arquivo não configurado');
         }
-        
+
         // Converter para UTF-8
         Helper::fileConvertToUtf8($this->file);
-        
-        
+
         if (($handle = fopen($this->file, "r")) !== false) {
             // Definir explode
             $fh = fopen($this->file, "rb");
