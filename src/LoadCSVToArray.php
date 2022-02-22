@@ -42,6 +42,11 @@ class LoadCSVToArray {
         } else {
             throw new Exception('Tipo de arquivo não configurado');
         }
+        
+        // Converter para UTF-8
+        Helper::fileConvertToUtf8($this->file);
+        
+        
         if (($handle = fopen($this->file, "r")) !== false) {
             // Definir explode
             $fh = fopen($this->file, "rb");
