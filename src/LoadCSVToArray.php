@@ -35,12 +35,12 @@ class LoadCSVToArray {
                 }
                 $t = explode(DIRECTORY_SEPARATOR, $this->file);
                 $csv = '/tmp/' . str_replace('.xlsx', '.csv', array_pop($t));
-                $csv_error = shell_exec("xlsx2csv $file $csv");
+                $csv_error = shell_exec("xlsx2csv " . $this->file . " $csv");
                 if (!file_exists($csv)) {
                     $error = 'Ocorreu erro ao converter arquivo XLSX para CSV: ' . $csv_error;
                     throw new Exception($error);
                 }
-                $file = $csv;
+                $this->file = $csv;
             }
         } else {
             throw new Exception('Tipo de arquivo não configurado');
