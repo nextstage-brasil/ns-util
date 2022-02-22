@@ -28,7 +28,7 @@ class LoadCSVToArray {
         $ext = strtolower(pathinfo($this->file, PATHINFO_EXTENSION));
         if (in_array($ext, $types)) {
             // Caso seja xlsx, converter para CSV usando lib python
-            if ($ext === 'xlsx') {
+            if ($ext === 'xlsx' || $ext==='xls') {
                 $ret = shell_exec('type xlsx2csv');
                 if (stripos($ret, 'xlsx2csv is') === false) {
                     $error = "### ATENÇÃO ### \nBiblioteca xlsx2csv não esta instalada. "
