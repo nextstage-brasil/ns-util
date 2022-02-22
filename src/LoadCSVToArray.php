@@ -34,7 +34,7 @@ class LoadCSVToArray {
                     throw new Exception($error);
                 }
                 $t = explode(DIRECTORY_SEPARATOR, $this->file);
-                $csv = '/tmp/' . str_replace('.xlsx', '.csv', array_pop($t));
+                $csv = '/tmp/' . str_ireplace('.xlsx', '.csv', array_pop($t));
                 $csv_error = shell_exec("xlsx2csv " . $this->file . " $csv");
                 if (!file_exists($csv)) {
                     $error = 'Ocorreu erro ao converter arquivo XLSX para CSV: ' . $csv_error;
