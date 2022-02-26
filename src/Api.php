@@ -23,7 +23,7 @@ class Api {
 
         // Obtenção do verbo
         $metodo = $_SERVER['REQUEST_METHOD'];
-        $recurso = explode("/", substr(@$_SERVER['PATH_INFO'], 1));
+        $recurso = explode("/", mb_substr(@$_SERVER['PATH_INFO'], 1));
         $this->body = [];
 
         switch ($metodo) {
@@ -94,7 +94,7 @@ class Api {
         if (!function_exists('getallheaders')) {
             $headers = [];
             foreach ($_SERVER as $name => $value) {
-                if (substr($name, 0, 5) == 'HTTP_') {
+                if (mb_substr($name, 0, 5) == 'HTTP_') {
                     $headers[str_replace(' ', '-', ucwords(strtolower(str_replace('_', ' ', substr($name, 5)))))] = $value;
                 }
             }
@@ -272,7 +272,7 @@ class Api {
      * @return array
      */
     public function getUsernameAndPasswordFromAuthorizationHeaders(): array {
-        $dt = explode(':', base64_decode(substr($this->getHeaders()['Authorization'], 6)));
+        $dt = explode(':', base64_decode(mb_substr($this->getHeaders()['Authorization'], 6)));
         return [
             'username' => $dt[0],
             'password' => $dt[1]

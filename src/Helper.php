@@ -435,7 +435,7 @@ class Helper {
                     unset($dados[$key]);
                     continue;
                 } else {
-                    $dados[$key] = filter_var($value, FILTER_SANITIZE_STRING);
+                    $dados[$key] = Filter::string($value);
                     $dados[$key] = str_replace(['NS21', '&#34;'], ['&', '"'], $dados[$key]);
                 }
                 if (substr($key, 0, 2) === 'id') {
@@ -624,9 +624,10 @@ class Helper {
          */
     }
 
-    public static function getIP() {
+    public static function getIP() : string {
         $var = (($_SERVER['HTTP_X_FORWARDED_FOR']) ? 'HTTP_X_FORWARDED_FOR' : 'REMOTE_ADDR');
-        return filter_input(INPUT_SERVER, $var, FILTER_SANITIZE_STRING);
+        $ip = filter_input(INPUT_SERVER, $var, FILTER_DEFAULT);
+        return Filter::string($ip);
     }
 
     /**
@@ -646,13 +647,13 @@ class Helper {
                     if (stripos($key, 'email') > -1) {
                         $var[$key] = filter_var($value, FILTER_VALIDATE_EMAIL);
                     } else {
-                        $var[$key] = filter_var($value, FILTER_SANITIZE_STRING);
+                        $var[$key] = Filter::string($value);
                     }
                 }
             }
             return $var;
         } else {
-            return filter_var($var, FILTER_SANITIZE_STRING);
+            return Filter::string($var);
         }
     }
 
@@ -796,7 +797,7 @@ class Helper {
                 }
                 break;
             default:
-                $out = filter_var($string, FILTER_SANITIZE_STRING);
+                $out = Filter::string($string);
                 break;
         }
         return $out;
