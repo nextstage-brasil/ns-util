@@ -27,7 +27,7 @@ class S3ZipFiles {
         $this->filename = str_replace('.zip', '', Helper::sanitize($filenameSave)) . '.zip';
         $this->itens = $itens;
         $this->config = [];
-        $path = ((strtoupper(substr(PHP_OS, 0, 3)) === 'WIN') ? 'c:\\tmp' : '/tmp');
+        $path = ((strtoupper(substr((string)PHP_OS, 0, 3)) === 'WIN') ? 'c:\\tmp' : '/tmp');
         $this->setTempPath($path);
     }
 
@@ -59,7 +59,7 @@ class S3ZipFiles {
         if (!$this->config['s3']) {
             die('Configuração S3 não definida (S3Z52)');
         }
-        $dirTemp = $this->config['tmpdir'] . DIRECTORY_SEPARATOR . md5($this->filename);
+        $dirTemp = $this->config['tmpdir'] . DIRECTORY_SEPARATOR . md5((string)$this->filename);
         $tmpZip = $this->config['tmpdir'] . DIRECTORY_SEPARATOR . $this->filename;
         Helper::createTreeDir($dirTemp . '/_tmp');
         //$this->console($dirTemp);

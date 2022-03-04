@@ -38,11 +38,11 @@ class SmbAdapter implements AdapterInterface {
     }
 
     public function getMetadata($path) {
-        if (!$this->pathCache[md5($path)]['type']) {
+        if (!$this->pathCache[md5((string)$path)]['type']) {
             $dir_ret = $this->smbclient->dir('', $path);
             $this->mapFile($dir_ret[0], $path);
         }
-        return $this->pathCache[md5($path)];
+        return $this->pathCache[md5((string)$path)];
     }
 
     public function getMimetype($path) {
@@ -77,11 +77,11 @@ class SmbAdapter implements AdapterInterface {
 
     public function read($path) {
         if ($this->has($path)) {
-            $local = realpath($this->tmp_dir . '/' . md5($path));
+            $local = realpath($this->tmp_dir . '/' . md5((string)$path));
             $this->smbclient->get($path, $local);
-            $this->pathCache[md5($path)]['contents'] = fopen($local, 'r');
+            $this->pathCache[md5((string)$path)]['contents'] = fopen($local, 'r');
             unlink($local);
-            return $this->pathCache[md5($path)];
+            return $this->pathCache[md5((string)$path)];
         } else {
             return false;
         }
@@ -117,14 +117,14 @@ class SmbAdapter implements AdapterInterface {
 
     protected function upload($path, $contents) {
         // salvar o contents em um arquivo local
-        $local = $this->tmp_dir . '/' . md5($path);
+        $local = $this->tmp_dir . '/' . md5((string)$path);
         file_put_contents(realpath($local), $contents);
         unlink($local);
         return $this->smbclient->put($local, $path);
     }
 
     protected function mapFile($returnOfDir, $path) {
-        $this->pathCache[md5($path)] = [
+        $this->pathCache[md5((string)$path)] = [
             'type' => $returnOfDir['isdir'] ? 'dir' : 'file',
             'path' => $returnOfDir['filename'],
             //'contents' => '',
@@ -134,7 +134,7 @@ class SmbAdapter implements AdapterInterface {
             'size' => (int) ((!$returnOfDir['isdir']) ? $returnOfDir['size'] : 0),
             'mimetype' => \NsUtil\Storage\libs\Mimes::getMimeType($returnOfDir['filename'])
         ];
-        return $this->pathCache[md5($path)];
+        return $this->pathCache[md5((string)$path)];
     }
 
     public function download($path, $path_save) {

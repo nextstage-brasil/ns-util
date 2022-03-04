@@ -13,7 +13,7 @@ class Suporte extends Adapter {
         //$this->showLogs = true;
         $this->usuarioNome = $usuarioNome;
         $this->licencaSuporte = $licencaSuporte;
-        $this->sessionName = md5($endpoint . $appkey . $usuarioNome . $licencaSuporte);
+        $this->sessionName = md5((string)$endpoint . $appkey . $usuarioNome . $licencaSuporte);
         parent::__construct($endpoint, $appkey);
     }
 

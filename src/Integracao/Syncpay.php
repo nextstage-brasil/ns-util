@@ -35,7 +35,7 @@ class Syncpay extends Adapter {
             'emailEmpresa' => $email,
             'extrasEmpresa' => json_encode(["permisso" => $licencaPermisso, "cnpj" => $cnpj])
                 ]);
-        if (strlen($ret->content->AppKey) > 0) {
+        if (strlen((string)$ret->content->AppKey) > 0) {
             return ['error' => false, 'appkey' => $ret->content->AppKey];
         } else {
             return ['error' => $ret->error];

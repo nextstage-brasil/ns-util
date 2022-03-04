@@ -43,7 +43,7 @@ class Html {
     public static function inputDatePickerDependente($label, $model, $minDate = false, $maxDate = false, $ngChange = false, $readonly = true) {
         $readonly = (($readonly) ? ' readonly="true"' : '');
         return self::input([
-                    'id' => md5($model),
+                    'id' => md5((string)$model),
                     'ng-if' => '!' . $model . '_ro',
                     'readonly' => $model . '_ro',
                     'name' => $model,

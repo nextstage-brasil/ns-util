@@ -32,7 +32,7 @@ class Format {
     public function date($escolha = 'arrumar', $datahora = false, $alterarTimeZone = false) {
         $data = $this->string;
         if ($data !== 'NOW') {
-            if (strlen($data) < 6) {
+            if (strlen((string)$data) < 6) {
                 return '';
             }
             $data = str_replace('"', '', $data);
@@ -44,9 +44,9 @@ class Format {
                 $data = $t[0];
                 $hora = $t[1];
             }
-            $c = (string) substr($data, 2, 1);
+            $c = (string) substr((string)$data, 2, 1);
             if (!is_numeric($c)) {
-                $data = substr($data, 6, 4) . '-' . substr($data, 3, 2) . '-' . substr($data, 0, 2);
+                $data = substr((string)$data, 6, 4) . '-' . substr((string)$data, 3, 2) . '-' . substr((string)$data, 0, 2);
             }
             $data = $data . 'T' . $hora . '-00:00';
         }
@@ -100,18 +100,18 @@ class Format {
 
     public function fone() {
         $fone = self::parseInt($this->string);
-        $ddd = '(' . substr($fone, 0, 2) . ') ';
-        $fone = substr($fone, 2, strlen($fone) - 2);
-        $out = $ddd . substr($fone, 0, 4) . substr($fone, 4, 8);
-        if (strlen($fone) === 9) { // nono digito
-            $out = $ddd . substr($fone, 0, 5) . substr($fone, 5, 9);
+        $ddd = '(' . substr((string)$fone, 0, 2) . ') ';
+        $fone = substr((string)$fone, 2, strlen((string)$fone) - 2);
+        $out = $ddd . substr((string)$fone, 0, 4) . substr((string)$fone, 4, 8);
+        if (strlen((string)$fone) === 9) { // nono digito
+            $out = $ddd . substr((string)$fone, 0, 5) . substr((string)$fone, 5, 9);
         }
         return $out;
     }
 
     public function cep() {
         $cep = self::parseInt($this->string);
-        return substr($cep, 0, 5) . '-' . substr($cep, 5, 8);
+        return substr((string)$cep, 0, 5) . '-' . substr((string)$cep, 5, 8);
     }
 
     /**
@@ -120,7 +120,7 @@ class Format {
      */
     public function decimal() {
         $var = self::parseInt($this->string);
-        $var = substr($var, 0, strlen($var) - 2) . "." . substr($var, strlen($var) - 2, 2);
+        $var = substr((string)$var, 0, strlen((string)$var) - 2) . "." . substr((string)$var, strlen((string)$var) - 2, 2);
         return $var;
     }
 

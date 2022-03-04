@@ -259,7 +259,7 @@ class ConsoleTable {
     private function getCellOutput($index, $row = null) {
         $cell = $row ? $row[$index] : '-';
         $width = $this->columnWidths[$index];
-        $pad = $row ? $width - mb_strlen($cell, 'UTF-8') : $width;
+        $pad = $row ? ($width - mb_strlen((string)$cell, 'UTF-8')) : $width;
         $padding = str_repeat($row ? ' ' : '-', $this->padding);
 
         $output = '';
@@ -275,7 +275,7 @@ class ConsoleTable {
         $output .= $padding; # left padding
         $cell = trim(preg_replace('/\s+/', ' ', $cell)); # remove line breaks
         $content = preg_replace('#\x1b[[][^A-Za-z]*[A-Za-z]#', '', $cell);
-        $delta = mb_strlen($cell, 'UTF-8') - mb_strlen($content, 'UTF-8');
+        $delta = mb_strlen((string)$cell, 'UTF-8') - mb_strlen((string)$content, 'UTF-8');
         $output .= $this->strPadUnicode($cell, $width + $delta, $row ? ' ' : '-'); # cell content
         $output .= $padding; # right padding
         if ($row && $index == count($row) - 1 && $this->border) {
@@ -295,10 +295,10 @@ class ConsoleTable {
                 foreach ($row as $x => $col) {
                     $content = preg_replace('#\x1b[[][^A-Za-z]*[A-Za-z]#', '', $col);
                     if (!isset($this->columnWidths[$x])) {
-                        $this->columnWidths[$x] = mb_strlen($content, 'UTF-8');
+                        $this->columnWidths[$x] = mb_strlen((string)$content, 'UTF-8');
                     } else {
-                        if (mb_strlen($content, 'UTF-8') > $this->columnWidths[$x]) {
-                            $this->columnWidths[$x] = mb_strlen($content, 'UTF-8');
+                        if (mb_strlen((string)$content, 'UTF-8') > $this->columnWidths[$x]) {
+                            $this->columnWidths[$x] = mb_strlen((string)$content, 'UTF-8');
                         }
                     }
                 }
@@ -313,8 +313,8 @@ class ConsoleTable {
      * @source http://php.net/manual/en/function.str-pad.php
      */
     private function strPadUnicode($str, $padLength, $padString = ' ', $dir = STR_PAD_RIGHT) {
-        $strLen = mb_strlen($str, 'UTF-8');
-        $padStrLen = mb_strlen($padString, 'UTF-8');
+        $strLen = mb_strlen((string)$str, 'UTF-8');
+        $padStrLen = mb_strlen((string)$padString, 'UTF-8');
 
         if (!$strLen && ($dir == STR_PAD_RIGHT || $dir == STR_PAD_LEFT)) {
             $strLen = 1;
@@ -328,16 +328,16 @@ class ConsoleTable {
         $repeat = ceil($strLen - $padStrLen + $padLength);
         if ($dir == STR_PAD_RIGHT) {
             $result = $str . str_repeat($padString, $repeat);
-            $result = mb_substr($result, 0, $padLength, 'UTF-8');
+            $result = mb_substr((string)$result, 0, $padLength, 'UTF-8');
         } elseif ($dir == STR_PAD_LEFT) {
             $result = str_repeat($padString, $repeat) . $str;
-            $result = mb_substr($result, -$padLength, null, 'UTF-8');
+            $result = mb_substr((string)$result, -$padLength, null, 'UTF-8');
         } elseif ($dir == STR_PAD_BOTH) {
             $length = ($padLength - $strLen) / 2;
             $repeat = ceil($length / $padStrLen);
-            $result = mb_substr(str_repeat($padString, $repeat), 0, floor($length), 'UTF-8')
+            $result = mb_substr((string)str_repeat($padString, $repeat), 0, floor($length), 'UTF-8')
                     . $str
-                    . mb_substr(str_repeat($padString, $repeat), 0, ceil($length), 'UTF-8');
+                    . mb_substr((string)str_repeat($padString, $repeat), 0, ceil($length), 'UTF-8');
         }
 
         return $result;

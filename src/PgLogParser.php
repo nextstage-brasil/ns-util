@@ -35,7 +35,7 @@ class PgLogParser {
 
         foreach ($list as $key => $item) {
             $item = str_replace(["\t", "\n"], [' ', ' '], trim($item));
-            if (strlen($item) < 2) {
+            if (strlen((string)$item) < 2) {
                 continue;
             }
             //2020-10-19 09:55:59.487 -03 [4880] ERROR: syntax error at or near ")" at character 1224
@@ -46,7 +46,7 @@ class PgLogParser {
             $data = false;
             try {
                 $str = $datahora[0] . ' ' . $datahora[1];
-                if (strlen($str) > 8) {
+                if (strlen((string)$str) > 8) {
                     $data = $format->setString($str)->date('arrumar', true);
                 }
             } catch (Exception $exc) {

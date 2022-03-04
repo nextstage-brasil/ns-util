@@ -30,7 +30,7 @@ class Table {
             $this->linha = false;
             $this->headTamanho = count($campos);
             $t['elements'] = $campos;
-            $t['id'] = (($idTabela) ? $idTabela : md5(microtime()));
+            $t['id'] = (($idTabela) ? $idTabela : md5((string)microtime()));
             $t['css'] = 'table ' . (($zebra) ? ' table-striped ' : '') . ' ' . $css;
             $this->infiniteScroll = $infinitescroll;
             $this->setHead($t, $head);
@@ -129,7 +129,7 @@ class Table {
             die('ERROR REGISTRADO');
             return false;
         }
-        $idLinha = $idLinha ? $idLinha : substr(md5(date('h-m-s')), 0, 6);
+        $idLinha = $idLinha ? $idLinha : substr((string)md5((string)date('h-m-s')), 0, 6);
         $onClick = (($this->onClick) ? 'ng-click="' . $this->onClick . '"' : '');
         $this->linha .= '<tr ' . $this->foreach . ' id="' . $idLinha . '" class="%$this->css% table-line" ' . $onClick . ''
                 . (($this->menuContexto) ? 'on-long-press="" context-itens="{{' . $this->menuContexto . '}}"' : '')

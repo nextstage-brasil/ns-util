@@ -14,7 +14,7 @@ class Api {
     private $simpleReturn = false; // Utilizado para deinfir se aapenas retornar o conteudo ou encerrar a aplicação
 
     public function __construct($typeOut = 'json') {
-        if ($type === 'json') {
+        if ($typeOut === 'json') {
             header('Content-Type:application/json');
         }
 
@@ -23,7 +23,7 @@ class Api {
 
         // Obtenção do verbo
         $metodo = $_SERVER['REQUEST_METHOD'];
-        $recurso = explode("/", mb_substr(@$_SERVER['PATH_INFO'], 1));
+        $recurso = explode("/", mb_substr((string)@$_SERVER['PATH_INFO'], 1));
         $this->body = [];
 
         switch ($metodo) {
@@ -94,8 +94,8 @@ class Api {
         if (!function_exists('getallheaders')) {
             $headers = [];
             foreach ($_SERVER as $name => $value) {
-                if (mb_substr($name, 0, 5) == 'HTTP_') {
-                    $headers[str_replace(' ', '-', ucwords(strtolower(str_replace('_', ' ', substr($name, 5)))))] = $value;
+                if (mb_substr((string)$name, 0, 5) == 'HTTP_') {
+                    $headers[str_replace(' ', '-', ucwords(strtolower(str_replace('_', ' ', substr((string)$name, 5)))))] = $value;
                 }
             }
             return Helper::filterSanitize($headers);
@@ -272,7 +272,7 @@ class Api {
      * @return array
      */
     public function getUsernameAndPasswordFromAuthorizationHeaders(): array {
-        $dt = explode(':', base64_decode(mb_substr($this->getHeaders()['Authorization'], 6)));
+        $dt = explode(':', base64_decode(mb_substr((string)$this->getHeaders()['Authorization'], 6)));
         return [
             'username' => $dt[0],
             'password' => $dt[1]
@@ -284,7 +284,7 @@ class Api {
      * @return string
      */
     public function getTokenFromAuthorizationHeaders(): string {
-        return (string) substr($this->getHeaders()['Authorization'], 6);
+        return (string) substr((string)$this->getHeaders()['Authorization'], 6);
     }
 
     function getResponseData() {

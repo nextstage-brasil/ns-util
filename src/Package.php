@@ -53,7 +53,7 @@ class Package {
         $path_versionNew = implode(DIRECTORY_SEPARATOR, $itens);
 
         if (Helper::getSO() === 'windows') {
-            $init = substr($path_versionNew, 0, 2);
+            $init = substr((string)$path_versionNew, 0, 2);
         }
 
         return [

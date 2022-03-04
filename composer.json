@@ -13,7 +13,10 @@
     "autoload": {
         "psr-4": {
             "NsUtil\\": "src/"
-        }
+        }, 
+        "files": [
+            "src/functions_include.php"
+        ]
     },
     "authors": [
         {

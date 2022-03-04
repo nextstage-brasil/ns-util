@@ -11,7 +11,7 @@ abstract class Adapter {
         $this->endpoint = $endpoint;
         $this->appkey = $appkey;
         if (!$this->sessionName) {
-            $this->sessionName = md5($endpoint . $appkey);
+            $this->sessionName = md5((string)$endpoint . $appkey);
         }
         $_SESSION[$this->sessionName] = 0;
         if ($autologin) {

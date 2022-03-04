@@ -266,7 +266,7 @@ class Packer {
             do {
                 $word = $unsorted[--$i];
                 if (isset($protected[$word]) /* != null */) {
-                    $_sorted[$protected[$word]] = substr($word, 1);
+                    $_sorted[$protected[$word]] = substr((string)$word, 1);
                     $_protected[$protected[$word]] = true;
                     $this->_count[$word] = 0;
                 }
@@ -288,7 +288,7 @@ class Packer {
             //  we must add the sorted words around them
             do {
                 if (!isset($_sorted[$i]))
-                    $_sorted[$i] = substr($unsorted[$j++], 1);
+                    $_sorted[$i] = substr((string)$unsorted[$j++], 1);
                 $_encoded[$_sorted[$i]] = $values[$i];
             } while (++$i < count($unsorted));
         }
@@ -575,7 +575,7 @@ class ParseMaster {
                 // a simple lookup? (e.g. "$2")
                 if (preg_match($this->INDEXED, $replacement)) {
                     // store the index (used for fast retrieval of matched strings)
-                    $replacement = (int) (substr($replacement, 1)) - 1;
+                    $replacement = (int) (substr((string)$replacement, 1)) - 1;
                 } else { // a complicated lookup (e.g. "Hello $2 $1")
                     // build a function to do the lookup
                     $quote = preg_match($this->QUOTE, $this->_internalEscape($replacement)) ? '"' : "'";
@@ -604,9 +604,9 @@ class ParseMaster {
         // simulate the _patterns.toSTring of Dean
         $regexp = '/';
         foreach ($this->_patterns as $reg) {
-            $regexp .= '(' . substr($reg[self::EXPRESSION], 1, -1) . ')|';
+            $regexp .= '(' . substr((string)$reg[self::EXPRESSION], 1, -1) . ')|';
         }
-        $regexp = substr($regexp, 0, -1) . '/';
+        $regexp = substr((string)$regexp, 0, -1) . '/';
         $regexp .= ($this->ignoreCase) ? 'i' : '';
 
         $string = $this->_escape($string, $this->escapeChar);
@@ -681,9 +681,9 @@ class ParseMaster {
     }
 
     private function _replace_name($match, $offset) {
-        $length = strlen($match[$offset + 2]);
-        $start = $length - max($length - strlen($match[$offset + 3]), 0);
-        return substr($match[$offset + 1], $start, $length) . $match[$offset + 4];
+        $length = strlen((string)$match[$offset + 2]);
+        $start = $length - max($length - strlen((string)$match[$offset + 3]), 0);
+        return substr((string)$match[$offset + 1], $start, $length) . $match[$offset + 4];
     }
 
     private function _replace_encoded($match, $offset) {

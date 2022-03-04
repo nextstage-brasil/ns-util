@@ -113,7 +113,7 @@ class Gitlab {
     public function issueAdd($title, array $data = []) {
         $this->issueSetDateFormat($data);
         $resource = $this->config->get('rProject') . '/issues';
-        $data['title'] = substr($title, 0, 255);
+        $data['title'] = substr((string)$title, 0, 255);
         $method = 'POST';
         try {
             $ret = $this->fetch($resource, $data, $method);
@@ -133,7 +133,7 @@ class Gitlab {
     }
 
     public function setEstimate($issue_iid, $estimate) {
-        if (strlen($estimate) <= 0) {
+        if (strlen((string)$estimate) <= 0) {
             return;
         }
         $resource = $this->config->get('rProject') . '/issues/' . $issue_iid . '/time_estimate';
@@ -152,7 +152,7 @@ class Gitlab {
     }
 
     public function setSpend($issue_iid, $spend) {
-        if (strlen($spend) <= 0) {
+        if (strlen((string)$spend) <= 0) {
             return;
         }
         $this->clearSpentTime($issue_iid);
@@ -360,7 +360,7 @@ class Gitlab {
                 $item['labels'][] = 'Milestone: ' . $titleMilestone;
 
                 // Criar milestone se não existir
-                $msID = md5($titleMilestone);
+                $msID = md5((string)$titleMilestone);
                 if (!$out['milestones'][$msID]) {
                     $ms = $this->milestoneAdd($titleMilestone, '', $depara['milestones']['createOn'], $params['due_date'], $params['due_date']);
                     $out['milestones'][$msID] = $ms['id'];
@@ -423,7 +423,7 @@ class Gitlab {
             default:
                 die('Tipo de local não permitido: ' . $local);
         }
-        if (strlen($startDate) > 0 && $startDate === $dueDate) {
+        if (strlen((string)$startDate) > 0 && $startDate === $dueDate) {
             // Acrescentar 1 dia
             $dt = new \NsUtil\Format($dueDate);
             $dueDate = $dt->setString($dt->date('timestamp') + (60 * 60 * 24))->date('arrumar');

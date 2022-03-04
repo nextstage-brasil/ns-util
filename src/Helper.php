@@ -155,7 +155,7 @@ class Helper {
      */
     public static function reverteName2CamelCase($string): string {
         $out = '';
-        for ($i = 0; $i < strlen($string); $i++) {
+        for ($i = 0; $i < strlen((string) $string); $i++) {
             if ($string[$i] === mb_strtoupper($string[$i]) && $string[$i] !== '.') {
                 $out .= (($i > 0) ? '_' : '');
                 $string[$i] = mb_strtolower($string[$i]);
@@ -303,7 +303,7 @@ class Helper {
      */
     public static function curlCall($url, $params = [], $method = 'GET', $header = ['Content-Type:application/json'], $ssl = true, int $timeout = 30) {
         // Remover cookie em excesso
-        $cookiefile = "/tmp/" . md5(date('Ymd')) . '.txt';
+        $cookiefile = "/tmp/" . md5((string) date('Ymd')) . '.txt';
         $options = [
             CURLOPT_URL => trim($url),
             CURLOPT_CUSTOMREQUEST => $method,
@@ -341,7 +341,7 @@ class Helper {
         //echo 'error: ' . curl_errno($ch);
         // headers
         $header_size = curl_getinfo($ch, CURLINFO_HEADER_SIZE);
-        $body = substr($output, $header_size);
+        $body = substr((string) $output, $header_size);
 
         $headers = [];
         $output = rtrim($output);
@@ -438,7 +438,7 @@ class Helper {
                     $dados[$key] = Filter::string($value);
                     $dados[$key] = str_replace(['NS21', '&#34;'], ['&', '"'], $dados[$key]);
                 }
-                if (substr($key, 0, 2) === 'id') {
+                if (substr((string) $key, 0, 2) === 'id') {
                     $dados[$key] = (int) filter_var($value, FILTER_VALIDATE_INT);
                 }
             }
@@ -484,7 +484,7 @@ class Helper {
                 $cmd = "iconv -f $enc -t utf-8 -o $output $filepath ";
                 //echo $cmd;
                 $ret = shell_exec($cmd);
-                if (strlen($ret) > 0) {
+                if (strlen((string) $ret) > 0) {
                     throw new \Exception("Erro ao converter arquivo $filepath pata UTF-8: " . $ret);
                 }
             }
@@ -536,7 +536,7 @@ class Helper {
                 $out = $t > 0;
                 break;
             default:
-                $out = strlen((string) $value) > 0;
+                $out = strlen((string) (string) $value) > 0;
                 break;
         }
         return $out;
@@ -624,7 +624,7 @@ class Helper {
          */
     }
 
-    public static function getIP() : string {
+    public static function getIP(): string {
         $var = (($_SERVER['HTTP_X_FORWARDED_FOR']) ? 'HTTP_X_FORWARDED_FOR' : 'REMOTE_ADDR');
         $ip = filter_input(INPUT_SERVER, $var, FILTER_DEFAULT);
         return Filter::string($ip);
@@ -641,7 +641,7 @@ class Helper {
                 if (is_array($value)) {
                     $var[$key] = self::filterSanitize($value);
                 } else {
-                    if (substr($key, 0, 2) === 'id') {
+                    if (substr((string) $key, 0, 2) === 'id') {
                         $var[$key] = filter_var($value, FILTER_VALIDATE_INT);
                     }
                     if (stripos($key, 'email') > -1) {
@@ -813,10 +813,10 @@ class Helper {
 
     public static function formatCpfCnpj($var) {
         $var = self::parseInt($var);
-        if (strlen($var) === 11) { // cpf
-            $out = substr($var, 0, 3) . '.' . substr($var, 3, 3) . '.' . substr($var, 6, 3) . '-' . substr($var, 9, 2);
-        } else if (strlen($var) === 14) { // cnpj
-            $out = substr($var, 0, 2) . '.' . substr($var, 2, 3) . '.' . substr($var, 5, 3) . '/' . substr($var, 8, 4) . '-' . substr($var, 12, 2);
+        if (strlen((string) $var) === 11) { // cpf
+            $out = substr((string) $var, 0, 3) . '.' . substr((string) $var, 3, 3) . '.' . substr((string) $var, 6, 3) . '-' . substr((string) $var, 9, 2);
+        } else if (strlen((string) $var) === 14) { // cnpj
+            $out = substr((string) $var, 0, 2) . '.' . substr((string) $var, 2, 3) . '.' . substr((string) $var, 5, 3) . '/' . substr((string) $var, 8, 4) . '-' . substr((string) $var, 12, 2);
         } else {
             $out = $var;
         }
@@ -833,13 +833,13 @@ class Helper {
         $textosan = self::sanitize($texto);
         $inicio = stripos($textosan, $searchsan);
         if ($inicio >= 0) {
-            $trecho = \mb_substr($texto, $inicio, strlen($search));
+            $trecho = \mb_substr((string) $texto, $inicio, strlen((string) $search));
             $texto = \str_replace($trecho, '<span class="ns-highlight-text">' . $trecho . '</span>', $texto);
         }
     }
 
     public static function getPsr4Name($dir = '') {
-        $dir = ((strlen($dir)) ? $dir : Helper::getPathApp());
+        $dir = ((strlen((string) $dir)) ? $dir : Helper::getPathApp());
         $composer = file_get_contents(Helper::fileSearchRecursive('composer.json', $dir));
         $composer = json_decode($composer, true);
         return str_replace('\\', '', key($composer['autoload']['psr-4']));
@@ -878,7 +878,7 @@ class Helper {
     public static function decimalFormat($var) {
         if (stripos($var, ',') > -1) { // se achar virgula, veio da view, com formato. da base, nao vem virgula
             $var = self::parseInt($var);
-            $var = substr($var, 0, strlen($var) - 2) . "." . substr($var, strlen($var) - 2, 2);
+            $var = substr((string) $var, 0, strlen((string) $var) - 2) . "." . substr((string) $var, strlen((string) $var) - 2, 2);
         }
         return $var;
     }
@@ -918,6 +918,46 @@ class Helper {
                 $out[] = "\n";
             }
             $out[] = "$key=\"$value\"";
+        }
+        return $out;
+    }
+
+    /**
+     * Return de icon name
+     * @param type $filename
+     * @return string
+     */
+    public static function getThumbsByFilename(string $filename): string {
+        $t = explode('.', $filename);
+        $extensao = array_pop($t);
+        $out = '';
+        switch (mb_strtoupper($extensao)) {
+            case 'XLSX':
+            case 'XLS':
+                $out = 'file-excel-o';
+                break;
+            case 'PDF':
+                $out = 'file-pdf-o';
+                break;
+            case 'PNG':
+            case 'JPG':
+            case 'GIF':
+            case 'JPEG':
+                $out = 'file-image-o';
+                break;
+            case 'ZIP':
+                $out = 'file-archive-o';
+                break;
+            case 'MP3':
+            case 'AAC':
+                $out = 'file-audio-o';
+                break;
+            case 'AVI':
+            case 'MP4':
+                $out = 'file-video-o';
+                break;
+            default:
+                $out = 'file';
         }
         return $out;
     }

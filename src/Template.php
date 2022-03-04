@@ -125,7 +125,7 @@ class Template {
             $error = error_get_last();
             throw new RuntimeException(
             sprintf(
-                    'Could not write to %s: %s', $target, substr(
+                    'Could not write to %s: %s', $target, substr((string)
                             $error['message'], strpos($error['message'], ':') + 2
                     )
             )
