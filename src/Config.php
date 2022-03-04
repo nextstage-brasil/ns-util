@@ -141,4 +141,17 @@ class Config {
         return self::$data;
     }
 
+    public static function getDBErrors(): array {
+        // Tratamento de erros de banco de dados
+        return [
+            'Undefined column' => 'Erro no sistema. (Cód Erro: ABS1001)',
+            'app_usuario_un' => 'E-mail informado não disponível para uso',
+            '42703' => 'Erro no sistema (DB42703)', // undefined column
+            '23505' => 'Já existe registro com esses dados', // unicidade
+            '23502' => 'Campo obrigatório não informado',
+            'not-null constraint' => 'Verifique campos obrigatórios',
+            'unique constraint' => 'Já existe registro com esses dados'
+        ];
+    }
+
 }
