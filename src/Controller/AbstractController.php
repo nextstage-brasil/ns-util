@@ -6,7 +6,7 @@ class AbstractController {
 
     protected $config;
 
-    public function __construct($url, $token, $config = []) {
+    public function __construct($url, $token, array $config = []) {
         $config['token'] = $token;
         $config['url'] = $url;
         $this->config = new \NsUtil\Config($config);
