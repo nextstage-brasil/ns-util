@@ -2,7 +2,7 @@
 
 namespace NsUtil;
 
-class ErrorHander {
+class ErrorHandler {
 
     private $filename, $applicationName, $printError;
 
