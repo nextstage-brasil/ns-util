@@ -175,7 +175,9 @@ class Helper {
         $parts = explode(DIRECTORY_SEPARATOR, $path);
         $file = array_pop($parts);
         $dir = implode(DIRECTORY_SEPARATOR, $parts);
-        @mkdir($dir, 0777, true);
+        if (!is_dir($dir) && !is_file($dir)) {
+            @mkdir($dir, 0777, true);
+        }
         return (object) ['path' => $dir, 'name' => $file];
     }
 
@@ -960,6 +962,22 @@ class Helper {
                 $out = 'file';
         }
         return $out;
+    }
+
+    /**
+     * Executa uma busca no viacep e retorna
+     * @param string $cep
+     * @return \stdClass
+     */
+    public static function buscacep(string $cep): \stdClass {
+        $cepSearch = self::parseInt($cep);
+        if ($cepSearch < 8) {
+            return (object) ['error' => "Number of characters must be equal to 8 in '$cep'"];
+        }
+
+        $url = "https://viacep.com.br/ws/$cepSearch/json/";
+        $ret = file_get_contents($url);
+        return (object) json_decode($ret)->content;
     }
 
 }

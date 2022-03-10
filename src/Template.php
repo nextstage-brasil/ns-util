@@ -106,8 +106,7 @@ class Template {
         foreach ($this->values as $key => $value) {
             $keys[] = $this->openDelimiter . $key . $this->closeDelimiter;
         }
-        //Log::logTxt('debug', $value);
-        $this->template = str_replace($keys, $this->values, $this->template);
+        $this->template = \str_replace($keys, $this->values, $this->template);
         return $this->template;
     }
 

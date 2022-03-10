@@ -26,7 +26,7 @@ class Router {
         $this->arrayValues = $arrayValues;
 
         //retorna o valor da REQUEST_URI ( LINK )
-        $this->serverUri = $_SERVER['REQUEST_URI'];
+        $this->serverUri = ((isset($_SERVER['REQUEST_URI'])) ? $_SERVER['REQUEST_URI'] : '');
 
         //retorna o valoar da ( path quebrada PHP_URL_PATH ) para validação
         $this->valorTotalURl = parse_url($this->serverUri, PHP_URL_PATH);
@@ -95,7 +95,7 @@ class Router {
 
         // IDENTIFICAR PARAMETROS
         $temp = explode('/', $url);
-        $this->param[] = (int) $temp[2]; // obrigatoriamente um ID deve ser um inteiro
+        $this->param[] = (int) ((isset($temp[2])) ? $temp[2] : 0); // obrigatoriamente um ID deve ser um inteiro
         unset($temp[0]); // zero, vazio
         unset($temp[1]); // 1: rota
         unset($temp[2]); // 2: ID
@@ -125,7 +125,7 @@ class Router {
     public function routes() {
         // IDENTIFICAR PARAMETROS
         $temp = explode('/', $this->genereteUrl());
-        $rota = '/' . $temp[1];
+        $rota = '/' . ((isset($temp[1])) ? $temp[1] : '');
 
         // Default
         $this->route = '/not-found';
@@ -207,7 +207,7 @@ class Router {
 
     function getAllParam($key = false) {
         if ($key !== false) {
-            return $this->allParam[$key];
+            return ((isset($this->allParam[$key])) ? $this->allParam[$key] : null);
         } else {
             return $this->allParam;
         }

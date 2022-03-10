@@ -38,7 +38,7 @@ abstract class Adapter {
     /**
      * Ignora por uma unica vez a verificação de login
      */
-    public function ignoreLogin($segundos = 3) {
+    public function ignoreLogin(int $segundos = 3) {
         $this->atualLoginTime = $_SESSION[$this->sessionName];
         $_SESSION[$this->sessionName] = time() + 3 * $segundos;
     }

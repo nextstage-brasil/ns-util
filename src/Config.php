@@ -85,6 +85,37 @@ class Config {
     }
 
     /**
+     * Define o array enviado para o conjunto de configurações
+     * @param array $settings
+     * @param bool $merge
+     * @return void
+     */
+    public function setByArray(array $settings, bool $merge = true): void {
+        if (!$merge) {
+            $this->settings = [];
+        }
+        $this->settings = array_merge($this->settings, $settings);
+    }
+
+    /**
+     * Faz a leitura de um arquivo tipo .env e insere nas configs atuais
+     * @param type $envFilePath
+     * @param type $merge
+     */
+    public function loadEnvFile(string $envFilePath, bool $merge = true): void {
+        if (file_exists($envFilePath)) {
+            $_CONFIG = parse_ini_file($envFilePath);
+            if (!is_array($_CONFIG)) {
+                throw new \Exception("Incorrect file configuration for .env type in file '$envFilePath'");
+            }
+            $this->setByArray($_CONFIG, $merge);
+        } else {
+            throw new \Exception('File not found: ' . $envFilePath);
+        }
+    }
+
+
+    /**
      * Set the fallback.
      *
      * @param Config $fallback
@@ -93,11 +124,14 @@ class Config {
      */
     public function setFallback(Config $fallback) {
         $this->fallback = $fallback;
-
         return $this;
     }
 
-    public function getAll() {
+    /**
+     * Retorna toda configuração contida no objeto
+     * @return type
+     */
+    public function getAll(): array {
         return $this->settings;
     }
 
@@ -110,13 +144,13 @@ class Config {
     }
 
     /**
-     * Set data
+     * Define um  valor para chave
      * @param type $key1
      * @param type $value
-     * @param type $key2
+     * @param type $merge
      */
     public static function setData($key1, $value, $merge = true) {
-        if (isset(self::$data[$key1]) && is_array($value) && $merge) {
+        if ($merge && is_array($value) &&  isset(self::$data[$key1])) {
             self::$data[$key1] = array_merge(self::$data[$key1], $value);
         } else {
             self::$data[$key1] = $value;
@@ -152,6 +186,25 @@ class Config {
             'not-null constraint' => 'Verifique campos obrigatórios',
             'unique constraint' => 'Já existe registro com esses dados'
         ];
+    }
+
+    /**
+     * Busca pelo profile estabelcido na configuração os valores de key e secret
+     */
+    public static function setAWSByProfile() {
+        if (!self::$data['fileserver']['S3']['credentials']['key']) {
+            $env_vars = getenv();
+            if ($env_vars['AWS_KEY']) {
+                self::$data['fileserver']['S3']['credentials']['key'] = $env_vars['AWS_KEY'];
+                self::$data['fileserver']['S3']['credentials']['secret'] = $env_vars['AWS_SECRET'];
+            } else {
+                // Storage
+                $client = new \Aws\S3\S3Client(self::$data['fileserver']['S3']);
+                $ret = $client->getCredentials()->wait();
+                self::$data['fileserver']['S3']['credentials']['key'] = $ret->getAccessKeyId();
+                self::$data['fileserver']['S3']['credentials']['secret'] = $ret->getSecretKey();
+            }
+        }
     }
 
 }

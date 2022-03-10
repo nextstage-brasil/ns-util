@@ -35,6 +35,6 @@ function json_decode($json, bool $assoc = false, int $depth = 512, int $options 
  * @param type $delimiter
  * @param type $string
  */
-function explode($delimiter, $string) {
-    explode((string) $delimiter, (string) $string);
+function ns_explode($delimiter, $string) {
+    return explode((string) $delimiter, (string) $string);
 }
