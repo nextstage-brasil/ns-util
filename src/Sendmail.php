@@ -2,6 +2,9 @@
 
 namespace NsUtil;
 
+use NsUtil\Integracao\SendgridService;
+use PHPMailer\PHPMailer\PHPMailer;
+
 //require __DIR__ . '/lib/phpmailer/class.phpmailer.php';
 
 class Sendmail {
@@ -40,7 +43,7 @@ class Sendmail {
      */
     public static function send(array $to, string $subject, $text, array $config, int $debug = 0, array $attach = []) {
 //        $mail = new \PHPMailer();
-        $mail = new \PHPMailer\PHPMailer\PHPMailer();
+        $mail = new PHPMailer();
         $mail->IsSMTP(); // Define que a mensagem será SMTP
 
         $mail->Host = $config['host'];
@@ -100,7 +103,31 @@ class Sendmail {
             return $exc->getMessage();
         }
     }
-    
-    
+
+    public static function sendBySendgrid(
+            string $apiKey,
+            string $fromAddress,
+            string $fromName,
+            string $toAddress,
+            string $toName,
+            string $subject = null,
+            string $template_id = null,
+            array $template_data = []
+    ) {
+        $sg = new SendgridService($apiKey);
+        $headers = [
+            'from' => ['address' => $fromAddress, 'name' => $fromName],
+            'to' => ['address' => $toAddress, 'name' => $toName]
+        ];
+        if (!is_null($subject)) {
+            $headers['subject'] = $subject;
+        }
+        $sg->setEmailHeaders($headers);
+        if (!is_null($template_id)) {
+            $sg->setTemplate($template_id, $template_data);
+        }
+        $ret = $sg->sendEmail();
+        return (($ret->statusCode() < 300) ? true : $ret->headers());
+    }
 
 }
