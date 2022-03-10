@@ -26,9 +26,7 @@ class Package {
         }
 
         // $versionamento com base nas mensagens
-        echo "$file $versao $message".__LINE__;
         $exp = explode('/', $message);
-        echo "$file $versao".__LINE__;
         $content = file_get_contents($file);
                         
         $v = explode('.', $content);
