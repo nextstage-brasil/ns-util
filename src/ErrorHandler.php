@@ -4,7 +4,7 @@ namespace NsUtil;
 
 class ErrorHandler {
 
-    private $filename, $applicationName, $printError;
+    private $filename, $applicationName, $printError; 
 
     function __construct(string $log_filename, string $applicationName, bool $printError = false) {
         $this->filename = $log_filename;
