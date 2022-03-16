@@ -22,8 +22,9 @@ class Api {
         $this->headers = $this->getAllHeaders();
 
         // Obtenção do verbo
-        $metodo = $_SERVER['REQUEST_METHOD'];
-        $recurso = explode("/", mb_substr((string) @$_SERVER['PATH_INFO'], 1));
+        $metodo = ((isset($_SERVER['REQUEST_METHOD'])) ? $_SERVER['REQUEST_METHOD'] : 'NULL' );
+//        $pathinfo = ((isset($_SERVER['PATH_INFO'])) ? $_SERVER['PATH_INFO'] : '-');
+//        $recurso = explode("/", mb_substr((string) $pathinfo, 1));
         $this->body = [];
 
         switch ($metodo) {
