@@ -31,7 +31,7 @@ class Ioncube {
 
     public function encode($pathToEncoderBatFile, $pathToPostEncoderBatFile) {
         // Acionar ioncube
-        echo "\nCodificado arquivos PHP";
+        echo "\nCodificando arquivos PHP";
         $cmd = 'call ' . $pathToEncoderBatFile;
         shell_exec($cmd);
 
