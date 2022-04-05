@@ -10,16 +10,28 @@ class ErrorHandler {
         $this->filename = $log_filename;
         $this->applicationName = $applicationName;
         $this->printError = $printError;
-
         set_error_handler([&$this, 'userErrorHandler']);
     }
 
     function userErrorHandler($errno, $errmsg, $filename, $linenum) {
         $log_file_error = $this->filename;
 
-        if (!file_exists($log_file_error)) {
-            Helper::saveFile($log_file_error, false, "appname,time,filename,line_num,error,message,backtrace");
+       // Rotate File
+        if (file_exists($this->filename)) {
+            if (filesize($this->filename) >= 1046000) {
+                rename($this->filename, $this->filename . '_' . date('YmdHis') . '.old');
+            }
         }
+
+        if (!file_exists($this->filename)) {
+            Helper::saveFile($this->filename, false, "appname,time,filename,line_num,error,message,backtrace");
+        }
+
+        // Ignore notice
+        if (8 === (int)$errno) {
+            return false;
+        }
+        
         $time = date("d M Y H:i:s");
         // Get the error type from the error number 
         $errortype = array(1 => "Error",
