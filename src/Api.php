@@ -4,7 +4,7 @@ namespace NsUtil;
 
 class Api {
 
-    private $body;
+    private $body = [];
     private $headers;
     private $responseData = ['content' => [], 'error' => false];
     private $eficiencia;
@@ -208,7 +208,7 @@ class Api {
      * Retorna o body da requisição
      * @return type
      */
-    function getBody() {
+    function getBody() : array {
         return $this->body;
     }
 
@@ -216,7 +216,7 @@ class Api {
      * Retorna o headers da requisição
      * @return type
      */
-    function getHeaders($keysToLower = false) {
+    function getHeaders($keysToLower = false) : array {
         if ($keysToLower) {
             foreach ($this->headers as $key => $val) {
                 unset($this->headers[$key]);
@@ -236,10 +236,10 @@ class Api {
 
     /**
      * Estaticamente, cria uma instancia da API e responde o body com o código citado
-     * @param type $code
-     * @param type $response
+     * @param int $code
+     * @param array $response
      */
-    public static function result($code, $response, $type = 'json') {
+    public static function result(int $code, array $response, $type = 'json') {
         $api = new Api();
         $api->response($response, $code, $type);
     }
@@ -300,7 +300,7 @@ class Api {
 
         // Sanitização
         $this->responseData['error'] = (($this->responseData['error'] !== false) ? $this->responseData['error'] : false);
-        if ($this->responseData['error'] !== false || ($this->responseCode > 401 && stripos($this->responseData, 'SQLSTATE') === false)) {
+        if ($this->responseData['error'] !== false || ($this->responseCode > 401 && stripos((string)$this->responseData, 'SQLSTATE') === false)) {
             $this->responseData = ['error' => $this->responseData['error'], 'content' => []];
         }
         return $this->responseData;
