@@ -119,7 +119,11 @@ class Helper {
             throw new Exception('NSUtil (NSH120): Variavel não é um array');
         }
         $key = array_search($valor, array_column($array, $chave));
-        return $array[$key];
+        if (false !== $key) {
+            return $array[$key];
+        } else {
+            return [];
+        }
     }
 
     /**
