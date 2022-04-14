@@ -28,12 +28,24 @@ class Assync {
     }
 
     /**
+     * 
+     * @param string $path Comando a ser executado, ex.: php /local/do/arquivo.php
+     * @param string $recurso Chave do comando a ser localizado no arquivo.php
+     * @param array $params parametros a ser enviado para o executor
+     */
+    public function addByParams(string $path, string $recurso, array $params) : Assync {
+        $cmd = "${path} ${recurso} " . base64_encode(json_encode($params));
+        $this->add($cmd);
+        return $this;
+    }
+
+    /**
      * Adiciona um processo a lista de execução
      * @param type $cmd
      * @param type $outputfile
      * @return $this
      */
-    public function add($cmd, $outputfile = '/dev/null') {
+    public function add($cmd, $outputfile = '/dev/null') : Assync {
         $pidfile = '/tmp/' . hash('sha1', $cmd);
         $this->list[] = ['command' => sprintf("%s > %s 2>&1 & echo $! > %s", $cmd, $outputfile, $pidfile), 'pidfile' => $pidfile, 'cmd' => $cmd];
         if ($this->verbose !== false) {
@@ -41,7 +53,7 @@ class Assync {
         }
         return $this;
     }
-    
+
     /**
      * Executa os processos adicionados, limitando a N processos por vez, conforme configuração
      */
