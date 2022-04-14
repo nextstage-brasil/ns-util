@@ -33,7 +33,8 @@ class Assync {
      * @param string $recurso Chave do comando a ser localizado no arquivo.php
      * @param array $params parametros a ser enviado para o executor
      */
-    public function addByParams(string $path, string $recurso, array $params) : Assync {
+    public function addByParams(string $path, string $recurso, array $params, string $className = null): Assync {
+        $param['className'] = $className;
         $cmd = "${path} ${recurso} " . base64_encode(json_encode($params));
         $this->add($cmd);
         return $this;
@@ -45,7 +46,7 @@ class Assync {
      * @param type $outputfile
      * @return $this
      */
-    public function add($cmd, $outputfile = '/dev/null') : Assync {
+    public function add($cmd, $outputfile = '/dev/null'): Assync {
         $pidfile = '/tmp/' . hash('sha1', $cmd);
         $this->list[] = ['command' => sprintf("%s > %s 2>&1 & echo $! > %s", $cmd, $outputfile, $pidfile), 'pidfile' => $pidfile, 'cmd' => $cmd];
         if ($this->verbose !== false) {
