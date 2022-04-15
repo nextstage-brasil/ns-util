@@ -20,7 +20,6 @@ class LoadArgs {
             $defaultValues[$key] = $val[1];
         }
         $newparamns['h'] = 'Help';
-        $defaultValues['h'] = 'Not defined';
         //$defaultValues['h'] = -1;
         // Documentação
         $help[] = "Usage: \n\t" . $usageExample;
@@ -28,7 +27,7 @@ class LoadArgs {
 
         $options = [];
         foreach ($newparamns as $key => $val) {
-            $help[] = "\t-$key\t" . $val . ". Default: " . $defaultValues[$key];
+            $help[] = "\t-$key\t" . $val . ". Default: " . ((isset($defaultValues[$key]))?$defaultValues[$key]:'Not defined');
             $options[$key] = "$key:";
         }
         $help [] = '';
