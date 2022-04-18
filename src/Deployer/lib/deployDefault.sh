@@ -111,10 +111,10 @@ if [ -f "$DIR/www/package.json" ]; then
 fi
 
 
-# Manter somente as 5 ultimas versoes
+# Manter somente as 2 ultimas versoes
 echo "- Remover releases anteriores"
 cd "$RELEASES_DIR"
-ls -dt ${RELEASES_DIR}/* | tail -n +6 | xargs -d "\n" rm -rf;
+ls -dt ${RELEASES_DIR}/* | tail -n +3 | xargs -d "\n" rm -rf;
 
 # finalizar
 echo "- Reiniciar serviços"
