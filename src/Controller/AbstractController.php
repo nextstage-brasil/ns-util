@@ -24,7 +24,7 @@ class AbstractController {
         ;
         $ret = \NsUtil\Helper::curlCall($url, $data, $method, $headers);
         if ($ret->status > 299 ) {
-            throw new \Exception('Chamada ao recurso ' . $resource . ' com status ' . $ret->status. "\n URL: $url \nMethod: $method");
+            throw new \Exception('Chamada ao recurso ' . $resource . ' com status ' . $ret->status. "\n URL: $url \nMethod: $method \n");
         }
         $ret->content = json_decode($ret->content);
 
