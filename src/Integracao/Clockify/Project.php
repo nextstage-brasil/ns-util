@@ -49,4 +49,12 @@ class Project implements InterfaceClockify {
         return $this;
     }
 
+    public function read(): array {
+        $item = $this->client->call('projects/' . $this->getSettedId())['content'];
+        if (!isset($item['id'])) {
+            throw new Exception('Project not found');
+        }
+        return $item;
+    }
+
 }
