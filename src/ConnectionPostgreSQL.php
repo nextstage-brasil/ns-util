@@ -210,7 +210,7 @@ class ConnectionPostgreSQL {
     public function insert($table, $array, $nomeCpoId, $onConflict = '') {
         $preValues = $update = $valores = [];
         foreach ($array as $key => $value) {
-            $keys[] = $key;
+            $keys[] = '"'.$key.'"';
             $preValues[] = '?';
             $valores[] = $value;
         }
@@ -249,7 +249,7 @@ class ConnectionPostgreSQL {
         unset($array[$cpoWhere]);
         foreach ($array as $key => $value) {
             $valores[] = $value;
-            $update[] = "$key=?";
+            $update[] = "\"$key\"=?";
         }
         // where
         $valores[] = $idWhere;
