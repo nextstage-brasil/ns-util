@@ -147,6 +147,7 @@ class Helper {
         }
 
         $string = str_replace('_', ' ', $string);
+        $string = str_replace('-', ' ', $string);
 //        $out = str_replace(' ', '', ucwords($string));
         $out = lcfirst(str_replace(' ', '', ucwords($string)));
         return $out;
