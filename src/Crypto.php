@@ -65,11 +65,11 @@ class Crypto {
      * @param type $chave
      * @return type
      */
-    public function simple(string $action, string $string, string $chave = null) {
+    public function simple(string $action, string $string, string $chave = '') {
         $output = false;
 
         $encrypt_method = "AES-256-CBC";
-        if ($chave) {
+        if (strlen($chave) > 0) {
             $secret_key = md5((string) $this->chave . $chave);
         } else {
             $secret_key = $this->chave;

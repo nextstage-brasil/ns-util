@@ -985,4 +985,16 @@ class Helper {
         return (object) json_decode($ret)->content;
     }
 
+    public static function setPaginacao(int $registros, int $limit, array &$out, array &$dados): void {
+        $paginas = (int) ($registros / $limit);
+        $out['pagination'] = [];
+        $out['pagination']['atualPage'] = (int) $dados['pagina'];
+        $out['pagination']['totalPages'] = (($paginas * $limit < $registros) ? $paginas + 1 : $paginas);
+        $out['pagination']['totalItens'] = $registros;
+        $out['pagination']['nextPage'] = $out['pagination']['page'] + 1 < $out['pagination']['totalPages'] ? $out['pagination']['page'] + 1 : null;
+        $out['pagination']['previusPage'] = $out['pagination']['page'] - 1 >= 0 ? $out['pagination']['page'] - 1 : null;
+        $out['pagination']['initalPage'] = 0;
+        $out['pagination']['lastPage'] = $out['pagination']['totalPages'];
+    }
+
 }
