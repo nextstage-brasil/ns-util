@@ -65,12 +65,23 @@ variables:
         return $this;
     }
 
+    private function setDefaultScritps($pathDeployer) {
+        $scripts = \NsUtil\DirectoryManipulation::openDir(__DIR__ . '/lib');
+        \NsUtil\Helper::mkdir($pathDeployer . '/deploy/scripts');
+        foreach ($scripts as $script) {
+            $from = __DIR__ . '/lib/' . $script;
+            $dest = $pathDeployer . '/deploy/scripts/' . $script;
+            copy($from, $dest);
+        }
+    }
+
     /**
      * Gera os arquivo sh e runners
      * @param type $pathDeployer: Deve ser o mesmo diretório onde se encontra o "builder.php"
      */
     public function run($pathDeployer, $phpVersion = '7.2') {
         $this->configs['pathDeployer'] = $pathDeployer;
+        $this->setDefaultScritps($pathDeployer);
         foreach ($this->configs['deployers'] as $key => $val) {
             // Deployer default
             $val['packageName'] = $this->configs['packageName'];
@@ -154,7 +165,7 @@ timeout /t 15";
 
     private function gitLabCI_AddStage($branchName, $sshHost, $sshPath, $sshDeployerFilename, $sshUserDeployer, $item) {
         // Gerado pelo Package
-        $zipCommand = file_get_contents($this->configs['pathDeployer'] . '/deploy/zip/zipCommandToCI.sh');
+        $zipCommand = file_get_contents($this->configs['pathDeployer'] . '/deploy/scripts/zipCommandToCI.sh');
 
         // Template to VM
         $this->gitlabCI[] = 'deploy_' . $branchName . ':
@@ -162,20 +173,12 @@ timeout /t 15";
     only:
         - ' . $branchName . '
     before_script:
-        - apk update && apk add zip openssh-client
-        - mkdir -p ~/.ssh
-        - chmod 700 ~/.ssh
-        - echo -e "Host *\n\tStrictHostKeyChecking no\n\n" > ~/.ssh/config
-        - echo "$SSH_PRIVATE_KEY" > ~/.ssh/id_rsa
-        - chmod 600 ~/.ssh/id_rsa
-        ## Instacao AWS Cli e configuracoes
-        #- apk add --no-cache python3 py3-pip && pip3 install --upgrade pip && pip3 install awscli
-        #- rm -rf /var/cache/apk/*
-        #- mkdir -p ~/.aws && chmod 700 ~/.aws
-        #- echo -e "[default]\naws_access_key_id=$AWS_KEY\naws_secret_access_key=$AWS_SECRET" > ~/.aws/credentials
+         - sh ./_build/install/deploy/scripts/before_php.sh
+         - alias composer="php composer.phar"
     script:
         # Preparar pacote
-        - ' . $zipCommand . '
+        - sh ./_build/install/deploy/zip/zipCommandToCI.sh
+
         # Enviar arquivos
         - scp -p $CI_COMMIT_SHA.zip ' . $sshUserDeployer . '@' . $sshHost . ':' . $sshPath . '/build/$PACKAGE_NAME
         - scp -p ' . $sshDeployerFilename . ' ' . $sshUserDeployer . '@' . $sshHost . ':' . $sshPath . '/build/deploy.sh

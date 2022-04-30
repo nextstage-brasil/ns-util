@@ -235,10 +235,10 @@ class Package {
 
         // Salvar o comando para gerar o ZIP limpo tbem no CI
         self::$zipExcluded = (object) [
-                    'zipCi' => 'zip -qr $CI_COMMIT_SHA.zip . ' . $exCI,
+                    'zipCi' => "#!/bin/bash\nzip -qr \$CI_COMMIT_SHA.zip . $exCI",
                     'ex' => $exCI
         ];
-        Helper::saveFile("$origem/$build/install/deploy/zip/zipCommandToCI.sh", false, self::$zipExcluded->zipCi, 'SOBREPOR');
+        Helper::saveFile("$origem/$build/install/deploy/scripts/zipCommandToCI.sh", false, self::$zipExcluded->zipCi, 'SOBREPOR');
 
         // salvar o comand para o pos ioncube
         echo "\n - Criado arquivo post encode para ioncube ...";
