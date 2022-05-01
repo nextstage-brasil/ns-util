@@ -982,7 +982,7 @@ class Helper {
 
         $url = "https://viacep.com.br/ws/$cepSearch/json/";
         $ret = file_get_contents($url);
-        return (object) json_decode($ret)->content;
+        return (object) json_decode($ret);
     }
 
     public static function setPaginacao(int $registros, int $limit, array &$out, array &$dados): void {
