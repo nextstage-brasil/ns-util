@@ -387,15 +387,22 @@ class Api {
      * Verifica se a classe existe no path indicado, cria o controller padrão e entrega conforme os verbos para execução
      * @param type $namespace
      */
-    public static function restFull(string $namespace, string $allowOrigin = '*', string $allowMethods = 'GET,PUT,POST,DELETE,OPTIONS', string $allowHeaders = 'Data,Cache-Control,Referer,User-Agent,Origin,Accept,X-Requested-With,Content-Type,Access-Control-Request-Method,Access-Control-Request-Headers,Token,Authorization') : void {
+    public static function restFull(string $namespace, string $allowOrigin = '*', string $allowMethods = 'GET,PUT,POST,DELETE,OPTIONS', string $allowHeaders = 'Data,Cache-Control,Referer,User-Agent,Origin,Accept,X-Requested-With,Content-Type,Access-Control-Request-Method,Access-Control-Request-Headers,Token,Authorization'): void {
         self::options();
         $api = (new Api())->setConfig();
         $rest = (object) \NsUtil\Config::getData('rest');
         $class_name = $namespace . '\\' . ucwords(Helper::name2CamelCase($rest->resource));
-        if (class_exists($class_name)) {
-            (new $class_name($api))();
-        } else {
-            http_response_code(501);
+        $class_name_controller = $class_name . 'Controller';
+        switch (true) {
+            case (class_exists($class_name)):
+                (new $class_name($api))();
+                break;
+            case (class_exists($class_name_controller)):
+                (new $class_name_controller($api))();
+                break;
+            default:
+                http_response_code(Api::HTTP_NOT_IMPLEMENTED);
+                die();
         }
     }
 
