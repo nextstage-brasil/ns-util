@@ -102,7 +102,7 @@ class Config {
      * @param type $envFilePath
      * @param type $merge
      */
-    public function loadEnvFile(string $envFilePath, bool $merge = true): void {
+    public function loadEnvFile(string $envFilePath, bool $merge = true): Config {
         if (file_exists($envFilePath)) {
             $_CONFIG = parse_ini_file($envFilePath);
             if (!is_array($_CONFIG)) {
@@ -112,6 +112,8 @@ class Config {
         } else {
             throw new \Exception('File not found: ' . $envFilePath);
         }
+        
+        return $this;
     }
 
 
