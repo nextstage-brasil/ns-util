@@ -6,6 +6,7 @@ class Package {
 
     static $zipExcluded = '';
     private static $urlLocalApplication = '';
+    private static $projectName = null;
 
     public function __construct() {
         
@@ -20,6 +21,14 @@ class Package {
         self::$urlLocalApplication = $urlLocalApplication;
     }
 
+    public static function getProjectName() {
+        return self::$projectName;
+    }
+
+    public static function setProjectName($projectName): void {
+        self::$projectName = $projectName;
+    }
+
     public static function setVersion($file, $message = 'default/Not defined', int $major_increment = null, int $minor_increment = null, int $path_increment = null) {
         if (!file_exists($file)) {
             file_put_contents($file, '1.0.0');
@@ -28,7 +37,7 @@ class Package {
         // $versionamento com base nas mensagens
         $exp = explode('/', $message);
         $content = file_get_contents($file);
-                        
+
         $v = explode('.', $content);
 
         $X = (int) filter_var($v[0], FILTER_SANITIZE_NUMBER_INT);
@@ -118,9 +127,13 @@ class Package {
         Helper::directorySeparator($dirOutput);
 
         // projectName
-        $fontes = str_replace('/', DIRECTORY_SEPARATOR, $origem);
-        $t = explode(DIRECTORY_SEPARATOR, $fontes);
-        $projectName = mb_strtolower(array_pop($t));
+        if (null === self::getProjectName()) {
+            $fontes = str_replace('/', DIRECTORY_SEPARATOR, $origem);
+            $t = explode(DIRECTORY_SEPARATOR, $fontes);
+            $projectName = mb_strtolower(array_pop($t));
+            self::setProjectName($projectName);
+        }
+        $projectName = self::getProjectName();
 
         // versao: nunca irá incrementar além da data e hora
         $file = $fontes . '/version';
@@ -209,7 +222,7 @@ class Package {
             '*teste.php',
 //            '*composer.lock*',
             '/.env',
-            '/.env.example', 
+            '/.env.example',
             '*serverless*'
         ];
         $excluded_x = array_merge([

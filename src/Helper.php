@@ -729,7 +729,7 @@ class Helper {
      * @return type
      */
     public static function jsonToArrayFromView($json) {
-        return json_decode(str_replace('&#34;', '"', $json), true);
+        return json_decode(str_replace('&#34;', '"', (string) $json), true);
     }
 
     /**
