@@ -720,7 +720,7 @@ class Helper {
      * @return type
      */
     public static function parseInt($var) {
-        return preg_replace("/[^0-9]/", "", $var);
+        return preg_replace("/[^0-9]/", "", (string) $var);
     }
 
     /**
