@@ -170,7 +170,7 @@ class Package {
 
 
         echo "\n - Construindo aplicacao ... ";
-        $ret = Helper::curlCall("$urlLocalApplication/$build/builder.php?pack=true", [], 'GET', [], false);
+        $ret = Helper::curlCall("$urlLocalApplication/$build/builder.php?pack=true", [], 'GET', [], false, 180);
         echo $ret->status;
         if ((int) $ret->status !== 200) {
             var_export($ret);
@@ -178,7 +178,7 @@ class Package {
         }
 
         echo "\n - Construindo JS e Componentes ...";
-        $ret = Helper::curlCall("$urlLocalApplication/$build/compile.php?pack=true&compileToBuild=YES&recompile=ALL", [], 'GET', [], false);
+        $ret = Helper::curlCall("$urlLocalApplication/$build/compile.php?pack=true&compileToBuild=YES&recompile=ALL", [], 'GET', [], false, 180);
         echo $ret->status;
         if ((int) $ret->status !== 200) {
             var_export($ret);
