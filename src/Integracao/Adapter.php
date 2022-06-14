@@ -29,7 +29,7 @@ abstract class Adapter {
             if ($ret->status === 200 && $ret->error === false && $ret->content->token) {
                 $this->token = $ret->content->token;
             } else {
-                die('Não foi possível efetuar login em "' . $this->endpoint . '" com as credenciais informadas');
+                throw new \Exception('IntegracaoAdapterLogin: Não foi possível efetuar login em "' . $this->endpoint . '" com as credenciais informadas');
             }
             $_SESSION[$this->sessionName] = time() + (58 * $ret->content->expire); // duração do token, para não ficar fazendo login toda hora
         }
