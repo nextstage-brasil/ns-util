@@ -218,7 +218,7 @@ class Helper {
     }
 
     public static function directorySeparator(&$var) {
-        $var = str_replace('/', DIRECTORY_SEPARATOR, $var);
+        $var = str_replace(['/', '\\'], DIRECTORY_SEPARATOR, $var);
     }
 
     public static function deleteDir($pasta) {
