@@ -7,9 +7,33 @@ class Package {
     static $zipExcluded = '';
     private static $urlLocalApplication = '';
     private static $projectName = null;
+    private static $createFrontendFiles = false;
+    private static $dockerBuildParams = [];
 
     public function __construct() {
         
+    }
+
+    public static function setCreateFrontendFiles(bool $createFrontendFiles): void {
+        self::$createFrontendFiles = $createFrontendFiles;
+    }
+
+    /**
+     * Prepara o cenário para execução do Dockerfile
+     * @param string $pathDockerfile
+     * @param string $dockerHubUser
+     * @param string $packageName
+     * @param string $tag
+     * @param array $args
+     * @return void
+     */
+    public static function setDockerBuildParams(string $pathDockerfile, string $dockerHubUser, string $packageName, string $tag = 'latest', array $args = []): void {
+        self::$dockerBuildParams = [
+            'Dockerfile' => $pathDockerfile,
+            'Username' => $dockerHubUser . ((strlen($dockerHubUser) > 0) ? '/' : '') . $packageName,
+            'Args' => $args,
+            'Tag' => $tag
+        ];
     }
 
     /**
@@ -113,18 +137,34 @@ class Package {
             array $excluded_x,
             string $dirOutput,
             string $ioncube_post,
-            string $patch7zip = 'C:\Program Files\7-Zip\7z.exe'
+            string $patch7zip = ''
     ) {
-        if (Helper::getSO() !== 'windows') {
-            die('ERROR: Este método é exclusivo para uso em ambiente Windows');
-        }
 
+        $cmdsConfig = [
+            'linux' => [
+                'clearFiles' => 'find %1$s -name "*XPTO*" -delete && find %1$s/app/_45h -name "*.php" -delete && find %1$s/app/45h -name "*.php" -delete',
+                'move' => 'mv'
+            ],
+            'windows' => [
+                'clearFiles' => 'del "%1$s\*XPTO*" /s /q > nul && del "%1$s\app\_45h\*.php" > nul && del "%1$s\app\45h\*.php" > nul',
+                'move' => 'move'
+            ]
+        ];
+
+//        if (Helper::getSO() !== 'windows') {
+//            die('ERROR: Este método é exclusivo para uso em ambiente Windows');
+//        }
+
+        if (strlen($patch7zip) === 0) {
+            $patch7zip = ((\NsUtil\Helper::getSO() === 'windows') ? 'C:\Program Files\7-Zip\7z.exe' : '/usr/bin/zip');
+        }
         if (!file_exists($patch7zip)) {
             die('ERROR: Executável do 7z não localizado. Path: ' . $patch7zip);
         }
 
         date_default_timezone_set('America/Recife');
         Helper::directorySeparator($dirOutput);
+        $dirOutput = realpath($dirOutput);
 
         // projectName
         if (null === self::getProjectName()) {
@@ -138,12 +178,6 @@ class Package {
         // versao: nunca irá incrementar além da data e hora
         $file = $fontes . '/version';
         $versao = self::setVersion($file, 'default/Package', 0, 0, 0)['version_full'];
-
-        // composer
-        if (file_exists($origem . '/composer.json')) {
-            echo " - Atualizando pacotes via composer ...";
-            shell_exec('composer update -q --prefer-dist --optimize-autoloader --no-dev --working-dir="' . $origem . '"');
-        }
 
         // builder and compile
         switch (true) {
@@ -160,6 +194,7 @@ class Package {
                 die('Build directory not found!');
                 break;
         }
+        $buildDir = realpath($fontes . DIRECTORY_SEPARATOR . $build);
 
         // Definição do URL da aplicação
         $urlLocalApplication = self::$urlLocalApplication;
@@ -167,30 +202,49 @@ class Package {
             $urlLocalApplication = "https://localhost/$projectName";
         }
 
-
-
-        echo "\n - Construindo aplicacao ... ";
-        $ret = Helper::curlCall("$urlLocalApplication/$build/builder.php?pack=true", [], 'GET', [], false, 180);
-        echo $ret->status;
-        if ((int) $ret->status !== 200) {
-            var_export($ret);
-            die("\n################## ERROR!!: #################### \n\n STATUS BUILDER <> 200 \n\n###########################################\n");
-        }
-
-        echo "\n - Construindo JS e Componentes ...";
-        $ret = Helper::curlCall("$urlLocalApplication/$build/compile.php?pack=true&compileToBuild=YES&recompile=ALL", [], 'GET', [], false, 180);
-        echo $ret->status;
-        if ((int) $ret->status !== 200) {
-            var_export($ret);
-            die("\n################## ERROR!!: #################### \n\n STATUS COMPILE <> 200 \n\n###########################################\n");
-        }
-
-
         // zip file
         $zip = $dirOutput . DIRECTORY_SEPARATOR . $projectName . '-package.zip';
         $encodedFile = $dirOutput . DIRECTORY_SEPARATOR . $projectName . '-encoded';
         Helper::deleteFile($zip);
         Helper::deleteFile($encodedFile);
+
+        // Nomes
+        echo "\n### NSUtil Package Generator ###"
+        . "\n - Configurations: "
+        . "\n Running on $urlLocalApplication"
+        . "\n PHP Version: " . PHP_VERSION . " on " . Helper::getSO()
+        . "\n Package output: " . $dirOutput . DIRECTORY_SEPARATOR . $projectName . '-package.zip'
+        . "\n Create docker image?: " . ((count(self::$dockerBuildParams) > 0) ? 'yes' : 'no')
+        . "\n Copy frontend files?: " . ((self::$createFrontendFiles === true) ? 'yes' : 'no')
+        . "\n Alright, let's run!"
+        . "\n\n"
+        ;
+
+        // composer
+        $last = (int) file_get_contents($buildDir . '/.lastComposerUpdate');
+        $composerIsOld = (!file_exists($buildDir . '/.lastComposerUpdate')) || $last < time() - (60 * 60 * 2);
+        echo "\n - Atualizando pacotes via composer ... ";
+        if (file_exists($origem . '/composer.json') && $composerIsOld) {
+            shell_exec('composer update -q --prefer-dist --optimize-autoloader --no-dev --working-dir="' . $origem . '"');
+            file_put_contents($buildDir . '/.lastComposerUpdate', time());
+        }
+        echo "OK! Is updated at " . date('Y-m-d H:i:s', (int) file_get_contents($buildDir . '/.lastComposerUpdate'));
+
+        echo "\n - Construindo aplicacao ... ";
+        $ret = Helper::curlCall("$urlLocalApplication/$build/builder.php?pack=true", [], 'GET', [], false, (60 * 10));
+        if ((int) $ret->status !== 200) {
+            var_export($ret);
+            die("\n################## ERROR!!: #################### \n\n STATUS BUILDER <> 200 \n\n###########################################\n");
+        }
+        echo 'OK!';
+
+        echo "\n - Construindo JS e Componentes ... ";
+        $ret = Helper::curlCall("$urlLocalApplication/$build/compile.php?pack=true&compileToBuild=YES&recompile=ALL", [], 'GET', [], false, (60 * 10));
+        if ((int) $ret->status !== 200) {
+            var_export($ret);
+            die("\n################## ERROR!!: #################### \n\n STATUS COMPILE <> 200 \n\n###########################################\n");
+        }
+        echo 'OK!';
 
         // Lista de exclusões que não devem constar em builds
         $excluded_xr = [
@@ -254,47 +308,137 @@ class Package {
         Helper::saveFile("$origem/$build/install/deploy/scripts/zipCommandToCI.sh", false, self::$zipExcluded->zipCi, 'SOBREPOR');
 
         // salvar o comand para o pos ioncube
-        echo "\n - Criado arquivo post encode para ioncube ...";
+        echo "\n - Criando arquivo post encode para ioncube ... ";
         Helper::directorySeparator($ioncube_post);
         $tmp = explode(DIRECTORY_SEPARATOR, $ioncube_post);
         $filenamePost = array_pop($tmp);
         $ioncube_post_dir = implode(DIRECTORY_SEPARATOR, $tmp);
-
         $bat = $dirOutput . DIRECTORY_SEPARATOR . $filenamePost;
-
         file_put_contents($bat, '@echo OFF
     del ' . $encodedFile . '.zip /q
     "' . $patch7zip . '" a ' . $encodedFile . '.zip ' . $encodedFile . '\* ' . $ex . ' > nul
     rmdir ' . $encodedFile . ' /s /q
 	');
-        shell_exec("move $bat $ioncube_post_dir");
-
+        shell_exec($cmdsConfig[Helper::getSO()]['move'] . " $bat $ioncube_post_dir" . DIRECTORY_SEPARATOR . $filenamePost);
         sleep(0.2);
-
-        //## "C:\Program Files (x86)\WinSCP\WinSCP.exe"
+        echo "OK!";
 
         $command .= $ex;
 
-        echo "\n - Criando pacote ...";
+        echo "\n - Criando pacote ... ";
         shell_exec($command);
+        echo "OK!";
 
-        echo "\nLimpando arquivos ...";
-        shell_exec("del $fontes" . DIRECTORY_SEPARATOR . "*XPTO* /s > nul");
-        shell_exec("del $fontes" . DIRECTORY_SEPARATOR . "app" . DIRECTORY_SEPARATOR . "_45h" . DIRECTORY_SEPARATOR . "*.php > nul");
+        echo "\n - Limpando arquivos ... ";
+        $cmd = sprintf($cmdsConfig[Helper::getSO()]['clearFiles'], $fontes);
+        shell_exec($cmd);
+//        
+//        \NsUtil\DirectoryManipulation::openDir($fontes);
+//        $adapter = new \League\Flysystem\Adapter\Local($fontes);
+//        $fs = new \League\Flysystem\Filesystem($adapter);
+//        $list = $adapter->
+//        var_export($list);
+//        die();
+//        shell_exec("del $fontes" . DIRECTORY_SEPARATOR . "*XPTO* /s /q > nul");
+//        shell_exec("del $fontes" . DIRECTORY_SEPARATOR . "app" . DIRECTORY_SEPARATOR . "_45h" . DIRECTORY_SEPARATOR . "*.php > nul");
+        echo "OK!";
 
         // Abrir diretorio de saida
         $zipdir = explode(DIRECTORY_SEPARATOR, $zip);
         array_pop($zipdir);
         //shell_exec("explorer " . implode(DIRECTORY_SEPARATOR, $zipdir));
 
-        echo "\n Versao '$versao' criada com sucesso!  \n";
-        echo "------------- \n";
 
+        echo "";
+        // Criação do frontend
+        if (self::$createFrontendFiles === true) {
+            self::copyFilesToAppView($origem, $buildDir . '/@WebAPP');
+        }
+
+        // Criação do Dockerfile
+        self::dockerBuilder();
+
+        echo "\n\n ### Package '$versao' was created successfully!! ###"
+        . "\n--------------------------------------\n";
         return $projectName;
     }
 
     static function getZipExcluded() {
         return self::$zipExcluded;
+    }
+
+    static function copyFilesToAppView(string $applicationPath, string $destPath, bool $clearOldVersion = true): void {
+        echo "\n - Criando aplicação frontend local ...";
+        $listToCopy = ['view/css', 'view/images', 'view/fonts', 'view/audio', 'view/angular-file-upload-full_3', 'auto/components', 'node_modules', 'package.json'];
+
+        // Limpar instalações anteriores
+        if ($clearOldVersion && is_dir($destPath)) {
+            Helper::deleteDir($destPath);
+        }
+        Helper::mkdir($destPath);
+
+        // Copiar
+        $done = 0;
+        foreach ($listToCopy as $directory) {
+            echo "\n\t $directory ... ";
+            $src = $applicationPath . DIRECTORY_SEPARATOR . $directory;
+            $dst = $destPath . DIRECTORY_SEPARATOR . $directory;
+            Helper::directorySeparator($src);
+            Helper::directorySeparator($dst);
+            switch (true) {
+                case is_file($src) && file_exists($src):
+                    copy($src, $dst);
+                    echo ((file_exists($dst)) ? 'OK!' : 'ERROR!');
+                    break;
+                case is_dir($src):
+                    \NsUtil\DirectoryManipulation::recurseCopy($src, $dst);
+                    echo ((is_dir($dst)) ? 'OK!' : 'ERROR!');
+                    break;
+                default:
+                    echo " ERROR!";
+                    break;
+            }
+        }
+
+
+        // Copiar envs
+        $files = [
+            'auto/webapp.html' => 'index.html',
+            '_build/env/env.develop.js' => 'env.js',
+        ];
+        foreach ($files as $orig => $dest) {
+            $origem = $applicationPath . DIRECTORY_SEPARATOR . $orig;
+            $destino = $destPath . DIRECTORY_SEPARATOR . $dest;
+            Helper::directorySeparator($origem);
+            Helper::directorySeparator($destino);
+            if (is_file($origem)) {
+                copy($origem, $destino);
+            }
+        }
+    }
+
+    static function dockerBuilder(): void {
+        if (count(self::$dockerBuildParams) > 0) {
+            $arguments = '';
+            foreach (self::$dockerBuildParams['Args'] as $key => $val) {
+                $arguments .= " --build-arg $key=\"$val\"";
+            }
+
+            // Gerar imagem Docker local
+            echo "\n - Construindo imagem docker ... ";
+            $dockerCMD = 'docker build '
+                    . $arguments
+                    . " --quiet"
+                    . ' -t ' . self::$dockerBuildParams['Username'] . ":" . self::$dockerBuildParams['Tag']
+                    . ' '
+                    . self::$dockerBuildParams['Dockerfile']
+                    . '/.'
+            ;
+            exec($dockerCMD);
+            echo "OK!";
+        } else {
+            echo "\n - Docker Builder ERROR: para construir o docker, informe o método 'setDockerBuildParams'";
+        }
     }
 
 }
