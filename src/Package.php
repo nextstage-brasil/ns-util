@@ -436,9 +436,7 @@ class Package {
             ;
             exec($dockerCMD);
             echo "OK!";
-        } else {
-            echo "\n - Docker Builder ERROR: para construir o docker, informe o método 'setDockerBuildParams'";
-        }
+        } 
     }
 
 }
