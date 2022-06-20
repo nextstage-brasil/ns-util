@@ -431,8 +431,7 @@ class Package {
                     . " --quiet"
                     . ' -t ' . self::$dockerBuildParams['Username'] . ":" . self::$dockerBuildParams['Tag']
                     . ' '
-                    . self::$dockerBuildParams['Dockerfile']
-                    . '/.'
+                    . '"'.self::$dockerBuildParams['Dockerfile'].'/."'
             ;
             exec($dockerCMD);
             echo "OK!";
