@@ -20,11 +20,11 @@ class Package {
 
     /**
      * Prepara o cenário para execução do Dockerfile
-     * @param string $pathDockerfile
-     * @param string $dockerHubUser
-     * @param string $packageName
-     * @param string $tag
-     * @param array $args
+     * @param string $pathDockerfile Caminho absoluto para o arquivo Dockerfile
+     * @param string $dockerHubUser Nome do usuário no docker hub
+     * @param string $packageName nome do pacote. Ex.: myapp
+     * @param string $tag Versão da imagem
+     * @param array $args Argumentos para construção da imagem
      * @return void
      */
     public static function setDockerBuildParams(string $pathDockerfile, string $dockerHubUser, string $packageName, string $tag = 'latest', array $args = []): void {
