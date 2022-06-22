@@ -166,7 +166,7 @@ class Validate {
         return \NsUtil\Helper::validarCamposObrigatorios($campos);
     }
 
-    function is_luhn(string $n) {
+    public static function isLuhn(string $n) {
         $str = '';
         foreach (str_split(strrev((string) $n)) as $i => $d) {
             $str .= $i % 2 !== 0 ? $d * 2 : $d;
@@ -174,8 +174,8 @@ class Validate {
         return array_sum(str_split($str)) % 10 === 0;
     }
 
-    function isImei(string $n) : bool {
-        return is_luhn($n) && strlen($n) == 15;
+    public static function isImei(string $n) : bool {
+        return self::isLuhn($n) && strlen($n) == 15;
     }
 
 }
