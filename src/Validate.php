@@ -12,10 +12,10 @@ class Validate {
 
     public static function validaCpfCnpj($val) {
         $val = (string) (new Format($val))->parseInt();
-        if (strlen((string)$val) === 11) {
+        if (strlen((string) $val) === 11) {
             return self::validaCPF($val);
         }
-        if (strlen((string)$val) === 14) {
+        if (strlen((string) $val) === 14) {
             return self::validaCnpj($val);
         }
         return 'Preencha corretamente CPF/CNPJ';
@@ -29,7 +29,7 @@ class Validate {
         // Elimina possivel mascara
         $cpf = (new Format($cpf))->parseInt();
         // Verifica se o numero de digitos informados é igual a 11 
-        if (strlen((string)$cpf) != 11) {
+        if (strlen((string) $cpf) != 11) {
             return 'CPF Inválido: Menor que 11 digitos';
         }
         // Verifica se nenhuma das sequências invalidas abaixo 
@@ -68,7 +68,7 @@ class Validate {
         if (empty($cnpj) || $cnpj === '') {
             return 'CNPJ Inválido: Vazio';
         }
-        if (strlen((string)$cnpj) != 14) {
+        if (strlen((string) $cnpj) != 14) {
             return 'CNPJ Inválido: Menor que 14 digitos';
         }
         if ($cnpj === '00000000000000') {
@@ -76,14 +76,14 @@ class Validate {
         }
         $cnpj = (string) $cnpj;
         $cnpj_original = $cnpj;
-        $primeiros_numeros_cnpj = substr((string)$cnpj, 0, 12);
+        $primeiros_numeros_cnpj = substr((string) $cnpj, 0, 12);
         if (!function_exists('multiplica_cnpj')) {
 
             function multiplica_cnpj($cnpj, $posicao = 5) {
                 // Variável para o cálculo
                 $calculo = 0;
                 // Laço para percorrer os item do cnpj
-                for ($i = 0; $i < strlen((string)$cnpj); $i++) {
+                for ($i = 0; $i < strlen((string) $cnpj); $i++) {
                     // Cálculo mais posição do CNPJ * a posição
                     $calculo = $calculo + ( $cnpj[$i] * $posicao );
                     // Decrementa a posição a cada volta do laço
@@ -157,13 +157,25 @@ class Validate {
             $api->error($error);
         }
     }
-    
-    public function getValidadeAsArray(array $data) : array   {
-         $campos = [];
+
+    public function getValidadeAsArray(array $data): array {
+        $campos = [];
         foreach ($this->obrigatorios['list'] as $item) {
             $campos[] = ['key' => $item['key'], 'value' => $data[$item['key']], 'msg' => $item['msg'], 'type' => $item['type']];
         }
         return \NsUtil\Helper::validarCamposObrigatorios($campos);
+    }
+
+    function is_luhn(string $n) {
+        $str = '';
+        foreach (str_split(strrev((string) $n)) as $i => $d) {
+            $str .= $i % 2 !== 0 ? $d * 2 : $d;
+        }
+        return array_sum(str_split($str)) % 10 === 0;
+    }
+
+    function isImei(string $n) : bool {
+        return is_luhn($n) && strlen($n) == 15;
     }
 
 }
