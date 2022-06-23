@@ -367,9 +367,20 @@ class Package {
         return self::$zipExcluded;
     }
 
-    static function copyFilesToAppView(string $applicationPath, string $destPath, bool $clearOldVersion = true): void {
+    /**
+     * 
+     * @param string $applicationPath Caminho absoluto da raiz da aplicação
+     * @param string $destPath Caminho absoluto para salvar os arquivos
+     * @param array $pathsToCopy Diretorios a ser copiados, com razao a partir da raiz. Ex.: ['view/images', 'view/css']
+     * @param bool $clearOldVersion Se deve limpar o diretório destino antes de iniciar
+     * @return void
+     */
+    static function copyFilesToAppView(string $applicationPath, string $destPath, array $pathsToCopy = [], bool $clearOldVersion = true): void {
         echo "\n - Criando aplicação frontend local ...";
-        $listToCopy = ['view/css', 'view/images', 'view/fonts', 'view/audio', 'view/angular-file-upload-full_3', 'auto/components', 'node_modules', 'package.json'];
+        $listToCopy = array_merge(
+                ['view/css', 'view/images', 'view/fonts', 'view/audio', 'view/angular-file-upload-full_3', 'auto/components', 'node_modules', 'package.json']
+                , $pathsToCopy
+        );
 
         // Limpar instalações anteriores
         if ($clearOldVersion && is_dir($destPath)) {
@@ -431,11 +442,11 @@ class Package {
                     . " --quiet"
                     . ' -t ' . self::$dockerBuildParams['Username'] . ":" . self::$dockerBuildParams['Tag']
                     . ' '
-                    . '"'.self::$dockerBuildParams['Dockerfile'].'/."'
+                    . '"' . self::$dockerBuildParams['Dockerfile'] . '/."'
             ;
             exec($dockerCMD);
             echo "OK!";
-        } 
+        }
     }
 
 }
