@@ -177,7 +177,7 @@ timeout /t 15";
          - alias composer="php composer.phar"
     script:
         # Preparar pacote
-        - sh ./_build/install/deploy/script/zipCommandToCI.sh
+        - sh ./_build/install/deploy/scripts/zipCommandToCI.sh
 
         # Enviar arquivos
         - scp -p $CI_COMMIT_SHA.zip ' . $sshUserDeployer . '@' . $sshHost . ':' . $sshPath . '/build/$PACKAGE_NAME
