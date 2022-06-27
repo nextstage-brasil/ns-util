@@ -45,7 +45,7 @@ class Helper {
         preg_match_all('/./u', $to, $values);
         $mapping = array_combine($keys[0], $values[0]);
         $str = strtr($str, $mapping);
-        $str = preg_replace("/[^A-Za-z0-9]/", "_", (string)$str);
+        $str = preg_replace("/[^A-Za-z0-9]/", "_", (string) $str);
         return $str;
         //return str_replace(" ", "_", preg_replace("/&([a-z])[a-z]+;/i", "$1", htmlentities(trim($str))));
         //return str_replace(" ", "_", preg_replace("/&([a-z])[a-z]+;/i", "$1", htmlentities(trim($str))));
@@ -620,7 +620,7 @@ class Helper {
      * @return boolean
      */
     public static function isMobile() {
-        return preg_match("/(android|avantgo|blackberry|bolt|boost|cricket|docomo|fone|hiptop|mini|mobi|palm|phone|pie|tablet|up\.browser|up\.link|webos|wos)/i", (string)$_SERVER["HTTP_USER_AGENT"]);
+        return preg_match("/(android|avantgo|blackberry|bolt|boost|cricket|docomo|fone|hiptop|mini|mobi|palm|phone|pie|tablet|up\.browser|up\.link|webos|wos)/i", (string) $_SERVER["HTTP_USER_AGENT"]);
     }
 
     public static function getIP(): string {
@@ -664,6 +664,18 @@ class Helper {
      * @return type
      */
     public static function array2csv(array $array, $filepath = false, bool $withBom = true) {
+        // Manter o padrão entre as chaves
+        $trataed = [];
+        $keys = array_keys($array[0]);
+        foreach ($array as $val) {
+            $ni = [];
+            foreach ($keys as $k) {
+                $ni[$k] = $val[$k];
+            }
+            $trataed[] = $ni;
+        }
+        $array = $trataed;
+
         $delimiter = ';';
         if ($filepath) {
             $fp = fopen($filepath, 'w');
