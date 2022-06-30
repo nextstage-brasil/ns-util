@@ -169,7 +169,7 @@ class Format {
 
         if ($prefixo) {
             $prefixo = '<strong><small>' .
-                    (($prefixo !== true) ? $prefixo : $_SESSION['igreja']['extras_igreja']->currency)
+                    (($prefixo !== true) ? $prefixo : 'R$')
                     . '</small> </strong> ';
         }
         $out = $prefixo . number_format((double) $number, 2, ',', '.');
