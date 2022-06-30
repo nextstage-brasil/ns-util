@@ -173,8 +173,9 @@ timeout /t 15";
     only:
         - ' . $branchName . '
     before_script:
-         - sh ./_build/install/deploy/scripts/before_php.sh
-         - alias composer="php composer.phar"
+         - sh ./_build/install/deploy/scripts/before_simple.sh
+         #- sh ./_build/install/deploy/scripts/before_php.sh
+         #- alias composer="php composer.phar"
     script:
         # Preparar pacote
         - sh ./_build/install/deploy/scripts/zipCommandToCI.sh
