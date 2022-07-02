@@ -389,7 +389,6 @@ class Package {
         Helper::mkdir($destPath);
 
         // Copiar
-        $done = 0;
         foreach ($listToCopy as $directory) {
             echo "\n\t $directory ... ";
             $src = $applicationPath . DIRECTORY_SEPARATOR . $directory;
@@ -426,6 +425,9 @@ class Package {
                 copy($origem, $destino);
             }
         }
+
+        echo "\n\t OK! Frontend files is created!";
+        sleep(5);
     }
 
     static function dockerBuilder(): void {
