@@ -122,6 +122,7 @@ class Package {
         //        $filegit = $ret['path'] . '/__git.bat';
         //        Helper::saveFile($filegit, false, $template, 'SOBREPOR');
         shell_exec($ret['bat']);
+        return $ret;
     }
 
     /**
@@ -427,7 +428,7 @@ class Package {
         }
 
         echo "\n\t OK! Frontend files is created!";
-        sleep(5);
+        sleep(2);
     }
 
     static function dockerBuilder(): void {

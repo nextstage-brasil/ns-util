@@ -98,7 +98,7 @@ class ConnectionPostgreSQL {
             $this->result = false;
             $this->result = false;
             if (stripos($exc->getMessage(), 'ERROR:  function unaccent') > -1) {
-                die('DEV:  A EXTESÃO UNNACCENT NÃO FOI INSTALADA');
+                die('DEV:  A EXTENSÃO UNNACCENT NÃO FOI INSTALADA');
             }
             throw new Exception($exc->getMessage());
         }
