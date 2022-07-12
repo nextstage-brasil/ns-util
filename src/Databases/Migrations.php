@@ -53,7 +53,7 @@ class Migrations {
         return $this;
     }
 
-    public function update() {
+    public function update(): array {
         $files = DirectoryManipulation::openDir($this->sqlFilePath);
         $this->con->begin_transaction();
         $loader = new \NsUtil\StatusLoader(count($files), 'Migrations');
@@ -76,15 +76,14 @@ class Migrations {
                     $this->con->executeQuery("INSERT INTO _dbupdater._migrations (hash) VALUES ('$hash')");
                 } catch (Exception $exc) {
                     $this->con->rollback();
-                    echo $exc->getMessage();
-                    echo $exc->getTraceAsString();
-                    die();
+                    return ['error' => $exc->getMessage(), 'details' => $exc->getTraceAsString()];
                 }
             }
             $done++;
             $loader->done($done);
         }
         $this->con->commit();
+        return ['error' => false];
     }
 
 }
