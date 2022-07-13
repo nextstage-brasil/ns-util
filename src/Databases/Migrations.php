@@ -36,7 +36,7 @@ class Migrations {
         return \hash('sha256', $string);
     }
 
-    public function create(string $name, string $sql): Migrations {
+    public function create(string $name, string $sql, bool $includeDate = true): Migrations {
         // Verificar se já existe
         $files = DirectoryManipulation::openDir($this->sqlFilePath);
         $exists = false;
@@ -47,7 +47,7 @@ class Migrations {
             }
         }
         if (!$exists) {
-            $filename = $this->sqlFilePath . DIRECTORY_SEPARATOR . date('ymdHi') . '_' . $name . '.nsUtilDB';
+            $filename = $this->sqlFilePath . DIRECTORY_SEPARATOR . (($includeDate) ? date('ymdHi') . '_' : '') . $name . '.nsUtilDB';
             file_put_contents($filename, $sql);
             echo "\n$name was successfully created!";
         }
@@ -72,12 +72,12 @@ class Migrations {
             die("File not exists: $filepath");
         }
         $content = file_get_contents($filepath);
-        $this->create('aaa-0000-ns-ddl-execute', "CREATE OR REPLACE PROCEDURE public.ns_ddl_execute(query text) LANGUAGE plpgsql AS
+        $this->create('0000-aaa-ns-ddl-execute', "CREATE OR REPLACE PROCEDURE public.ns_ddl_execute(query text) LANGUAGE plpgsql AS
                                             \$procedure\$
                                                     begin
                                                             execute query;
                                                     END;
-                                            \$procedure\$;");
+                                            \$procedure\$;", false);
         return "call ns_ddl_execute('" . str_replace("'", "''", $content) . "')";
     }
 
