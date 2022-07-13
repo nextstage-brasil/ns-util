@@ -46,7 +46,7 @@ class Migrations {
             }
         }
         if (!$exists) {
-            $filename = $this->sqlFilePath . DIRECTORY_SEPARATOR . date('YmdHis') . '-' . $name . '.nsUtilDB';
+            $filename = $this->sqlFilePath . DIRECTORY_SEPARATOR . date('ymdHi') . '-' . $name . '.nsUtilDB';
             file_put_contents($filename, $sql);
             echo "\n$name was successfully created!";
         }
