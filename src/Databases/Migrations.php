@@ -28,7 +28,7 @@ class Migrations {
 
         // Criar tabela se não existir
         $this->con->executeQuery("CREATE SCHEMA IF NOT EXISTS _dbupdater");
-        $sql = 'CREATE TABLE IF NOT EXISTS _dbupdater._migrations (hash text NULL,created_at timestamp NULL DEFAULT now())';
+        $sql = 'CREATE TABLE IF NOT EXISTS _dbupdater._migrations (name text, hash text NULL,created_at timestamp NULL DEFAULT now())';
         $this->con->executeQuery($sql);
     }
 
@@ -46,7 +46,7 @@ class Migrations {
             }
         }
         if (!$exists) {
-            $filename = $this->sqlFilePath . DIRECTORY_SEPARATOR . date('ymdHi') . '-' . $name . '.nsUtilDB';
+            $filename = $this->sqlFilePath . DIRECTORY_SEPARATOR . date('ymdHi') . '_' . $name . '.nsUtilDB';
             file_put_contents($filename, $sql);
             echo "\n$name was successfully created!";
         }
@@ -64,7 +64,10 @@ class Migrations {
             if (stripos($file, '.nsUtilDB') !== false) {
 
                 // Verificar se a instrução já foi executada
-                $hash = $this->getHash($file);
+                $parts = explode('_', $file);
+                array_shift($parts);
+                $hash = $this->getHash(implode('_', $parts));
+
                 if ((int) $this->con->execQueryAndReturn("select count(*) as qtde from _dbupdater._migrations where hash= '$hash'")[0]['qtde'] > 0) {
                     continue;
                 }
@@ -73,7 +76,7 @@ class Migrations {
                 $sql = file_get_contents($this->sqlFilePath . DIRECTORY_SEPARATOR . $file);
                 try {
                     $this->con->executeQuery($sql);
-                    $this->con->executeQuery("INSERT INTO _dbupdater._migrations (hash) VALUES ('$hash')");
+                    $this->con->executeQuery("INSERT INTO _dbupdater._migrations (name,hash) VALUES ('$file', '$hash')");
                 } catch (Exception $exc) {
                     $this->con->rollback();
                     return ['error' => $exc->getMessage(), 'details' => $exc->getTraceAsString()];
