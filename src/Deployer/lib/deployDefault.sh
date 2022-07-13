@@ -110,6 +110,12 @@ if [ -f "$DIR/www/package.json" ]; then
     cd $DIR
 fi
 
+# Migrations
+if [ -d "$DIR/www/_migrations" ]; then
+    echo "- Permissão da pasta para versionamento de banco"
+    chmod 0777 -R "$DIR/www/_migrations"
+fi
+
 
 # Manter somente as 2 ultimas versoes
 echo "- Remover releases anteriores"
