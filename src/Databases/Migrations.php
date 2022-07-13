@@ -72,7 +72,7 @@ class Migrations {
             die("File not exists: $filepath");
         }
         $content = file_get_contents($filepath);
-        $this->create('00000-ns-ddl-execute', "CREATE OR REPLACE PROCEDURE public.ns_ddl_execute(query text) LANGUAGE plpgsql AS
+        $this->create('aaa-0000-ns-ddl-execute', "CREATE OR REPLACE PROCEDURE public.ns_ddl_execute(query text) LANGUAGE plpgsql AS
                                             \$procedure\$
                                                     begin
                                                             execute query;
