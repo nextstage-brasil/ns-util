@@ -40,6 +40,7 @@ class Migrations {
         // Verificar se já existe
         $files = DirectoryManipulation::openDir($this->sqlFilePath);
         $exists = false;
+        $name = str_replace(' ', '-', Helper::sanitize($name));
         foreach ($files as $file) {
             if (stripos($file, $name) !== false) {
                 $exists = true;
@@ -51,6 +52,33 @@ class Migrations {
             echo "\n$name was successfully created!";
         }
         return $this;
+    }
+
+    public function createByArray(array $list): Migrations {
+        $counter = 1;
+        foreach ($list as $title => $sql) {
+            $prefix = str_pad((string) $counter, 4, '0', STR_PAD_LEFT);
+            if (is_file($sql)) {
+                $sql = $this->getContentBySQLFileToNsDDLExecute($sql);
+            }
+            $this->create($prefix . '-' . $title, $sql);
+            $counter++;
+        }
+        return $this;
+    }
+
+    public function getContentBySQLFileToNsDDLExecute($filepath): string {
+        if (!file_exists($filepath)) {
+            die("File not exists: $filepath");
+        }
+        $content = file_get_contents($filepath);
+        $this->create('00000-ns-ddl-execute', "CREATE OR REPLACE PROCEDURE public.ns_ddl_execute(query text) LANGUAGE plpgsql AS
+                                            \$procedure\$
+                                                    begin
+                                                            execute query;
+                                                    END;
+                                            \$procedure\$;");
+        return "call ns_ddl_execute('" . str_replace("'", "''", $content) . "')";
     }
 
     public function update(): array {
