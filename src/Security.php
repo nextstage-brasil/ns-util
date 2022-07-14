@@ -19,7 +19,7 @@ class Security {
 
     public static function getUrlOfFileInDisc($filepath) {
         $env = getenv('DOCKER_PHP_FILES_DIR');
-        $root = ((null !== $env) ? $env : $_SERVER['DOCUMENT_ROOT']);
+        $root = ((false !== $env) ? $env : $_SERVER['DOCUMENT_ROOT']);
         $dr = str_replace("\\", '/', realpath($root));
         $dir = str_replace("\\", '/', $filepath);
         $path = str_replace($dr, '', $dir);
