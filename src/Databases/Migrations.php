@@ -30,6 +30,14 @@ class Migrations {
         $this->con->executeQuery("CREATE SCHEMA IF NOT EXISTS _dbupdater");
         $sql = 'CREATE TABLE IF NOT EXISTS _dbupdater._migrations (name text, hash text NULL,created_at timestamp NULL DEFAULT now())';
         $this->con->executeQuery($sql);
+
+        // Criação da função basica de execução
+        $this->con->executeQuery("CREATE OR REPLACE PROCEDURE public.ns_ddl_execute(query text) LANGUAGE plpgsql AS
+                                            \$procedure\$
+                                                    begin
+                                                            execute query;
+                                                    END;
+                                            \$procedure\$;");
     }
 
     private function getHash(string $string): string {
@@ -72,12 +80,6 @@ class Migrations {
             die("File not exists: $filepath");
         }
         $content = file_get_contents($filepath);
-        $this->create('0000-aaa-ns-ddl-execute', "CREATE OR REPLACE PROCEDURE public.ns_ddl_execute(query text) LANGUAGE plpgsql AS
-                                            \$procedure\$
-                                                    begin
-                                                            execute query;
-                                                    END;
-                                            \$procedure\$;", false);
         return "call ns_ddl_execute('" . str_replace("'", "''", $content) . "')";
     }
 
