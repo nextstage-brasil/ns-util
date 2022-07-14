@@ -18,11 +18,13 @@ class Security {
     }
 
     public static function getUrlOfFileInDisc($filepath) {
-        $protocol = 'https://'; //stripos($_SERVER['SERVER_PROTOCOL'], 'https') === 0 ? 'https://' : 'http://';
-        $dr = str_replace("\\", '/', realpath($_SERVER['DOCUMENT_ROOT']));
+        $env = getenv('DOCKER_PHP_FILES_DIR');
+        $root = ((null !== $env) ? $env : $_SERVER['DOCUMENT_ROOT']);
+        $dr = str_replace("\\", '/', realpath($root));
         $dir = str_replace("\\", '/', $filepath);
         $path = str_replace($dr, '', $dir);
-        return $protocol . $_SERVER['HTTP_HOST'] .  $path;
+        
+        return $_SERVER['REQUEST_SCHEME'] .'://'. $_SERVER['HTTP_HOST'] . $path;
     }
 
     public static function includeJSFromUrl(array $js) {
@@ -44,7 +46,7 @@ class Security {
                     self::getUrlOfFileInDisc(__DIR__ . '/lib/js/crypto.js'),
                     self::getUrlOfFileInDisc(__DIR__ . '/lib/js/fingerprint_util.js'),
         ]);
-        $iv = substr((string)hash('md5', $chave . '_IV'), 0, 16);
+        $iv = substr((string) hash('md5', $chave . '_IV'), 0, 16);
         $js = ""
                 . "var _NSC118= '$chave';"
                 . "var _NSIV = '$iv';"
@@ -87,13 +89,13 @@ class Security {
         $iv = hex2bin($jsondata["iv"]);
         $concatedPassphrase = $passphrase . $salt;
         $md5 = array();
-        $md5[0] = md5((string)$concatedPassphrase, true);
+        $md5[0] = md5((string) $concatedPassphrase, true);
         $result = $md5[0];
         for ($i = 1; $i < 3; $i++) {
-            $md5[$i] = md5((string)$md5[$i - 1] . $concatedPassphrase, true);
+            $md5[$i] = md5((string) $md5[$i - 1] . $concatedPassphrase, true);
             $result .= $md5[$i];
         }
-        $key = substr((string)$result, 0, 32);
+        $key = substr((string) $result, 0, 32);
         $data = openssl_decrypt($ct, 'aes-256-cbc', $key, true, $iv);
         return json_decode($data, true);
     }
@@ -110,12 +112,12 @@ class Security {
         $salt = openssl_random_pseudo_bytes(8);
         $salted = '';
         $dx = '';
-        while (strlen((string)$salted) < 48) {
-            $dx = md5((string)$dx . $passphrase . $salt, true);
+        while (strlen((string) $salted) < 48) {
+            $dx = md5((string) $dx . $passphrase . $salt, true);
             $salted .= $dx;
         }
-        $key = substr((string)$salted, 0, 32);
-        $iv = substr((string)$salted, 32, 16);
+        $key = substr((string) $salted, 0, 32);
+        $iv = substr((string) $salted, 32, 16);
         $encrypted_data = openssl_encrypt(json_encode($value), 'aes-256-cbc', $key, true, $iv);
         $data = array("ct" => base64_encode($encrypted_data), "iv" => bin2hex($iv), "s" => bin2hex($salt));
         return json_encode($data);
