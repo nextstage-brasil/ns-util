@@ -7,9 +7,11 @@
 namespace NsUtil\Databases;
 
 use Exception;
+use NsUtil\Config;
 use NsUtil\ConnectionPostgreSQL;
 use NsUtil\DirectoryManipulation;
 use NsUtil\Helper;
+use NsUtil\StatusLoader;
 
 class Migrations {
 
@@ -86,7 +88,7 @@ class Migrations {
     public function update(): array {
         $files = DirectoryManipulation::openDir($this->sqlFilePath);
         $this->con->begin_transaction();
-        $loader = new \NsUtil\StatusLoader(count($files), 'Migrations');
+        $loader = new StatusLoader(count($files), 'Migrations');
         $loader->setShowQtde(true);
         $done = 0;
         foreach ($files as $file) {
@@ -118,6 +120,42 @@ class Migrations {
         }
         $this->con->commit();
         return ['error' => false];
+    }
+
+    public static function builder(string $pathAplicacao, array $arrayMigrations, array $conPreQuerys = []) {
+        $config = new Config();
+        $config->loadEnvFile(Helper::fileSearchRecursive('.env', $pathAplicacao));
+        $con = new ConnectionPostgreSQL($config->get('DBHOST'), $config->get('DBUSER'), $config->get('DBPASS'), $config->get('DBPORT'), $config->get('DBNAME'));
+        foreach ($conPreQuerys as $q) {
+            $con->executeQuery($q);
+        }
+        $migrations = (new Migrations($pathAplicacao . '/_migrations', $con))
+                ->createByArray($arrayMigrations)
+                ->update()
+        ;
+        return $migrations;
+    }
+
+    public static function run(string $pathAplicacao, array $conPreQuerys = [], bool $removeDirAfterSuccess = false): array {
+        $dirMigrations = \realpath($pathAplicacao) . '/_migrations';
+        $migrations = [];
+        if (is_dir($dirMigrations)) {
+            ob_start();
+            $config = new Config();
+            $config->loadEnvFile(Helper::fileSearchRecursive('.env', $pathAplicacao));
+            $con = new ConnectionPostgreSQL($config->get('DBHOST'), $config->get('DBUSER'), $config->get('DBPASS'), $config->get('DBPORT'), $config->get('DBNAME'));
+            $migrations = (new Migrations($pathAplicacao . '/_migrations', $con))
+                    ->update()
+            ;
+            if ($migrations['error'] === false && $removeDirAfterSuccess) {
+                Helper::deleteDir($dirMigrations);
+                if (is_dir($dirMigrations)) {
+                    rename($dirMigrations, __DIR__ . '/../../_____rem');
+                }
+            }
+            ob_end_clean();
+        }
+        return $migrations;
     }
 
 }
