@@ -12,6 +12,7 @@ class Api {
     private $config = [];
     private $router;
     private $simpleReturn = false; // Utilizado para deinfir se aapenas retornar o conteudo ou encerrar a aplicação
+    private $successCallback;
 
     // [Informational 1xx]
     const HTTP_CONTINUE = 100;
@@ -238,6 +239,11 @@ class Api {
         // Caso seja um desses códigos, nem imprimir nada
         if (array_search($this->responseCode, [501]) === false) {
             echo json_encode($this->responseData, JSON_UNESCAPED_SLASHES);
+
+            // Executar função anonima caso exista
+            if (is_callable($this->successCallback)) {
+                call_user_func($this->successCallback, $this->responseData);
+            }
         }
 
         die();
@@ -404,6 +410,10 @@ class Api {
                 http_response_code(Api::HTTP_NOT_IMPLEMENTED);
                 die();
         }
+    }
+
+    public function setSuccessCallback($successCallback): void {
+        $this->successCallback = $successCallback;
     }
 
 }
