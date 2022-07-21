@@ -233,7 +233,7 @@ class Package {
 
         echo "\n - Construindo aplicacao ... ";
         $ret = Helper::curlCall("$urlLocalApplication/$build/builder.php?pack=true", [], 'GET', [], false, (60 * 10));
-        if ((int) $ret->status !== 200) {
+        if ((int) $ret->status !== 200 || stripos(json_encode($ret), 'Fatal error') !== false) {
             var_export($ret);
             die("\n################## ERROR!!: #################### \n\n STATUS BUILDER <> 200 \n\n###########################################\n");
         }
@@ -241,7 +241,7 @@ class Package {
 
         echo "\n - Construindo JS e Componentes ... ";
         $ret = Helper::curlCall("$urlLocalApplication/$build/compile.php?pack=true&compileToBuild=YES&recompile=ALL", [], 'GET', [], false, (60 * 10));
-        if ((int) $ret->status !== 200) {
+        if ((int) $ret->status !== 200 || stripos(json_encode($ret), 'Fatal error') !== false) {
             var_export($ret);
             die("\n################## ERROR!!: #################### \n\n STATUS COMPILE <> 200 \n\n###########################################\n");
         }
