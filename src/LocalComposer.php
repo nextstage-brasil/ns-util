@@ -45,6 +45,7 @@ class LocalComposer {
             $loader->done($done);
         }
         echo PHP_EOL;
+        echo "Vendor: $vendor".PHP_EOL;
         $log->display();
     }
 
