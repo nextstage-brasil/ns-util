@@ -27,9 +27,9 @@ class Migrations {
         if (!is_dir($this->sqlFilePath)) {
             Helper::mkdir($path);
         }
-        
+
         // HTAccess de proteção do apache
-        Helper::saveFile($this->sqlFilePath.'/.htaccess', false, "Require all denied", 'SOBREPOR');
+        Helper::saveFile($this->sqlFilePath . '/.htaccess', false, "Require all denied", 'SOBREPOR');
 
         // Criar tabela se não existir
         $this->con->executeQuery("CREATE SCHEMA IF NOT EXISTS _dbupdater");
@@ -97,15 +97,14 @@ class Migrations {
         foreach ($files as $file) {
             // somente arquivos desta classe
             if (stripos($file, '.nsUtilDB') !== false) {
-
                 // Verificar se a instrução já foi executada
                 $parts = explode('_', $file);
                 array_shift($parts);
                 $hash = $this->getHash(implode('_', $parts));
 
                 if ((int) $this->con->execQueryAndReturn("select count(*) as qtde from _dbupdater._migrations where hash= '$hash'")[0]['qtde'] > 0) {
-                    $loader->done($done);
                     $done++;
+                    $loader->done($done);
                     continue;
                 }
 
