@@ -27,6 +27,9 @@ class Migrations {
         if (!is_dir($this->sqlFilePath)) {
             Helper::mkdir($path);
         }
+        
+        // HTAccess de proteção do apache
+        Helper::saveFile($this->sqlFilePath.'/.htaccess', false, "Require all denied", 'SOBREPOR');
 
         // Criar tabela se não existir
         $this->con->executeQuery("CREATE SCHEMA IF NOT EXISTS _dbupdater");
