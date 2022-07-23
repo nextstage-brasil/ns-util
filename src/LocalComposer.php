@@ -14,7 +14,7 @@ class LocalComposer {
      * @param string $src
      * @return void
      */
-    public function __invoke(string $src, array $LOCAL_PROJECTS): void {
+    public function __invoke(string $src, array $LOCAL_PROJECTS, string $vendor = 'nextstage-brasil/ns-util'): void {
         if (!is_dir($src)) {
             die("SRC $src is not a directory");
         }
@@ -25,7 +25,7 @@ class LocalComposer {
         foreach ($LOCAL_PROJECTS as $projeto) {
             if (is_dir($projeto)) {
                 Helper::directorySeparator($projeto);
-                $dst = $projeto . "/vendor/nextstage-brasil/ns-util/src";
+                $dst = $projeto . "/vendor/$vendor/src";
                 $exists = is_dir($dst);
                 Helper::directorySeparator($dst);
 

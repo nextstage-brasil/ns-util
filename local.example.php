@@ -7,5 +7,5 @@ $LOCAL_PROJECTS = [
     $pathDefault . '/my-application',
 ];
 $src = realpath(__DIR__) . DIRECTORY_SEPARATOR . 'src';
-(new \NsUtil\LocalComposer())($src, $LOCAL_PROJECTS);
-
+$vendor = 'nextstage-brasil/ns-util';
+(new \NsUtil\LocalComposer())($src, $LOCAL_PROJECTS, $vendor);
