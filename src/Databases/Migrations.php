@@ -104,6 +104,7 @@ class Migrations {
                 $hash = $this->getHash(implode('_', $parts));
 
                 if ((int) $this->con->execQueryAndReturn("select count(*) as qtde from _dbupdater._migrations where hash= '$hash'")[0]['qtde'] > 0) {
+                    $loader->done($done);
                     $done++;
                     continue;
                 }
