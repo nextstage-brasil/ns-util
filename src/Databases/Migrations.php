@@ -141,7 +141,7 @@ class Migrations {
 
     public static function run(string $pathAplicacao, array $conPreQuerys = [], bool $removeDirAfterSuccess = false): array {
         $dirMigrations = \realpath($pathAplicacao) . '/_migrations';
-        $migrations = [];
+        $migrations = ['error' => "Path is not found $dirMigrations"];
         if (is_dir($dirMigrations)) {
             ob_start();
             $config = new Config();
