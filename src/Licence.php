@@ -48,30 +48,32 @@ class Licence {
      * @return type
      */
     public function read($licenceFile, $dieIfNotExists = true) {
-// varredura em busca do arquivo
-        $dirarray = explode(DIRECTORY_SEPARATOR, __DIR__);
-        $filename = implode(DIRECTORY_SEPARATOR, $dirarray) . DIRECTORY_SEPARATOR . $licenceFile;
-        $count = 0;
-        while (!file_exists($filename) && $count < 10) { // paths acima
-            array_pop($dirarray);
+        if (file_exists($licenceFile)) {
+            $filename = $licenceFile;
+        } else {
+            // varredura em busca do arquivo
+            $dirarray = explode(DIRECTORY_SEPARATOR, __DIR__);
             $filename = implode(DIRECTORY_SEPARATOR, $dirarray) . DIRECTORY_SEPARATOR . $licenceFile;
-            $count++;
-        }
-
-        $filename = realpath($filename);
-        if (!file_exists($filename)) {
-            if (!$dieIfNotExists) {
-                return null;
+            $count = 0;
+            while (!file_exists($filename) && $count < 10) { // paths acima
+                array_pop($dirarray);
+                $filename = implode(DIRECTORY_SEPARATOR, $dirarray) . DIRECTORY_SEPARATOR . $licenceFile;
+                $count++;
             }
-
-            die("NsLicence: Arquivo não localizado: $licenceFile");
+            $filename = realpath($filename);
+            if (!file_exists($filename)) {
+                if (!$dieIfNotExists) {
+                    return null;
+                }
+                die("NsLicence: Arquivo não localizado: $licenceFile");
+            }
         }
 
 // decodificar config
         $string = file_get_contents($filename);
         $config = $this->crypto->decrypt($string);
-        $md5 = substr((string)$config, 0, 64);
-        $code = substr((string)$config, 64);
+        $md5 = substr((string) $config, 0, 64);
+        $code = substr((string) $config, 64);
         $pre = $this->crypto->getHash($code);
 
 // validação que o código não foi alterado
