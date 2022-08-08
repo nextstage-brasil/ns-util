@@ -342,7 +342,7 @@ class Api {
      * @return string
      */
     public function getTokenFromAuthorizationHeaders(): string {
-        return (string) substr((string) $this->getHeaders()['Authorization'], 6);
+        return (string) trim(substr((string) $this->getHeaders()['Authorization'], 6));
     }
 
     function getResponseData() {
