@@ -24,6 +24,9 @@ class Assync {
         if ($verboseTitle) {
             $this->verbose = $verboseTitle;
         }
+        if (\NsUtil\Helper::getSO() === 'windows') {
+            throw new Exception('NSUtil::Assync ERROR: Only linux systems can use this class!');
+        }
         $this->status = new \NsUtil\StatusLoader(count($this->list), 'NsPHPAssync');
     }
 
