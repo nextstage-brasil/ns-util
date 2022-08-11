@@ -1001,4 +1001,31 @@ class Helper {
         $out['pagination']['lastPage'] = $out['pagination']['totalPages'];
     }
 
+    /**
+     * @return string
+     */
+    public function getTmpDir(): string {
+        // @codeCoverageIgnoreStart
+        if (function_exists('sys_get_temp_dir')) {
+            $tmp = sys_get_temp_dir();
+        } elseif (!empty($_SERVER['TMP'])) {
+            $tmp = $_SERVER['TMP'];
+        } elseif (!empty($_SERVER['TEMP'])) {
+            $tmp = $_SERVER['TEMP'];
+        } elseif (!empty($_SERVER['TMPDIR'])) {
+            $tmp = $_SERVER['TMPDIR'];
+        } else {
+            $tmp = getcwd();
+        }
+
+        return $tmp;
+    }
+
+    /**
+     * @return string
+     */
+    public function getHost(): string {
+        return php_uname('n');
+    }
+
 }
