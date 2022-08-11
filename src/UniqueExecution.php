@@ -9,7 +9,8 @@ class UniqueExecution {
 
     private $con, $ref;
 
-    public function __construct(string $dbName='defaultApplication', string $pathToDB = '/tmp') {
+    public function __construct(string $dbName = 'defaultApplication', string $pathToDB = '/tmp') {
+        $pathToDB = (($pathToDB === '/tmp') ? Helper::getTmpDir() : $pathToDB);
         $this->con = new SQLite($pathToDB . '/' . 'NSUniqueExecution');
         $this->ref = $dbName;
         $this->createDB();

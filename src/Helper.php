@@ -1004,7 +1004,7 @@ class Helper {
     /**
      * @return string
      */
-    public function getTmpDir(): string {
+    public static function getTmpDir(): string {
         // @codeCoverageIgnoreStart
         if (function_exists('sys_get_temp_dir')) {
             $tmp = sys_get_temp_dir();
@@ -1024,7 +1024,7 @@ class Helper {
     /**
      * @return string
      */
-    public function getHost(): string {
+    public static function getHost(): string {
         return php_uname('n');
     }
 
