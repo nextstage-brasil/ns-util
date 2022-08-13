@@ -146,7 +146,10 @@ class Migrations {
             if (is_dir($dirMigrations)) {
                 ob_start();
                 $config = new Config();
-                $config->loadEnvFile(Helper::fileSearchRecursive('.env', $pathAplicacao));
+                $inifile = Helper::fileSearchRecursive('.env', $pathAplicacao);
+                if (file_exists($inifile)) {
+                    $config->loadEnvFile($inifile);
+                }
                 $con = new ConnectionPostgreSQL($config->get('DBHOST'), $config->get('DBUSER'), $config->get('DBPASS'), $config->get('DBPORT'), $config->get('DBNAME'));
                 $migrations = (new Migrations($pathAplicacao . '/_migrations', $con))
                         ->update()
