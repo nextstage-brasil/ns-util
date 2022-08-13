@@ -2,6 +2,11 @@
 
 namespace NsUtil\Assync;
 
+use Exception;
+use NsUtil\Eficiencia;
+use NsUtil\Helper;
+use NsUtil\StatusLoader;
+
 /**
  * Class that can execute a background job, and check if the
  * background job is still running
@@ -24,10 +29,10 @@ class Assync {
         if ($verboseTitle) {
             $this->verbose = $verboseTitle;
         }
-        if (\NsUtil\Helper::getSO() === 'windows') {
+        if (Helper::getSO() === 'windows') {
             throw new Exception('NSUtil::Assync ERROR: Only linux systems can use this class!');
         }
-        $this->status = new \NsUtil\StatusLoader(count($this->list), 'NsPHPAssync');
+        $this->status = new StatusLoader(count($this->list), 'NsPHPAssync');
     }
 
     /**
@@ -53,7 +58,7 @@ class Assync {
         $pidfile = '/tmp/' . hash('sha1', $cmd);
         $this->list[] = ['command' => sprintf("%s > %s 2>&1 & echo $! > %s", $cmd, $outputfile, $pidfile), 'pidfile' => $pidfile, 'cmd' => $cmd];
         if ($this->verbose !== false) {
-            $this->status = new \NsUtil\StatusLoader(count($this->list), $this->verbose);
+            $this->status = new StatusLoader(count($this->list), $this->verbose);
         }
         return $this;
     }
@@ -64,7 +69,7 @@ class Assync {
     public function run() {
         $this->checkRunning();
         if (!$this->eficiencia) {
-            $this->eficiencia = new \NsUtil\Eficiencia();
+            $this->eficiencia = new Eficiencia();
         }
         foreach ($this->list as $key => $item) {
             if (!$item['pid'] && count($this->emAndamento) < $this->limit) {
