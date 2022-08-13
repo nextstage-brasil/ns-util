@@ -140,24 +140,29 @@ class Migrations {
     }
 
     public static function run(string $pathAplicacao, array $conPreQuerys = [], bool $removeDirAfterSuccess = false): array {
-        $dirMigrations = \realpath($pathAplicacao) . '/_migrations';
-        $migrations = ['error' => "Path is not found $dirMigrations"];
-        if (is_dir($dirMigrations)) {
-            ob_start();
-            $config = new Config();
-            $config->loadEnvFile(Helper::fileSearchRecursive('.env', $pathAplicacao));
-            $con = new ConnectionPostgreSQL($config->get('DBHOST'), $config->get('DBUSER'), $config->get('DBPASS'), $config->get('DBPORT'), $config->get('DBNAME'));
-            $migrations = (new Migrations($pathAplicacao . '/_migrations', $con))
-                    ->update()
-            ;
-            if ($migrations['error'] === false && $removeDirAfterSuccess) {
-                Helper::deleteDir($dirMigrations);
-                if (is_dir($dirMigrations)) {
-                    rename($dirMigrations, __DIR__ . '/../../_____rem');
+        try {
+            $dirMigrations = \realpath($pathAplicacao) . '/_migrations';
+            $migrations = ['error' => "Path is not found $dirMigrations"];
+            if (is_dir($dirMigrations)) {
+                ob_start();
+                $config = new Config();
+                $config->loadEnvFile(Helper::fileSearchRecursive('.env', $pathAplicacao));
+                $con = new ConnectionPostgreSQL($config->get('DBHOST'), $config->get('DBUSER'), $config->get('DBPASS'), $config->get('DBPORT'), $config->get('DBNAME'));
+                $migrations = (new Migrations($pathAplicacao . '/_migrations', $con))
+                        ->update()
+                ;
+                if ($migrations['error'] === false && $removeDirAfterSuccess) {
+                    Helper::deleteDir($dirMigrations);
+                    if (is_dir($dirMigrations)) {
+                        rename($dirMigrations, __DIR__ . '/../../_____rem');
+                    }
                 }
+                ob_end_clean();
             }
-            ob_end_clean();
+        } catch (\Exception $exc) {
+            throw new Exception($exc->getMessage());
         }
+
         return $migrations;
     }
 
