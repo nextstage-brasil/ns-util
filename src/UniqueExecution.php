@@ -75,4 +75,9 @@ class UniqueExecution {
         return $out;
     }
 
+    public function getDefaultMessageIsRunning() {
+        $init = $this->getStartedAt();
+        return 'There is another proccess running. Started at ' . date('c', $init);
+    }
+
 }
