@@ -75,7 +75,11 @@ class UniqueExecution {
         return $out;
     }
 
-    public function getDefaultMessageIsRunning() {
+    /**
+     * Retorna mensagem padrão contendo a data de inicio do processo atual
+     * @return string
+     */
+    public function getDefaultMessageIsRunning() : string {
         $init = $this->getStartedAt();
         return 'There is another proccess running. Started at ' . date('c', $init);
     }

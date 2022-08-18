@@ -222,7 +222,10 @@ class Package {
         ;
 
         // composer
-        $last = (int) file_get_contents($buildDir . '/.lastComposerUpdate');
+        $last = 0;
+        if (file_exists($buildDir . '/.lastComposerUpdate')) {
+            $last = (int) file_get_contents($buildDir . '/.lastComposerUpdate');
+        }
         $composerIsOld = (!file_exists($buildDir . '/.lastComposerUpdate')) || $last < time() - (60 * 60 * 2);
         echo "\n - Atualizando pacotes via composer ... ";
         if (file_exists($origem . '/composer.json') && $composerIsOld) {
