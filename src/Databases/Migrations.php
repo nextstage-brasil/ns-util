@@ -169,4 +169,18 @@ class Migrations {
         return $migrations;
     }
 
+    public function loadFromPath(string $path): array {
+        if (!is_dir($path)) {
+            throw new Exception("Path '$path' is not a directory");
+        }
+        $files = DirectoryManipulation::openDir($path);
+        $migrations = [];
+        foreach ($files as $file) {
+            $sql = "$path/$file";
+            Helper::directorySeparator($sql);
+            $migrations[$file] = $sql;
+        }
+        return $migrations;
+    }
+
 }
