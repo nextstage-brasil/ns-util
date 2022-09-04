@@ -126,7 +126,7 @@ class Migrations {
     }
 
     public static function builder(string $pathAplicacao, array $arrayMigrations, array $conPreQuerys = []) {
-        $config = new Config();
+        $config = new Config(getenv());
         $config->loadEnvFile(Helper::fileSearchRecursive('.env', $pathAplicacao));
         $con = new ConnectionPostgreSQL($config->get('DBHOST'), $config->get('DBUSER'), $config->get('DBPASS'), $config->get('DBPORT'), $config->get('DBNAME'));
         foreach ($conPreQuerys as $q) {
@@ -145,7 +145,7 @@ class Migrations {
             $migrations = ['error' => "Path is not found $dirMigrations"];
             if (is_dir($dirMigrations)) {
                 ob_start();
-                $config = new Config();
+                $config = new Config(getenv());
                 $inifile = Helper::fileSearchRecursive('.env', $pathAplicacao);
                 if (file_exists($inifile)) {
                     $config->loadEnvFile($inifile);
