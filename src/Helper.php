@@ -504,13 +504,13 @@ class Helper {
         $dirarray = explode(DIRECTORY_SEPARATOR, $dir_init);
         $filename = implode(DIRECTORY_SEPARATOR, $dirarray) . DIRECTORY_SEPARATOR . $file_name;
         $count = 0;
-        while (!file_exists($filename) && $count < $deep) { // paths acima
+        while (!@file_exists($filename) && $count < $deep) { // paths acima
             array_pop($dirarray);
             $filename = implode(DIRECTORY_SEPARATOR, $dirarray) . DIRECTORY_SEPARATOR . $file_name;
             $count++;
         }
-        $filename = realpath($filename);
-        if (!file_exists($filename)) {
+        $filename = @realpath($filename);
+        if (!@file_exists($filename)) {
             return false;
         } else {
             return $filename;
