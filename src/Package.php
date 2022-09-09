@@ -314,48 +314,34 @@ class Package {
         // salvar o comand para o pos ioncube
         echo "\n - Criando arquivo post encode para ioncube ... ";
         Helper::directorySeparator($ioncube_post);
-        $tmp = explode(DIRECTORY_SEPARATOR, $ioncube_post);
-        $filenamePost = array_pop($tmp);
-        $ioncube_post_dir = implode(DIRECTORY_SEPARATOR, $tmp);
-        $bat = $dirOutput . DIRECTORY_SEPARATOR . $filenamePost;
-        file_put_contents($bat, '@echo OFF
+        Helper::deleteFile($ioncube_post);
+        $contentIoncubepost = '@echo OFF
     del ' . $encodedFile . '.zip /q
     "' . $patch7zip . '" a ' . $encodedFile . '.zip ' . $encodedFile . '\* ' . $ex . ' > nul
     rmdir ' . $encodedFile . ' /s /q
-	');
-        shell_exec($cmdsConfig[Helper::getSO()]['move'] . " $bat $ioncube_post_dir" . DIRECTORY_SEPARATOR . $filenamePost);
+	';
+        Helper::saveFile($ioncube_post, false, $contentIoncubepost, "SOBREPOR");
         sleep(0.2);
-        echo "OK!";
-
-        $command .= $ex;
+        echo ((file_exists($ioncube_post)) ? "OK!" : "Erro ao gerar arquivo $ioncube_post");
 
         echo "\n - Criando pacote ... ";
+        $command .= $ex;
         shell_exec($command);
         echo "OK!";
 
         echo "\n - Limpando arquivos ... ";
         $cmd = sprintf($cmdsConfig[Helper::getSO()]['clearFiles'], $fontes);
         shell_exec($cmd);
-//        
-//        \NsUtil\DirectoryManipulation::openDir($fontes);
-//        $adapter = new \League\Flysystem\Adapter\Local($fontes);
-//        $fs = new \League\Flysystem\Filesystem($adapter);
-//        $list = $adapter->
-//        var_export($list);
-//        die();
-//        shell_exec("del $fontes" . DIRECTORY_SEPARATOR . "*XPTO* /s /q > nul");
-//        shell_exec("del $fontes" . DIRECTORY_SEPARATOR . "app" . DIRECTORY_SEPARATOR . "_45h" . DIRECTORY_SEPARATOR . "*.php > nul");
         echo "OK!";
 
         // Abrir diretorio de saida
         $zipdir = explode(DIRECTORY_SEPARATOR, $zip);
         array_pop($zipdir);
-        //shell_exec("explorer " . implode(DIRECTORY_SEPARATOR, $zipdir));
 
-
-        echo "";
+        
         // Criação do frontend
         if (self::$createFrontendFiles === true) {
+            echo "\n Criação dos Path de frontend";
             self::copyFilesToAppView($origem, $buildDir . '/@WebAPP');
         }
 
