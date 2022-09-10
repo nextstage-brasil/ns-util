@@ -980,8 +980,11 @@ class Helper {
      */
     public static function buscacep(string $cep): \stdClass {
         $cepSearch = self::parseInt($cep);
-        if ($cepSearch < 8) {
-            return (object) ['error' => "Number of characters must be equal to 8 in '$cep'"];
+        if (strlen($cepSearch) < 8) {
+            return (object) ['error' => "Quantidade de caracteres inválido: '$cep'"];
+        }
+        if ($cepSearch < 1) {
+            return (object) ['error' => "CEP inválido para pesquisa: '$cep'"];
         }
 
         $url = "https://viacep.com.br/ws/$cepSearch/json/";
@@ -1026,6 +1029,20 @@ class Helper {
      */
     public static function getHost(): string {
         return php_uname('n');
+    }
+
+    public static function addConditionFromAPI(array &$condition, array $dados): void {
+        if (isset($dados['conditions']) && is_array($dados['conditions'])) {
+            $newConditions = [];
+            foreach ($dados['conditions'] as $key => $val) {
+                $isJson = json_decode($val, true);
+                if ($isJson) {
+                    $val = $isJson;
+                }
+                $newConditions[$key . '_addedConditionFromAPI'] = $val;
+            }
+            $condition = array_merge($condition, $newConditions);
+        }
     }
 
 }
