@@ -312,7 +312,7 @@ class Helper {
         // Remover cookie em excesso
         $cookiefile = "/tmp/" . md5((string) date('Ymd')) . '.txt';
         $options = [
-            CURLOPT_URL => trim((string)$url),
+            CURLOPT_URL => trim((string) $url),
             CURLOPT_CUSTOMREQUEST => $method,
             CURLOPT_POST => false,
             CURLOPT_USERAGENT => 'Mozilla/5.0 (Windows NT 6.1; rv:8.0) Gecko/20100101 Firefox/8.0', //set user agent
@@ -351,7 +351,7 @@ class Helper {
         $body = substr((string) $output, $header_size);
 
         $headers = [];
-        $output = rtrim((string)$output);
+        $output = rtrim((string) $output);
         $data = explode("\n", $output);
         $headers['status'] = $data[0];
         array_shift($data);
@@ -400,7 +400,7 @@ class Helper {
         $line = implode('|M|', $data);
         //$line = str_replace(['|EN|', ';', "'", '\\n', "\t", "\r\n", "0x0d", '\\'], [$explode, ' ', '', chr(13), ' ', ' ', ' ', ''], trim((string)$line));
         //$line = str_replace(['|EN|', "\n", "\t", "\r\n", "0x0d", '\\', ';', "'"], [$explode, '', ' ', ' ', ' ', '', ' ', ''], trim((string)$line));
-        $line = str_replace($from, $to, trim((string)$line));
+        $line = str_replace($from, $to, trim((string) $line));
         $line = mb_convert_encoding($line, "UTF-8");
         $data = explode('|M|', $line);
 
@@ -481,7 +481,7 @@ class Helper {
         } else {
             throw new \Exception('getFileEncoding somente funciona em sistemas Linux. O seu é ' . $so);
         }
-        return trim((string)$cod);
+        return trim((string) $cod);
     }
 
     public static function fileConvertToUtf8($filepath, $output = false) {
@@ -671,7 +671,7 @@ class Helper {
         foreach ($array as $val) {
             $ni = [];
             foreach ($keys as $k) {
-                $ni[$k] = $val[$k];
+                $ni[$k] = ((isset($val[$k])) ? $val[$k] : '');
             }
             $trataed[] = $ni;
         }
