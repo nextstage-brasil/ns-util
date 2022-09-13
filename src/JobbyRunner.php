@@ -29,7 +29,7 @@ class JobbyRunner {
             die('ERROR: This class not running on windows');
         }
         if (!$this->pool->isSupported()) {
-            die('ERROR: Check the extensions pcntle posix');
+            die('ERROR: Check the extensions: pcntle posix');
         }
     }
 

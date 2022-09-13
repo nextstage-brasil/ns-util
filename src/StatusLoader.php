@@ -24,9 +24,9 @@ class StatusLoader {
 
     public function setLabel($label) {
 
-        $s = (int) $this->size * 0.5;
-        $label = str_pad($label, ($s + (int) $this->size));
-        $label = mb_substr((string)$label, 0, $s);
+        $s = (int) round($this->size * 0.5);
+        $label = str_pad($label, ($s + (int) round($this->size)));
+        $label = mb_substr((string) $label, 0, $s);
         $this->label = $label;
         if ($this->lastDone > 0) {
             $this->done($this->lastDone);

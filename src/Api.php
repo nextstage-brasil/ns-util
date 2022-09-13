@@ -113,7 +113,7 @@ class Api {
             'headers' => $this->getHeaders(),
             'rota' => $router->getAllParam(1) . (($router->getAllParam(2)) ? '/' . $router->getAllParam(2) : ''), // '/' . $router->getAllParam(2),
             'acao' => 'ws_' . $router->getAllParam(2),
-            'controller' => ucwords($router->getAllParam(1)),
+            'controller' => ucwords((string)$router->getAllParam(1)),
             'includeFile' => $router->getIncludeFile(),
             'ParamsRouter' => $router->getAllParam(),
             'dados' => array_merge($this->getBody(), [
@@ -222,7 +222,7 @@ class Api {
 
         if (count($response) > 0) {
             // caso content não venha nada, vou  colocar por padrão
-            if ($response['content'] === null && !isset($this->responseData['content'])) {
+            if (!isset($response['content']) && !isset($this->responseData['content'])) {
                 //$response['content'] = false;
             }
 

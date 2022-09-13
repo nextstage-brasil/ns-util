@@ -102,7 +102,7 @@ class Template {
      * @return string
      */
     public function render() {
-        $keys = array();
+        $keys = [];
         foreach ($this->values as $key => $value) {
             $keys[] = $this->openDelimiter . $key . $this->closeDelimiter;
         }
