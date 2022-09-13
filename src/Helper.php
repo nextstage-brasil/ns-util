@@ -362,7 +362,7 @@ class Helper {
             if (!isset($middle[1])) {
                 $middle[1] = null;
             }
-            $headers[trim($middle[0])] = trim($middle[1]);
+            $headers[trim((string) $middle[0])] = trim((string) $middle[1]);
         }
 
         $ret = (object) [

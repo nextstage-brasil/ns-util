@@ -56,7 +56,7 @@ class StatusLoader {
         $status_bar .= str_repeat("=", $bar);
         if ($bar < $tamanho) {
             $status_bar .= ">";
-            $status_bar .= str_repeat(" ", $tamanho - $bar);
+            $status_bar .= str_repeat(" ", (int) round($tamanho - $bar));
         } else {
             $status_bar .= "=";
         }
