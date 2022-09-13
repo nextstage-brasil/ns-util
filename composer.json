@@ -8,7 +8,8 @@
         "nelexa/zip": "^3.3 || ^4.0", 
         "smottt/wideimage": "^1.1",
         "phpmailer/phpmailer": "^6.1", 
-        "sendgrid/sendgrid" : "^7"
+        "sendgrid/sendgrid" : "^7", 
+        "spatie/async": "^1.5"
     },
     "license": "Apache-2.0",
     "autoload": {
