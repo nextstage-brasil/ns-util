@@ -342,7 +342,8 @@ class Api {
      * @return string
      */
     public function getTokenFromAuthorizationHeaders(): string {
-        $auth = ((isset($this->getHeaders()['Authorization'])) ? $this->getHeaders()['Authorization'] : '');
+        $headers = $this->getHeaders();
+        $auth = ((isset($headers['Authorization'])) ? $headers['Authorization'] : '');
         return (string) trim(substr($auth, 6));
     }
 
