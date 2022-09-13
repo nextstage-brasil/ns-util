@@ -113,7 +113,7 @@ class Api {
             'headers' => $this->getHeaders(),
             'rota' => $router->getAllParam(1) . (($router->getAllParam(2)) ? '/' . $router->getAllParam(2) : ''), // '/' . $router->getAllParam(2),
             'acao' => 'ws_' . $router->getAllParam(2),
-            'controller' => ucwords((string)$router->getAllParam(1)),
+            'controller' => ucwords((string) $router->getAllParam(1)),
             'includeFile' => $router->getIncludeFile(),
             'ParamsRouter' => $router->getAllParam(),
             'dados' => array_merge($this->getBody(), [
@@ -342,7 +342,8 @@ class Api {
      * @return string
      */
     public function getTokenFromAuthorizationHeaders(): string {
-        return (string) trim(substr((string) $this->getHeaders()['Authorization'], 6));
+        $auth = ((isset($this->getHeaders()['Authorization'])) ? $this->getHeaders()['Authorization'] : '');
+        return (string) trim(substr($auth, 6));
     }
 
     function getResponseData() {

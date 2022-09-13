@@ -157,7 +157,7 @@ class PgLoadCSV {
                 continue;
             }
             $cpos[] = "$val text null";
-            if ($this->run->fields[md5((string)$val)]) {
+            if (isset($this->run->fields[md5((string)$val)])) {
                 $control[md5((string)$val)]++;
                 $val = $val . '_' . $control[md5((string)$val)];
             } else {
