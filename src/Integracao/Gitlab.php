@@ -283,10 +283,10 @@ class Gitlab {
 
             // params
             $params = [
-                'due_date' => (string) trim($item['duedate']),
+                'due_date' => (string) trim((string)$item['duedate']),
                 'labels' => (string) implode(',', $item['labels']),
-                'assignee_ids' => (string) trim($this->getFromDePara('assigned', $item['assigned'])),
-                'created_at' => (string) trim($created['date']),
+                'assignee_ids' => (string) trim((string)$this->getFromDePara('assigned', $item['assigned'])),
+                'created_at' => (string) trim((string)$created['date']),
                 'description' => $item['description'],
             ];
 

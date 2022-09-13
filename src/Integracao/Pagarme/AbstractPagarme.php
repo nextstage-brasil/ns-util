@@ -30,8 +30,8 @@ abstract class AbstractPagarme {
         $out['type'] = trim(str_replace('ERROR_TYPE:', '', $tl[0]));
 
         $t2 = explode('MESSAGE:', $t1[1]);
-        $out['parameter'] = Config::getDicionario(str_replace('.', '', trim($t2[0])));
-        $out['message'] = Config::getDicionario(trim($t2[1]));
+        $out['parameter'] = Config::getDicionario(str_replace('.', '', trim((string)$t2[0])));
+        $out['message'] = Config::getDicionario(trim((string)$t2[1]));
 
         return $out['parameter'] . ((strlen((string)$out['message']) > 0) ? ': ' . $out['message'] : '');
     }

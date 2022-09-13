@@ -25,7 +25,7 @@ class Password {
     }
 
     private static function addToken(string &$senha, string $token = ''): void {
-        $senha = md5((string) trim($senha) . Config::getData('token')); // incluir o token da aplicação
+        $senha = md5((string) trim((string)$senha) . Config::getData('token')); // incluir o token da aplicação
     }
 
     public static function forcaSenha(string $senha): int {

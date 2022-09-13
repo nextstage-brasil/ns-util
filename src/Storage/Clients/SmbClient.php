@@ -375,8 +375,8 @@ domain   = $this->_domain";
             }
 
             list ($junk, $filename, $status, $size, $mtime) = $matches;
-            $filename = trim($filename);
-            $status = trim($status);
+            $filename = trim((string)$filename);
+            $status = trim((string)$status);
             $mtime = strtotime($mtime);
 
             $isdir = (stripos($status, 'D') !== false) ? true : false;

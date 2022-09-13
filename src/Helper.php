@@ -47,8 +47,8 @@ class Helper {
         $str = strtr($str, $mapping);
         $str = preg_replace("/[^A-Za-z0-9]/", "_", (string) $str);
         return $str;
-        //return str_replace(" ", "_", preg_replace("/&([a-z])[a-z]+;/i", "$1", htmlentities(trim($str))));
-        //return str_replace(" ", "_", preg_replace("/&([a-z])[a-z]+;/i", "$1", htmlentities(trim($str))));
+        //return str_replace(" ", "_", preg_replace("/&([a-z])[a-z]+;/i", "$1", htmlentities(trim((string)$str))));
+        //return str_replace(" ", "_", preg_replace("/&([a-z])[a-z]+;/i", "$1", htmlentities(trim((string)$str))));
     }
 
     public static function mkdir($path, $perm = 0777) {
@@ -312,7 +312,7 @@ class Helper {
         // Remover cookie em excesso
         $cookiefile = "/tmp/" . md5((string) date('Ymd')) . '.txt';
         $options = [
-            CURLOPT_URL => trim($url),
+            CURLOPT_URL => trim((string)$url),
             CURLOPT_CUSTOMREQUEST => $method,
             CURLOPT_POST => false,
             CURLOPT_USERAGENT => 'Mozilla/5.0 (Windows NT 6.1; rv:8.0) Gecko/20100101 Firefox/8.0', //set user agent
@@ -351,7 +351,7 @@ class Helper {
         $body = substr((string) $output, $header_size);
 
         $headers = [];
-        $output = rtrim($output);
+        $output = rtrim((string)$output);
         $data = explode("\n", $output);
         $headers['status'] = $data[0];
         array_shift($data);
@@ -398,9 +398,9 @@ class Helper {
         $to = [$explode, '', ' ', ' ', ' ', '', ' ', ''];
 
         $line = implode('|M|', $data);
-        //$line = str_replace(['|EN|', ';', "'", '\\n', "\t", "\r\n", "0x0d", '\\'], [$explode, ' ', '', chr(13), ' ', ' ', ' ', ''], trim($line));
-        //$line = str_replace(['|EN|', "\n", "\t", "\r\n", "0x0d", '\\', ';', "'"], [$explode, '', ' ', ' ', ' ', '', ' ', ''], trim($line));
-        $line = str_replace($from, $to, trim($line));
+        //$line = str_replace(['|EN|', ';', "'", '\\n', "\t", "\r\n", "0x0d", '\\'], [$explode, ' ', '', chr(13), ' ', ' ', ' ', ''], trim((string)$line));
+        //$line = str_replace(['|EN|', "\n", "\t", "\r\n", "0x0d", '\\', ';', "'"], [$explode, '', ' ', ' ', ' ', '', ' ', ''], trim((string)$line));
+        $line = str_replace($from, $to, trim((string)$line));
         $line = mb_convert_encoding($line, "UTF-8");
         $data = explode('|M|', $line);
 
@@ -474,13 +474,14 @@ class Helper {
 
     public static function fileGetEncoding($filename) {
         $so = php_uname();
+        $cod = '';
         if (stripos($so, 'linux') > -1) {
             $cmd = 'file -bi ' . $filename . ' | sed -e "s/.*[ ]charset=//"';
             $cod = shell_exec($cmd);
         } else {
             throw new \Exception('getFileEncoding somente funciona em sistemas Linux. O seu é ' . $so);
         }
-        return trim($cod);
+        return trim((string)$cod);
     }
 
     public static function fileConvertToUtf8($filepath, $output = false) {

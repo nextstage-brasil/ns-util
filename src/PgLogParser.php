@@ -34,7 +34,7 @@ class PgLogParser {
         $format = new Format();
 
         foreach ($list as $key => $item) {
-            $item = str_replace(["\t", "\n"], [' ', ' '], trim($item));
+            $item = str_replace(["\t", "\n"], [' ', ' '], trim((string)$item));
             if (strlen((string)$item) < 2) {
                 continue;
             }
@@ -69,8 +69,8 @@ class PgLogParser {
                 if (stripos($item, 'duration: ') > 0) {
                     $dur = explode(':', $descricao);
                     $tipo = $tipo2 = 'LENTIDAO';
-                    $duracao = explode(' ', trim($dur[1]))[0] . 'ms';
-                    $descricao = trim($dur[2]);
+                    $duracao = explode(' ', trim((string)$dur[1]))[0] . 'ms';
+                    $descricao = trim((string)$dur[2]);
                 }
                 // Novo item
                 if ($data !== $lastDate) {
@@ -93,10 +93,10 @@ class PgLogParser {
                         default:
                             $chave = 'descricao';
                     }
-                    $out[$i][$chave] .= chr(13) . trim($descricao);
+                    $out[$i][$chave] .= chr(13) . trim((string)$descricao);
                 }
             } else {
-                $out[$i][$chave] .= chr(13) . trim($item);
+                $out[$i][$chave] .= chr(13) . trim((string)$item);
             }
 
             //echo $item . "<br/>";

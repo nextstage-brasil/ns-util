@@ -69,13 +69,13 @@ class Upload {
     private function setArquivo($arquivo) {
         $this->arquivo = $arquivo;
         $this->arquivo['maxFilesize'] = (int) $this->arquivo['maxFilesize'];
-        $this->arquivo['name'] = trim($this->arquivo['name']);
+        $this->arquivo['name'] = trim((string)$this->arquivo['name']);
         // retirar extensão do arquivo
-        //$t = explode('.', preg_replace("/&([a-z])[a-z]+;/i", "$1", htmlentities(trim($this->arquivo['name']))));
+        //$t = explode('.', preg_replace("/&([a-z])[a-z]+;/i", "$1", htmlentities(trim((string)$this->arquivo['name']))));
         $t = explode('.', $this->arquivo['name']);
         $this->extensao = array_pop($t); //unset($t[count($t) - 1]);
         $this->nomeOriginal = implode(' ', $t); // será usado com oreferencia de nome para o usuario
-        //$this->arquivo['name'] = trim($this->arquivo['name']);
+        //$this->arquivo['name'] = trim((string)$this->arquivo['name']);
         //$this->tipo = self::$_MIMES[$this->getMimeType()];
         //$this->arquivo['type'] = $this->getMimeType();
         $this->mime = str_replace(['/vnd.dlna.adts'], ['/aac'], $this->arquivo['type']);
