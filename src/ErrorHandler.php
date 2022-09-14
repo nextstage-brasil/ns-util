@@ -18,11 +18,12 @@ class ErrorHandler {
         $log_file_error = $this->filename;
 
         // Rotate File
-        if (file_exists($this->filename)) {
-            if (filesize($this->filename) >= 1046000) {
-                rename($this->filename, $this->filename . '_' . date('YmdHis') . '.old');
-            }
-        }
+        Helper::directorySeparator($this->filename);
+        $parts = explode(DIRECTORY_SEPARATOR, $this->filename);
+        $filenameRotate = array_pop($parts);
+        $path = implode(DIRECTORY_SEPARATOR, $parts);
+        Helper::mkdir($path);
+        $this->filename = self::rotate($path, $filenameRotate);
 
         if (!file_exists($this->filename)) {
             Helper::saveFile($this->filename, false, "appname,time,filename,line_num,error,message,backtrace");

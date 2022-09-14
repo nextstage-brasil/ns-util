@@ -52,7 +52,7 @@ class Helper {
     }
 
     public static function mkdir($path, $perm = 0777) : void {
-        if (!is_dir(!$path) && !is_file($path)) {
+        if (!is_dir($path) && !is_file($path)) {
             @mkdir($path, $perm, true);
         }
     }
