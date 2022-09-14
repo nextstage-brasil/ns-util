@@ -68,8 +68,12 @@ class JobbyRunner {
             // Executar a closure conforme chamado
             if ($closure instanceof \Closure) {
                 $onlyOne = new UniqueExecution(md5(__FILE__ . $name));
-                $this->pool->add(function () use ($closure) {
-                            return $closure();
+                $this->pool->add(function () use ($closure, $onlyOne, $maxTimeExecution) {
+                            if ($onlyOne->isRunning($maxTimeExecution * 60)) {
+                                return $onlyOne->getDefaultMessageIsRunning();
+                            } else {
+                                return $closure();
+                            }
                         })
                         ->then(function ($output) use ($now, $onlyOne, $description, &$out) {
                             Log::logTxt($this->logError, "[$now] [$description] SUCCESS:  $output");
