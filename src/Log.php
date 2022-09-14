@@ -8,7 +8,7 @@ class Log {
         
     }
 
-    private function rotate(string $path, string $file): void {
+    private static function rotate(string $path, string $file): string {
         $filename = $path . DIRECTORY_SEPARATOR . $file;
         if (is_file($filename) && filesize($filename) > 1046000) {
             $zipname = $filename . '.' . \date('ymdHis') . '.zip';
@@ -20,6 +20,7 @@ class Log {
                 unlink($filename);
             }
         }
+        return $filename;
     }
 
     public static function logTxt(string $file, string $message): void {
@@ -35,7 +36,7 @@ class Log {
         $filename = array_pop($parts);
         $path = implode(DIRECTORY_SEPARATOR, $parts);
         Helper::mkdir($path);
-        $filelog = $this->rotate($path, $filename);
+        $filelog = self::rotate($path, $filename);
         $fp = fopen($filelog, "a");
         $date_message = "[" . date('d/m/Y H:i:s') . "]" . $message . $origem . "\r\n";
         fwrite($fp, $date_message);
