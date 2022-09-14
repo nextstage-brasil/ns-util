@@ -30,7 +30,7 @@ class Log {
         $b = debug_backtrace();
         $origem = ';-- {ORIGEM: ' . $b[1]['class'] . '::' . $b[1]['function'] . ':' . $b[0]['line'] . '}';
 
-        // criação do diretoiro caso não existe
+        // criação do diretorio caso não existe
         Helper::directorySeparator($file);
         $parts = explode(DIRECTORY_SEPARATOR, $file);
         $filename = array_pop($parts);
