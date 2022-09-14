@@ -90,7 +90,9 @@ class JobbyRunner {
                                 return $onlyOne->getDefaultMessageIsRunning();
                             } else {
                                 $onlyOne->start();
-                                return $closure();
+                                $out = $closure();
+                                $onlyOne->end();
+                                return $out;
                             }
                         })
                         ->then(function ($output) use ($now, $name, $description, $printSuccessLog) {
