@@ -52,7 +52,7 @@ class Helper {
     }
 
     public static function mkdir($path, $perm = 0777) : void {
-        if (!is_dir(!$path) && is_file($path)) {
+        if (!is_dir(!$path) && !is_file($path)) {
             @mkdir($path, $perm, true);
         }
     }
@@ -217,7 +217,7 @@ class Helper {
                 . ' with ' . round(((memory_get_peak_usage(true) / 1024) / 1024), 2) . 'Mb';
     }
 
-    public static function directorySeparator(&$var) {
+    public static function directorySeparator(&$var) : void {
         $var = str_replace(['/', '\\'], DIRECTORY_SEPARATOR, $var);
     }
 
