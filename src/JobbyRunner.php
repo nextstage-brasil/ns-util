@@ -56,28 +56,32 @@ class JobbyRunner {
             $out[] = 'Enabled: ' . $isEnable ? 'true' : 'false';
             if (!$isEnable || !CrontabCheck::check($schedule)) {
                 $out[] = 'Não executado: fora do prazo ou não habilitado';
-                continue;
+                $closure = null;
             }
 
             $onlyOne = new UniqueExecution(md5(__FILE__ . $name));
             if ($onlyOne->isRunning($maxTimeExecution * 60)) {
                 $out[] = 'Não executado: Its Running. Started at ' . date('c', $onlyOne->getStartedAt());
-                continue;
+                $closure = null;
             }
 
             // Executar a closure conforme chamado
             if ($closure instanceof \Closure) {
-                $this->pool->add($closure)
-                        ->then(function ($output) use ($now, $description, &$out) {
+                $onlyOne = new UniqueExecution(md5(__FILE__ . $name));
+                $this->pool->add(function () use ($closure) {
+                            return $closure();
+                        })
+                        ->then(function ($output) use ($now, $onlyOne, $description, &$out) {
                             Log::logTxt($this->logError, "[$now] [$description] SUCCESS:  $output");
                             $out[] = 'Executado';
+                            $onlyOne->end();
                         })
-                        ->catch(function (Exception $exception) use ($now, $description, &$out) {
+                        ->catch(function (Exception $exception) use ($now, $onlyOne, $description, &$out) {
                             $out[] = 'ERROR';
                             Log::logTxt($this->logError, "[$now] [$description] ERROR: " . $exception->getMessage());
+                            $onlyOne->end();
                         });
             }
-            $onlyOne->end();
             $ja[] = implode('|', array_values($out));
         }
 
