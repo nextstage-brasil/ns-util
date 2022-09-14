@@ -2,6 +2,8 @@
 
 namespace NsUtil;
 
+use ZipArchive;
+
 class Log {
 
     public function __construct() {
@@ -12,7 +14,7 @@ class Log {
         $filename = $path . DIRECTORY_SEPARATOR . $file;
         if (is_file($filename) && filesize($filename) > 1046000) {
             $zipname = $filename . '.' . \date('ymdHis') . '.zip';
-            $zip = new \ZipArchive();
+            $zip = new ZipArchive();
             $zip->open($zipname, ZipArchive::CREATE);
             $zip->addFile($filename);
             $zip->close();
