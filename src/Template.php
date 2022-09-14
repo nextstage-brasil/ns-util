@@ -77,7 +77,7 @@ class Template {
             $this->template = file_get_contents($distFile);
         } else {
             throw new InvalidArgumentException(
-            'Template file could not be loaded.'
+                            'Template file could not be loaded.'
             );
         }
     }
@@ -103,10 +103,15 @@ class Template {
      */
     public function render() {
         $keys = [];
+        $values = [];
         foreach ($this->values as $key => $value) {
+            if (is_array($value)) {
+                continue;
+            }
             $keys[] = $this->openDelimiter . $key . $this->closeDelimiter;
+            $values[] = $value;
         }
-        $this->template = \str_replace($keys, $this->values, $this->template);
+        $this->template = \str_replace($keys, $values, $this->template);
         return $this->template;
     }
 
@@ -123,11 +128,11 @@ class Template {
         } else {
             $error = error_get_last();
             throw new RuntimeException(
-            sprintf(
-                    'Could not write to %s: %s', $target, substr((string)
-                            $error['message'], strpos($error['message'], ':') + 2
-                    )
-            )
+                            sprintf(
+                                    'Could not write to %s: %s', $target, substr((string)
+                                            $error['message'], strpos($error['message'], ':') + 2
+                                    )
+                            )
             );
         }
     }
