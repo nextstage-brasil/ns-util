@@ -101,7 +101,7 @@ class JobbyRunner {
                             }
                             (new UniqueExecution(md5(__FILE__ . $name)))->end();
                         })
-                        ->catch(function (Exception $exception) use ($now, $description) {
+                        ->catch(function (Exception $exception) use ($now, $name,  $description) {
                             Log::logTxt($this->logError, "[$now] [$description] ERROR: " . $exception->getMessage());
                             (new UniqueExecution(md5(__FILE__ . $name)))->end();
                         });
