@@ -16,7 +16,7 @@ class Log {
      * @param int $maxSize Em MB, tamanho máximo do arquivo para rotacionar
      * @return string
      */
-    public static function rotate(string $file, int $maxSize = 10): string {
+    public static function rotate(string $file, int $maxSize = 10): void {
         Helper::directorySeparator($file);
         $parts = explode(DIRECTORY_SEPARATOR, $file);
         $filename = array_pop($parts);
@@ -33,7 +33,6 @@ class Log {
                 unlink($filenameFull);
             }
         }
-        return $filenameFull;
     }
 
     public static function logTxt(string $file, string $message): void {
@@ -44,8 +43,8 @@ class Log {
         $origem = ';-- {ORIGEM: ' . ((isset($b[1])) ? $b[1]['class'] : '') . '::' . ((isset($b[1])) ? $b[1]['function'] : '') . ':' . $b[0]['line'] . '}';
 
         // criação do diretorio caso não existe
-        $filelog = self::rotate($file);
-        $fp = fopen($filelog, "a");
+        self::rotate($file);
+        $fp = fopen($file, "a");
         $date_message = "[" . date('d/m/Y H:i:s') . "]" . $message . $origem . "\r\n";
         fwrite($fp, $date_message);
         fclose($fp);

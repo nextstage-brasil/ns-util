@@ -18,7 +18,7 @@ class ErrorHandler {
         $log_file_error = $this->filename;
 
         // Rotate File
-        $this->filename = Log::rotate($this->filename);
+        Log::rotate($this->filename);
         if (!file_exists($this->filename)) {
             Helper::saveFile($this->filename, false, "appname,time,filename,line_num,error,message,backtrace");
         }

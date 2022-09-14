@@ -19,10 +19,8 @@ class JobbyRunner {
 
     public function __construct(string $pathToLog) {
         // logError
-        $this->logError = $pathToLog;
-        Helper::directorySeparator($this->logError);
-        Helper::mkdir($this->logError);
-        $this->logError .= DIRECTORY_SEPARATOR . 'NS_JobbyRunner.log';
+        $this->logError = $pathToLog . DIRECTORY_SEPARATOR . 'NS_JobbyRunner.log';
+        Log::rotate($this->logError, 5);
         $this->pool = Pool::create();
         $this->pool instanceof Pool;
 
@@ -101,7 +99,7 @@ class JobbyRunner {
                             }
                             (new UniqueExecution(md5(__FILE__ . $name)))->end();
                         })
-                        ->catch(function (Exception $exception) use ($now, $name,  $description) {
+                        ->catch(function (Exception $exception) use ($now, $name, $description) {
                             Log::logTxt($this->logError, "[$now] [$description] ERROR: " . $exception->getMessage());
                             (new UniqueExecution(md5(__FILE__ . $name)))->end();
                         });
