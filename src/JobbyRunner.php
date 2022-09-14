@@ -48,7 +48,6 @@ class JobbyRunner {
         $ja = [];
 
         $now = date('c');
-        $onlyOne = [];
         foreach ($this->jobs as $job) {
             list($name, $description, $maxTimeExecution, $schedule, $isEnable, $closure) = $job;
             $out = [];
@@ -60,31 +59,32 @@ class JobbyRunner {
                 $closure = null;
             }
 
-            $onlyOne[$name] = new UniqueExecution(md5(__FILE__ . $name));
-            if ($onlyOne[$name]->isRunning($maxTimeExecution * 60)) {
-                $out[] = $onlyOne[$name]->getDefaultMessageIsRunning();
+            $onlyOne = new UniqueExecution(md5(__FILE__ . $name));
+            if ($onlyOne->isRunning($maxTimeExecution * 60)) {
+                $out[] = $onlyOne->getDefaultMessageIsRunning();
                 $closure = null;
             }
 
             // Executar a closure conforme chamado
             if ($closure instanceof \Closure) {
-                $this->pool->add(function () use ($name, $closure, $onlyOne, $maxTimeExecution) {
+                $this->pool->add(function () use ($name, $closure, $maxTimeExecution) {
+                            $onlyOne = new UniqueExecution(md5(__FILE__ . $name));
                             if ($onlyOne->isRunning($maxTimeExecution * 60)) {
-                                return $onlyOne[$name]->getDefaultMessageIsRunning();
+                                return $onlyOne->getDefaultMessageIsRunning();
                             } else {
-                                $onlyOne[$name]->start();
+                                $onlyOne->start();
                                 return $closure();
                             }
                         })
-                        ->then(function ($output) use ($now, $name, $onlyOne, $description, &$out) {
+                        ->then(function ($output) use ($now, $name, $description, &$out) {
                             Log::logTxt($this->logError, "[$now] [$description] SUCCESS:  $output");
                             $out[] = 'Executado';
-                            $onlyOne[$name]->end();
+                            (new UniqueExecution(md5(__FILE__ . $name)))->end();
                         })
                         ->catch(function (Exception $exception) use ($now, $onlyOne, $description, &$out) {
                             $out[] = 'ERROR';
                             Log::logTxt($this->logError, "[$now] [$description] ERROR: " . $exception->getMessage());
-                            $onlyOne[$name]->end();
+                            (new UniqueExecution(md5(__FILE__ . $name)))->end();
                         });
             }
             $ja[] = implode('|', array_values($out));
