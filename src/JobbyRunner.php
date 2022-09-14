@@ -61,7 +61,7 @@ class JobbyRunner {
             }
 
             $onlyOne[$name] = new UniqueExecution(md5(__FILE__ . $name));
-            if ($onlyOne->isRunning($maxTimeExecution * 60)) {
+            if ($onlyOne[$name]->isRunning($maxTimeExecution * 60)) {
                 $out[] = $onlyOne[$name]->getDefaultMessageIsRunning();
                 $closure = null;
             }
