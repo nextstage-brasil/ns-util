@@ -3,11 +3,26 @@
 namespace NsUtil;
 
 class Log {
-    
+
     public function __construct() {
+        
     }
 
-    public static function logTxt($file, $message) {
+    private function rotate(string $path, string $file): void {
+        $filename = $path . DIRECTORY_SEPARATOR . $file;
+        if (is_file($filename) && filesize($filename) > 1046000) {
+            $zipname = $filename . '.' . \date('ymdHis') . '.zip';
+            $zip = new \ZipArchive();
+            $zip->open($zipname, ZipArchive::CREATE);
+            $zip->addFile($filename);
+            $zip->close();
+            if (file_exists($zipname)) {
+                unlink($filename);
+            }
+        }
+    }
+
+    public static function logTxt(string $file, string $message): void {
         if (is_array($message) || is_object($message)) {
             $message = var_export($message, true);
         }
@@ -15,15 +30,16 @@ class Log {
         $origem = ';-- {ORIGEM: ' . $b[1]['class'] . '::' . $b[1]['function'] . ':' . $b[0]['line'] . '}';
 
         // criação do diretoiro caso não existe
-        $filename = str_replace(['/', '\\'], DIRECTORY_SEPARATOR, $file);
-        $dir = explode(DIRECTORY_SEPARATOR, $filename);
-        array_pop($dir);
-        Helper::mkdir(implode(DIRECTORY_SEPARATOR, $dir));
-        $fp = fopen($filename, "a");
+        Helper::directorySeparator($file);
+        $parts = explode(DIRECTORY_SEPARATOR, $file);
+        $filename = array_pop($parts);
+        $path = implode(DIRECTORY_SEPARATOR, $parts);
+        Helper::mkdir($path);
+        $filelog = $this->rotate($path, $filename);
+        $fp = fopen($filelog, "a");
         $date_message = "[" . date('d/m/Y H:i:s') . "]" . $message . $origem . "\r\n";
         fwrite($fp, $date_message);
         fclose($fp);
     }
-
 
 }

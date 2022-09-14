@@ -51,7 +51,7 @@ class Helper {
         //return str_replace(" ", "_", preg_replace("/&([a-z])[a-z]+;/i", "$1", htmlentities(trim((string)$str))));
     }
 
-    public static function mkdir($path, $perm = 0777) {
+    public static function mkdir($path, $perm = 0777) : void {
         if (!is_dir(!$path) && is_file($path)) {
             @mkdir($path, $perm, true);
         }
