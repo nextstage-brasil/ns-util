@@ -12,24 +12,28 @@ class Log {
 
     /**
      * 
-     * @param string $path
-     * @param string $file
+     * @param string $file Path absoluto do arquivo
      * @param int $maxSize Em MB, tamanho máximo do arquivo para rotacionar
      * @return string
      */
-    public static function rotate(string $path, string $file, int $maxSize=10): string {
-        $filename = $path . DIRECTORY_SEPARATOR . $file;
-        if (is_file($filename) && filesize($filename) > 1024 * 1024 * $maxSize) {
-            $zipname = $filename . '.' . \date('ymdHis') . '.zip';
+    public static function rotate(string $file, int $maxSize = 10): string {
+        Helper::directorySeparator($file);
+        $parts = explode(DIRECTORY_SEPARATOR, $file);
+        $filename = array_pop($parts);
+        $path = implode(DIRECTORY_SEPARATOR, $parts);
+        Helper::mkdir($path);
+        $filenameFull = $path . DIRECTORY_SEPARATOR . $filename;
+        if (is_file($filenameFull) && filesize($filenameFull) > 1024 * 1024 * $maxSize) {
+            $zipname = $filenameFull . '.' . \date('ymdHis') . '.zip';
             $zip = new ZipArchive();
             $zip->open($zipname, ZipArchive::CREATE);
-            $zip->addFile($filename);
+            $zip->addFile($filenameFull);
             $zip->close();
             if (file_exists($zipname)) {
-                unlink($filename);
+                unlink($filenameFull);
             }
         }
-        return $filename;
+        return $filenameFull;
     }
 
     public static function logTxt(string $file, string $message): void {
@@ -40,12 +44,7 @@ class Log {
         $origem = ';-- {ORIGEM: ' . ((isset($b[1])) ? $b[1]['class'] : '') . '::' . ((isset($b[1])) ? $b[1]['function'] : '') . ':' . $b[0]['line'] . '}';
 
         // criação do diretorio caso não existe
-        Helper::directorySeparator($file);
-        $parts = explode(DIRECTORY_SEPARATOR, $file);
-        $filename = array_pop($parts);
-        $path = implode(DIRECTORY_SEPARATOR, $parts);
-        Helper::mkdir($path);
-        $filelog = self::rotate($path, $filename);
+        $filelog = self::rotate($file);
         $fp = fopen($filelog, "a");
         $date_message = "[" . date('d/m/Y H:i:s') . "]" . $message . $origem . "\r\n";
         fwrite($fp, $date_message);
