@@ -22,7 +22,7 @@ class ErrorHandler {
         $filenameRotate = array_pop($parts);
         $path = implode(DIRECTORY_SEPARATOR, $parts);
         Helper::mkdir($path);
-        $this->filename = Log::rotate($path, $filenameRotate);
+        $this->filename = Log::rotate($path, $filenameRotate, 10);
 
         if (!file_exists($this->filename)) {
             Helper::saveFile($this->filename, false, "appname,time,filename,line_num,error,message,backtrace");
