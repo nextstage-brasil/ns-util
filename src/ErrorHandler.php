@@ -18,12 +18,11 @@ class ErrorHandler {
         $log_file_error = $this->filename;
 
         // Rotate File
-        Helper::directorySeparator($this->filename);
         $parts = explode(DIRECTORY_SEPARATOR, $this->filename);
         $filenameRotate = array_pop($parts);
         $path = implode(DIRECTORY_SEPARATOR, $parts);
         Helper::mkdir($path);
-        $this->filename = self::rotate($path, $filenameRotate);
+        $this->filename = Log::rotate($path, $filenameRotate);
 
         if (!file_exists($this->filename)) {
             Helper::saveFile($this->filename, false, "appname,time,filename,line_num,error,message,backtrace");
@@ -33,7 +32,8 @@ class ErrorHandler {
         if (8 !== (int) $errno) {
             $time = date("d M Y H:i:s");
             // Get the error type from the error number 
-            $errortype = array(1 => "Error",
+            $errortype = [
+                1 => "Error",
                 2 => "Warning",
                 4 => "Parsing Error",
                 8 => "Notice",
@@ -44,7 +44,8 @@ class ErrorHandler {
                 256 => "User Error",
                 512 => "User Warning",
                 1024 => "User Notice",
-                8192 => 'Deprecated');
+                8192 => 'Deprecated'
+            ];
             $errlevel = $errortype[$errno];
 
             //Write error to log file (CSV format) 
