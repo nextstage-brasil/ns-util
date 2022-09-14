@@ -15,6 +15,7 @@ class JobbyRunner {
     private $logError;
     private $jobs = [];
     private $pool;
+    private $printSuccessLog = false;
 
     public function __construct(string $pathToLog) {
         // logError
@@ -43,29 +44,45 @@ class JobbyRunner {
         return $this;
     }
 
+    public function setPrintSuccessLog(bool $printSuccessLog): JobbyRunner {
+        $this->printSuccessLog = $printSuccessLog;
+        return $this;
+    }
+
     public function run(): array {
         // Executar os arquivos conforme regras
         $ja = [];
 
         $now = date('c');
+        $printSuccessLog = $this->printSuccessLog;
         foreach ($this->jobs as $job) {
             list($name, $description, $maxTimeExecution, $schedule, $isEnable, $closure) = $job;
+            $onlyOne = new UniqueExecution(md5(__FILE__ . $name));
             $out = [];
             $out[] = $name;
             $out[] = $schedule;
             $out[] = 'Enabled: ' . $isEnable ? 'true' : 'false';
-            if (!$isEnable || !CrontabCheck::check($schedule)) {
-                $out[] = 'Fora do prazo ou não habilitado';
-                $closure = null;
+
+            // Validação de execução
+            switch (true) {
+                case $onlyOne->isRunning($maxTimeExecution * 60):
+                    $out[] = $onlyOne->getDefaultMessageIsRunning();
+                    $closure = null;
+                    break;
+                case (!$isEnable):
+                    $out[] = 'Não habilitado';
+                    $closure = null;
+                    break;
+                case (!CrontabCheck::check($schedule)):
+                    $out[] = 'Fora do prazo';
+                    $closure = null;
+                    break;
+                default:
+                    $out[] = 'Execução agendada';
+                    break;
             }
 
-            $onlyOne = new UniqueExecution(md5(__FILE__ . $name));
-            if ($onlyOne->isRunning($maxTimeExecution * 60)) {
-                $out[] = $onlyOne->getDefaultMessageIsRunning();
-                $closure = null;
-            }
-
-            // Executar a closure conforme chamado
+            // Programar a closure conforme chamado
             if ($closure instanceof \Closure) {
                 $this->pool->add(function () use ($name, $closure, $maxTimeExecution) {
                             $onlyOne = new UniqueExecution(md5(__FILE__ . $name));
@@ -76,13 +93,13 @@ class JobbyRunner {
                                 return $closure();
                             }
                         })
-                        ->then(function ($output) use ($now, $name, $description, &$out) {
-                            Log::logTxt($this->logError, "[$now] [$description] SUCCESS:  $output");
-                            $out[] = 'Executado';
+                        ->then(function ($output) use ($now, $name, $description, $printSuccessLog) {
+                            if ($printSuccessLog) {
+                                Log::logTxt($this->logError, "[$now] [$description] SUCCESS:  $output");
+                            }
                             (new UniqueExecution(md5(__FILE__ . $name)))->end();
                         })
-                        ->catch(function (Exception $exception) use ($now, $onlyOne, $description, &$out) {
-                            $out[] = 'ERROR';
+                        ->catch(function (Exception $exception) use ($now, $description) {
                             Log::logTxt($this->logError, "[$now] [$description] ERROR: " . $exception->getMessage());
                             (new UniqueExecution(md5(__FILE__ . $name)))->end();
                         });
