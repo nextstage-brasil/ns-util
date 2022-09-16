@@ -167,9 +167,11 @@ class Package {
         Helper::directorySeparator($dirOutput);
         $dirOutput = realpath($dirOutput);
 
+        // Fontes
+        $fontes = str_replace('/', DIRECTORY_SEPARATOR, $origem);
+
         // projectName
         if (null === self::getProjectName()) {
-            $fontes = str_replace('/', DIRECTORY_SEPARATOR, $origem);
             $t = explode(DIRECTORY_SEPARATOR, $fontes);
             $projectName = mb_strtolower(array_pop($t));
             self::setProjectName($projectName);
@@ -338,7 +340,6 @@ class Package {
         $zipdir = explode(DIRECTORY_SEPARATOR, $zip);
         array_pop($zipdir);
 
-        
         // Criação do frontend
         if (self::$createFrontendFiles === true) {
             echo "\n Criação dos Path de frontend";
