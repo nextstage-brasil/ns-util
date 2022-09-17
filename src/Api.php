@@ -13,6 +13,9 @@ class Api {
     private $router;
     private $simpleReturn = false; // Utilizado para deinfir se aapenas retornar o conteudo ou encerrar a aplicação
     private $successCallback;
+    private $errorCallback;
+    private $authRequired;
+    private $validators = [];
 
     // [Informational 1xx]
     const HTTP_CONTINUE = 100;
@@ -236,13 +239,19 @@ class Api {
         // Saida
         http_response_code($this->responseCode);
 
+        // Executar função anonima caso exista
+        if (is_callable($this->errorCallback) && $this->responseCode > 399) {
+            $this->successCallback = null;
+            call_user_func($this->errorCallback, $this->responseData, $this->responseCode);
+        }
+
         // Caso seja um desses códigos, nem imprimir nada
         if (array_search($this->responseCode, [501]) === false) {
             echo json_encode($this->responseData, JSON_UNESCAPED_SLASHES);
 
             // Executar função anonima caso exista
             if (is_callable($this->successCallback)) {
-                call_user_func($this->successCallback, $this->responseData);
+                call_user_func($this->successCallback, $this->responseData, $this->responseCode);
             }
         }
 
@@ -394,12 +403,26 @@ class Api {
     /**
      * Verifica se a classe existe no path indicado, cria o controller padrão e entrega conforme os verbos para execução
      * @param type $namespace
+     * string $allowOrigin = '*', string $allowMethods = 'GET,PUT,POST,DELETE,OPTIONS', string $allowHeaders = 'Data,Cache-Control,Referer,User-Agent,Origin,Accept,X-Requested-With,Content-Type,Access-Control-Request-Method,Access-Control-Request-Headers,Token,Authorization'
      */
-    public static function restFull(string $namespace, string $allowOrigin = '*', string $allowMethods = 'GET,PUT,POST,DELETE,OPTIONS', string $allowHeaders = 'Data,Cache-Control,Referer,User-Agent,Origin,Accept,X-Requested-With,Content-Type,Access-Control-Request-Method,Access-Control-Request-Headers,Token,Authorization'): void {
+    public static function restFull(string $namespace, Api $api = null): void {
         self::options();
-        $api = (new Api())->setConfig();
-        $rest = (object) \NsUtil\Config::getData('rest');
-        $class_name = $namespace . '\\' . ucwords(Helper::name2CamelCase($rest->resource));
+        if (null === $api) {
+            $api = new Api();
+        }
+        $api->setConfig();
+
+        // Executar função anonima caso exista
+        foreach ($api->validators as $validator) {
+            if (is_callable($validator)) {
+                $api->successCallback = \null;
+                call_user_func($validator, $api);
+                die();
+            }
+        }
+
+        $rest = (object) $api->getConfigData()['rest'];  // \NsUtil\Config::getData('rest');
+        $class_name = $namespace . '\\' . ucwords((string) Helper::name2CamelCase($rest->resource));
         $class_name_controller = $class_name . 'Controller';
         switch (true) {
             case (class_exists($class_name)):
@@ -414,8 +437,33 @@ class Api {
         }
     }
 
-    public function setSuccessCallback($successCallback): void {
+    public function setSuccessCallback(\Closure $successCallback): Api {
         $this->successCallback = $successCallback;
+        return $this;
+    }
+
+    public function onSuccess(\Closure $successCallback): Api {
+        $this->successCallback = $successCallback;
+        return $this;
+    }
+
+    public function onError(\Closure $errorCallback): Api {
+        $this->errorCallback = $errorCallback;
+        return $this;
+    }
+
+    public function validator(string $message, int $code, \Closure $rule): Api {
+        $ret = call_user_func($rule);
+        if ($ret !== true) {
+            $this->validators[] = function ($api) use ($code, $message) {
+                $api->error($message, $code);
+            };
+        }
+        return $this;
+    }
+
+    public function rest(string $namespace): void {
+        self::restFull($namespace, $this);
     }
 
 }
