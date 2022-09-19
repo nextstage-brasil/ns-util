@@ -20,6 +20,7 @@ class StatusLoader {
      */
     public function setShowQtde(bool $show) {
         $this->showQtde = $show;
+        return $this;
     }
 
     public function setLabel($label) {
@@ -31,6 +32,8 @@ class StatusLoader {
         if ($this->lastDone > 0) {
             $this->done($this->lastDone);
         }
+        
+        return $this;
     }
 
     public function done($done) {
@@ -86,6 +89,7 @@ class StatusLoader {
             $this->lastStatusBar = $this->label . ': Elapsed ' . gmdate("H:i:s", (int) $elapsed);
             echo "\n";
         }
+        return $this;
     }
 
     function getLastStatusBar() {

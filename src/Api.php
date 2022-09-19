@@ -412,7 +412,7 @@ class Api {
         }
         $api->setConfig();
 
-        // Executar função anonima caso exista
+        // Executar função anonima caso exista. Só existe função em caso de erro. O teste da funcao enviada é feito na chamada do metodo validator()
         foreach ($api->validators as $validator) {
             if (is_callable($validator)) {
                 $api->successCallback = \null;
