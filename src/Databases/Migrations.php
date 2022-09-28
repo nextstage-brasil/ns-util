@@ -95,6 +95,7 @@ class Migrations {
         $loader = new StatusLoader(count($files), 'Migrations');
         $loader->setShowQtde(true);
         $done = 0;
+        asort($files);
         foreach ($files as $file) {
             // somente arquivos desta classe
             if (stripos($file, '.nsUtilDB') !== false) {
