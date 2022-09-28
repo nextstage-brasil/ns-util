@@ -52,6 +52,7 @@ class Migrations {
     public function create(string $name, string $sql, bool $includeDate = true): Migrations {
         // Verificar se já existe
         $files = DirectoryManipulation::openDir($this->sqlFilePath);
+        asort($files);
         $exists = false;
         $name = str_replace(' ', '-', Helper::sanitize($name));
         foreach ($files as $file) {
@@ -91,11 +92,11 @@ class Migrations {
 
     public function update(): array {
         $files = DirectoryManipulation::openDir($this->sqlFilePath);
+        asort($files);
         $this->con->begin_transaction();
         $loader = new StatusLoader(count($files), 'Migrations');
         $loader->setShowQtde(true);
         $done = 0;
-        asort($files);
         foreach ($files as $file) {
             // somente arquivos desta classe
             if (stripos($file, '.nsUtilDB') !== false) {
@@ -176,6 +177,7 @@ class Migrations {
             throw new Exception("Path '$path' is not a directory");
         }
         $files = DirectoryManipulation::openDir($path);
+        asort($files);
         $migrations = [];
         foreach ($files as $file) {
             $sql = "$path/$file";

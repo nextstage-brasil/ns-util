@@ -51,7 +51,7 @@ class Helper {
         //return str_replace(" ", "_", preg_replace("/&([a-z])[a-z]+;/i", "$1", htmlentities(trim((string)$str))));
     }
 
-    public static function mkdir($path, $perm = 0777) : void {
+    public static function mkdir($path, $perm = 0777): void {
         if (!is_dir($path) && !is_file($path)) {
             @mkdir($path, $perm, true);
         }
@@ -217,7 +217,7 @@ class Helper {
                 . ' with ' . round(((memory_get_peak_usage(true) / 1024) / 1024), 2) . 'Mb';
     }
 
-    public static function directorySeparator(&$var) : void {
+    public static function directorySeparator(&$var): void {
         $var = str_replace(['/', '\\'], DIRECTORY_SEPARATOR, $var);
     }
 
@@ -735,6 +735,10 @@ class Helper {
      */
     public static function jsonToArrayFromView($json) {
         return json_decode(str_replace('&#34;', '"', (string) $json), true);
+    }
+
+    public static function objectPHP2Array(\stdClass $object) {
+        return json_decode(json_encode($object), true);
     }
 
     /**
