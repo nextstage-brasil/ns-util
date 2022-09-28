@@ -157,9 +157,12 @@ class Package {
 //        }
 
         if (strlen($patch7zip) === 0) {
-            $patch7zip = ((\NsUtil\Helper::getSO() === 'windows') ? 'C:\Program Files\7-Zip\7z.exe' : '/usr/bin/zip');
+            $patch7zip = ((\NsUtil\Helper::getSO() === 'windows') ? 'C:\Program Files\7-Zip\7z.exe' : 'zip');
         }
-        if (!file_exists($patch7zip)) {
+        if (
+                (\NsUtil\Helper::getSO() === 'windows' && !file_exists($patch7zip)) ||
+                (\NsUtil\Helper::getSO() === 'linux' && stripos(shell_exec('type ' . $patch7zip), 'not found') > -1 )
+        ) {
             die('ERROR: Executável do 7z não localizado. Path: ' . $patch7zip);
         }
 
