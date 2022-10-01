@@ -61,6 +61,7 @@ class Package {
         // $versionamento com base nas mensagens
         $exp = explode('/', $message);
         $content = file_get_contents($file);
+        $createTag = true;
 
         $v = explode('.', $content);
 
@@ -83,6 +84,7 @@ class Package {
                 $Z += (($path_increment !== null) ? $path_increment : 1);
                 break;
             default:
+                $createTag = false;
                 break;
         }
 
@@ -100,6 +102,7 @@ class Package {
             $init = substr((string) $path_versionNew, 0, 2);
         }
 
+        $tag = $createTag ? " git tag -a $X.$Y.$Z HEAD" : "type('ls')";
         return [
             'version' => "$X.$Y.$Z",
             'version_full' => $versao,
@@ -110,16 +113,14 @@ class Package {
             . " cd $path_versionNew &&"
             . " git add .  &&"
             . " git commit -m \"$message\" && "
-            . " git tag $X.$Y.$Z HEAD &&"
-            //            . " git push --tags &&"
-            //            . "echo \"VERSAO CRIADA E COMMITADA. TAG CRIADA.\""
+            . $tag . " &&"
             . "timeout /t 10",
             'git' => [
                 'local' => (isset(($init)) ? true : false),
                 'cd' => "cd $path_versionNew",
                 'add' => "git add . ",
                 'commit' => "git commit -m \"$message\" ",
-                'tag' => "git tag -a $X.$Y.$Z HEAD",
+                'tag' => $tag,
                 'push' => "git push --tags",
                 'timeout' => 'timeout /t 10'
             ]
