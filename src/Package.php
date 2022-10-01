@@ -102,7 +102,7 @@ class Package {
             $init = substr((string) $path_versionNew, 0, 2);
         }
 
-        $tag = $createTag ? " git tag -a $X.$Y.$Z HEAD" : " type ls)";
+        $tag = $createTag ? " git tag $X.$Y.$Z HEAD" : " type ls)";
         return [
             'version' => "$X.$Y.$Z",
             'version_full' => $versao,
@@ -113,7 +113,7 @@ class Package {
             . " cd $path_versionNew &&"
             . " git add .  &&"
             . " git commit -m \"$message\" &&"
-            //. (($createTag) ? " git tag -a $X.$Y.$Z HEAD &&" : "")
+            . (($createTag) ? " git tag $X.$Y.$Z HEAD &&" : "")
             . "timeout /t 10",
             'git' => [
                 'local' => (isset(($init)) ? true : false),
