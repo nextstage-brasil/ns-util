@@ -67,15 +67,25 @@ class Package {
         $X = (int) filter_var($v[0], FILTER_SANITIZE_NUMBER_INT);
         $Y = (int) filter_var($v[1], FILTER_SANITIZE_NUMBER_INT);
         $Z = (int) filter_var($v[2], FILTER_SANITIZE_NUMBER_INT);
-        if ($exp[0] === 'version' || $exp[0] === 'release') {
-            $X += (($major_increment !== null) ? $major_increment : 1);
-            $Y = $Z = 0;
-        } else if ($exp[0] === 'feature') {
-            $Y += (($minor_increment !== null) ? $minor_increment : 1);
-            $Z = 0;
-        } else {
-            $Z += (($path_increment !== null) ? $path_increment : 1);
+
+        switch ($exp[0]) {
+            case 'version':
+            case 'release':
+                $X += (($major_increment !== null) ? $major_increment : 1);
+                $Y = $Z = 0;
+                break;
+            case 'feature':
+                $Y += (($minor_increment !== null) ? $minor_increment : 1);
+                $Z = 0;
+                break;
+            case 'bugfix':
+            case 'fix':
+                $Z += (($path_increment !== null) ? $path_increment : 1);
+                break;
+            default:
+                break;
         }
+
         $versao = "$X.$Y.$Z." . date('YmdHi');
         file_put_contents($file, $versao);
 
