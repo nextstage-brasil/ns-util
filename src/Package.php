@@ -102,7 +102,7 @@ class Package {
             $init = substr((string) $path_versionNew, 0, 2);
         }
 
-        $tag = $createTag ? " git tag -a $X.$Y.$Z HEAD" : "type('ls')";
+        $tag = $createTag ? " git tag -a $X.$Y.$Z HEAD" : "type ls)";
         return [
             'version' => "$X.$Y.$Z",
             'version_full' => $versao,
