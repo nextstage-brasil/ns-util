@@ -112,8 +112,8 @@ class Package {
             . (isset(($init)) ? $init . " &&" : "")
             . " cd $path_versionNew &&"
             . " git add .  &&"
-            . " git commit -m \"$message\" && "
-            . $tag . " &&"
+            . " git commit -m \"$message\" &&"
+            . (($createTag) ? " git tag -a $X.$Y.$Z HEAD &&" : "")
             . "timeout /t 10",
             'git' => [
                 'local' => (isset(($init)) ? true : false),
