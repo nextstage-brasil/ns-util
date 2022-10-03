@@ -136,8 +136,9 @@ class Validate {
         }
     }
 
-    public function addCampoObrigatorio($key, $msg, $type = 'string') {
+    public function addCampoObrigatorio(string $key, string $msg, string $type = 'string'): Validate {
         $this->obrigatorios['list'][] = ['key' => $key, 'msg' => $msg, 'type' => $type];
+        return $this;
     }
 
     /**
@@ -174,7 +175,7 @@ class Validate {
         return array_sum(str_split($str)) % 10 === 0;
     }
 
-    public static function isImei(string $n) : bool {
+    public static function isImei(string $n): bool {
         return self::isLuhn($n) && strlen($n) == 15;
     }
 

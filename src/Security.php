@@ -56,23 +56,7 @@ class Security {
         ;
         $js = \NsUtil\Packer::jsPack($js);
         return $crypto . $js;
-    }
-
-    /**
-     * 
-     * @param type $var
-     * @param type $chave
-     * @return typeDecripta uma variavel criada pela funcao JS, MyCripto()
-
-      public static function decryptFromJS($var, $chave) {
-      self::addSessionToKey($chave);
-      $iv_1 = substr((string)hash('sha256', $chave . '_IV'), 0, 16);
-      $key = pack('H*', $chave);
-      $iv = pack('H*', $iv_1);
-      $decrypted = openssl_decrypt(base64_decode($var), "AES-256-CBC", $key, OPENSSL_RAW_DATA, $iv);
-      return json_decode($decrypted);
-      }
-     */
+    }   
 
     /**
      * Decrypt data from a CryptoJS json encoding string
