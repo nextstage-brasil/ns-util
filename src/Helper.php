@@ -326,6 +326,7 @@ class Helper {
             CURLOPT_TIMEOUT => (int) $timeout, // timeout on response
             CURLOPT_MAXREDIRS => 10, // stop after 10 redirects
             CURLOPT_SSL_VERIFYPEER => $ssl,
+            CURLOPT_SSL_VERIFYSTATUS => $ssl, 
             CURLOPT_HEADER => true,
             CURLOPT_VERBOSE => false,
         ];
@@ -801,6 +802,9 @@ class Helper {
     public static function getValByType($string, $type) {
         switch ($type) {
             case 'int':
+            case 'serial':
+            case 'serial4':
+            case 'serial8':
                 $out = filter_var($string, FILTER_VALIDATE_INT);
                 if (!$out) {
                     $out = null;
