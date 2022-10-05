@@ -2,6 +2,7 @@
 
 namespace NsUtil;
 
+use Exception;
 use NsUtil\Crypto;
 
 class Licence {
@@ -21,24 +22,24 @@ class Licence {
      * @param type $filenameOrigem
      * @param type $filenameDestino
      * @return type
-     * @throws \Exception
+     * @throws Exception
      */
     public function create($filenameOrigem, $filenameDestino) {
         $origem = realpath($filenameOrigem);
         $destino = $filenameDestino;
 
         if (!file_exists($filenameOrigem)) {
-            throw new \Exception('NsLicence: Arquivo de origem não localizado: ' . $origem);
+            throw new Exception('NsLicence: Arquivo de origem não localizado: ' . $origem);
         }
-// carga do conteudo
+        // carga do conteudo
         $content = file_get_contents($origem);
         $content = str_replace('<?php', '', $content);
 
-// crypto
+        // crypto
         $pre = $this->crypto->getHash($content);
-// save
+        // save
         $toSave = $this->crypto->encrypt($pre . $content);
-// return
+        // return
         return Helper::saveFile($destino, '', $toSave, 'SOBREPOR');
     }
 
@@ -48,35 +49,26 @@ class Licence {
      * @return type
      */
     public function read($licenceFile, $dieIfNotExists = true) {
-        if (file_exists($licenceFile)) {
-            $filename = $licenceFile;
-        } else {
-            // varredura em busca do arquivo
-            $dirarray = explode(DIRECTORY_SEPARATOR, __DIR__);
-            $filename = implode(DIRECTORY_SEPARATOR, $dirarray) . DIRECTORY_SEPARATOR . $licenceFile;
-            $count = 0;
-            while (!file_exists($filename) && $count < 10) { // paths acima
-                array_pop($dirarray);
-                $filename = implode(DIRECTORY_SEPARATOR, $dirarray) . DIRECTORY_SEPARATOR . $licenceFile;
-                $count++;
-            }
-            $filename = realpath($filename);
-            if (!file_exists($filename)) {
+        if (!file_exists((string) $licenceFile)) {
+            $filename = Helper::fileSearchRecursive($licenceFile, __DIR__, 20);
+            if (!file_exists((string) $filename)) {
                 if (!$dieIfNotExists) {
                     return null;
                 }
                 die("NsLicence: Arquivo não localizado: $licenceFile");
             }
+            return $this->read($filename, $dieIfNotExists = true);
         }
 
-// decodificar config
+
+        // decodificar config
         $string = file_get_contents($filename);
         $config = $this->crypto->decrypt($string);
         $md5 = substr((string) $config, 0, 64);
         $code = substr((string) $config, 64);
         $pre = $this->crypto->getHash($code);
 
-// validação que o código não foi alterado
+        // validação que o código não foi alterado
         if ($pre !== $md5) {
             die('NsLicence: Arquivo de configuração inválido ou violado');
         }
