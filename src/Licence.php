@@ -62,11 +62,11 @@ class Licence {
 
 
         // decodificar config
-        $string = file_get_contents($filename);
-        $config = $this->crypto->decrypt($string);
+        $string = file_get_contents((string) $licenceFile);
+        $config = $this->crypto->decrypt((string) $string);
         $md5 = substr((string) $config, 0, 64);
         $code = substr((string) $config, 64);
-        $pre = $this->crypto->getHash($code);
+        $pre = $this->crypto->getHash((string) $code);
 
         // validação que o código não foi alterado
         if ($pre !== $md5) {
