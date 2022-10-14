@@ -32,7 +32,7 @@ class StatusLoader {
         if ($this->lastDone > 0) {
             $this->done($this->lastDone);
         }
-        
+
         return $this;
     }
 
@@ -94,6 +94,15 @@ class StatusLoader {
 
     function getLastStatusBar() {
         return $this->lastStatusBar;
+    }
+
+    public static function poolRunner(\Spatie\Async\Pool $pool, int $total, string $message, bool $showQtde) {
+        $loader = (new StatusLoader($total, $message))->setShowQtde($showQtde);
+        $pool->wait(function ($th) use ($loader) {
+            $loader->done(count($th->getFinished()) + count($th->getFailed()));
+        });
+        $loader->done($total);
+        return $pool;
     }
 
 }
