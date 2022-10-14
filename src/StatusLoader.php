@@ -96,7 +96,7 @@ class StatusLoader {
         return $this->lastStatusBar;
     }
 
-    public static function poolRunner(\Spatie\Async\Pool $pool, int $total, string $message, bool $showQtde) {
+    public static function poolRunner(\Spatie\Async\Pool $pool, int $total, string $message='Processando', bool $showQtde=true) {
         $loader = (new StatusLoader($total, $message))->setShowQtde($showQtde);
         $pool->wait(function ($th) use ($loader) {
             $loader->done(count($th->getFinished()) + count($th->getFailed()));
