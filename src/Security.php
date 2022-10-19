@@ -19,13 +19,12 @@ class Security {
 
     public static function getUrlOfFileInDisc($filepath) {
         $env = getenv('DOCKER_PHP_FILES_DIR');
-        $protocol = ((getenv('DOCKER_PROTOCOL_INCLUDE') !== null) ? getenv('DOCKER_PROTOCOL_INCLUDE') : $_SERVER['REQUEST_SCHEME']);
+        $protocol = ((getenv('DOCKER_PROTOCOL_INCLUDE') !== false) ? getenv('DOCKER_PROTOCOL_INCLUDE') : $_SERVER['REQUEST_SCHEME']);
         $root = ((false !== $env) ? $env : $_SERVER['DOCUMENT_ROOT']);
         $dr = str_replace("\\", '/', realpath($root));
         $dir = str_replace("\\", '/', $filepath);
         $path = str_replace($dr, '', $dir);
-        
-        return $protocol .'://'. $_SERVER['HTTP_HOST'] . $path;
+        return $protocol . '://' . $_SERVER['HTTP_HOST'] . $path;
     }
 
     public static function includeJSFromUrl(array $js) {
@@ -57,7 +56,7 @@ class Security {
         ;
         $js = \NsUtil\Packer::jsPack($js);
         return $crypto . $js;
-    }   
+    }
 
     /**
      * Decrypt data from a CryptoJS json encoding string
