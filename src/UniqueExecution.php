@@ -10,11 +10,20 @@ class UniqueExecution {
     private $con, $ref;
 
     public function __construct(string $dbName = 'defaultApplication', string $pathToDB = '/tmp') {
+        $user = posix_getpwuid(posix_geteuid())['name'];
         $pathToDB = (($pathToDB === '/tmp') ? Helper::getTmpDir() : $pathToDB);
-        $this->con = new SQLite($pathToDB . '/' . 'NSUniqueExecution');
+        $db = $pathToDB . '/' . 'NSUniqueExecution';
+        $this->con = new SQLite($db);
         $this->ref = $dbName;
         $this->createDB();
         date_default_timezone_set('UTC');
+
+        if ($user !== 'root')   {
+            chmod($db, 0777);
+            chown($db, 'root');
+            chgrp($db, 'root');
+        }
+
     }
 
     // Cria a tabela necessária para execução
