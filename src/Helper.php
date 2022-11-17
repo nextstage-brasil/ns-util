@@ -2,18 +2,23 @@
 
 namespace NsUtil;
 
+use Exception;
+use stdClass;
+
 // Helper funcionrs
 class Helper {
 
-    /**
-     * 
-     * @param type $configName
-     * @param type $dirArquivoSample
-     */
-    public static function nsIncludeConfigFile($dirArquivoSample) {
+     /**
+      * Retorna um caminho absoluto de um arquivo
+      *
+      * @param string $dirArquivoSample
+      * @return void
+      */
+    public static function nsIncludeConfigFile(string $dirArquivoSample) {
         $dirArquivoSample = realpath($dirArquivoSample);
         $temp = explode(DIRECTORY_SEPARATOR, $dirArquivoSample);
         $configName = array_pop($temp);
+
         // importar arquivo de configuração desta aplicação.
         $t = explode(DIRECTORY_SEPARATOR, __DIR__);
         $file = 'nao-deve-achar.json';
@@ -36,7 +41,13 @@ class Helper {
         return $$var;
     }
 
-    public static function sanitize($str) {
+    /**
+     * Sanitize function
+     *
+     * @param string $str
+     * @return string
+     */
+    public static function sanitize(string $str) : string {
         $from = "áàãâéêíóôõúüçÁÀÃÂÉÊÍÓÔÕÚÜÇ";
         $to = "aaaaeeiooouucAAAAEEIOOOUUC";
         $keys = array();
@@ -109,12 +120,15 @@ class Helper {
         });
     }
 
-    /**
-     * Ira procurar num array multidimensional a chave e retornara um array correspondente aquela chave
-     * @param type $array
-     * @param type $chave
-     */
-    public static function arraySearchByKey(&$array, $chave, $valor): array {
+     /**
+      * Ira procurar num array multidimensional a chave e retornara um array correspondente aquela chave
+      *
+      * @param array $array
+      * @param string $chave
+      * @param string $valor
+      * @return array
+      */
+    public static function arraySearchByKey(array &$array, string $chave, string $valor): array {
         if (!is_array($array)) {
             throw new Exception('NSUtil (NSH120): Variavel não é um array');
         }
@@ -128,9 +142,9 @@ class Helper {
 
     /**
      * Retorna a string no formato camelCase
-     * @param type $string
+     * @param string|array $string
      * @param array $prefixo
-     * @return type string
+     * @return string|array
      */
     public static function name2CamelCase($string, $prefixo = false) {
         $prefixo = array('mem_', 'sis_', 'anz_', 'aux_', 'app_');
@@ -148,7 +162,7 @@ class Helper {
 
         $string = str_replace('_', ' ', $string);
         $string = str_replace('-', ' ', $string);
-//        $out = str_replace(' ', '', ucwords($string));
+        //        $out = str_replace(' ', '', ucwords($string));
         $out = lcfirst(str_replace(' ', '', ucwords($string)));
         return $out;
     }
@@ -170,15 +184,19 @@ class Helper {
         return (string) $out;
     }
 
-    /**
-     * Cria a arvore de diretorios
-     * @param type $filename
-     * @return type
-     */
-    public static function createTreeDir($filename) {
+     /**
+      * Simple mkdir ignoring errors
+      *
+      * @param string $filename
+      * @return object
+      */
+    public static function createTreeDir(string $filename) : object {
         $path = str_replace('/', DIRECTORY_SEPARATOR, $filename);
         $parts = explode(DIRECTORY_SEPARATOR, $path);
         $file = array_pop($parts);
+        if (!is_file($file))   {
+            $parts[] = $file;
+        }
         $dir = implode(DIRECTORY_SEPARATOR, $parts);
         if (!is_dir($dir) && !is_file($dir)) {
             @mkdir($dir, 0777, true);
@@ -213,8 +231,8 @@ class Helper {
         $minutos = (int) number_format((float) $elapsed_time / 60, 0);
 
         return 'Elapsed '
-                . gmdate("H:i:s", (int) $elapsed_time)
-                . ' with ' . round(((memory_get_peak_usage(true) / 1024) / 1024), 2) . 'Mb';
+            . gmdate("H:i:s", (int) $elapsed_time)
+            . ' with ' . round(((memory_get_peak_usage(true) / 1024) / 1024), 2) . 'Mb';
     }
 
     public static function directorySeparator(&$var): void {
@@ -247,16 +265,18 @@ class Helper {
         return is_dir($pasta);
     }
 
-    /**
-     * Remove um arquivo em disco
-     * @param type $filepath
-     * @param type $apagarDiretorio
-     * @param type $trash
-     * @return boolean
-     */
-    public static function deleteFile($filepath, $apagarDiretorio = false, $trash = false) {
+   
+     /**
+      * Remvoe um arquivop
+      *
+      * @param string $filepath
+      * @param boolean $apagarDiretorio
+      * @param boolean $trash
+      * @return void
+      */
+    public static function deleteFile(string $filepath, bool $apagarDiretorio = false, bool $trash = false) {
         ///echo $filename;
-        $filename = str_replace('/', DIRECTORY_SEPARATOR, $filepath);
+        $filename = (string) str_replace('/', DIRECTORY_SEPARATOR, $filepath);
 
         if (is_dir($filename)) {
             $dir = dir($filename);
@@ -282,12 +302,12 @@ class Helper {
     /**
      * Permite o uso em ambientes com SSL
      * 
-     * @param type $url
+     * @param string $url
      * @param bool $ssl Tru or false para validação de SSL. Default false
      * @param int $timeout Timeout da chamada. Default 30 segundos
-     * @return type
+     * @return string
      */
-    public static function myFileGetContents(string $url, bool $ssl = false, int $timeout = 30) {
+    public static function myFileGetContents(string $url, bool $ssl = false, int $timeout = 30) : string {
         $config = [
             'http' => [
                 'timeout' => $timeout
@@ -306,11 +326,11 @@ class Helper {
      * @param string $url
      * @param array $params
      * @param string $method
-     * @return Array
+     * @return object
      */
-    public static function curlCall($url, $params = [], $method = 'GET', $header = ['Content-Type:application/json'], $ssl = true, int $timeout = 30) {
+    public static function curlCall($url, $params = [], $method = 'GET', $header = ['Content-Type:application/json'], $ssl = true, int $timeout = 30): object {
         // Remover cookie em excesso
-        $cookiefile = "/tmp/" . md5((string) date('Ymd')) . '.txt';
+        $cookiefile = Helper::getTmpDir() . DIRECTORY_SEPARATOR .'NsUtilCurlCookie_'. md5((string) date('Ymd')) . '.txt';
         $options = [
             CURLOPT_URL => trim((string) $url),
             CURLOPT_CUSTOMREQUEST => $method,
@@ -326,7 +346,7 @@ class Helper {
             CURLOPT_TIMEOUT => (int) $timeout, // timeout on response
             CURLOPT_MAXREDIRS => 10, // stop after 10 redirects
             CURLOPT_SSL_VERIFYPEER => $ssl,
-            CURLOPT_SSL_VERIFYSTATUS => $ssl, 
+            CURLOPT_SSL_VERIFYSTATUS => $ssl,
             CURLOPT_HEADER => true,
             CURLOPT_VERBOSE => false,
         ];
@@ -367,13 +387,13 @@ class Helper {
         }
 
         $ret = (object) [
-                    'content' => $body,
-                    'errorCode' => curl_errno($ch),
-                    'error' => ((curl_error($ch)) ? curl_error($ch) : curl_errno($ch)),
-                    'status' => (int) curl_getinfo($ch)['http_code'],
-                    'http_code' => (int) curl_getinfo($ch)['http_code'],
-                    'headers' => $headers,
-                    'url' => $urlInfo
+            'content' => $body,
+            'errorCode' => curl_errno($ch),
+            'error' => ((curl_error($ch)) ? curl_error($ch) : curl_errno($ch)),
+            'status' => (int) curl_getinfo($ch)['http_code'],
+            'http_code' => (int) curl_getinfo($ch)['http_code'],
+            'headers' => $headers,
+            'url' => $urlInfo
         ];
         //Log::error(json_encode($ret));
         //echo json_encode($content);
@@ -410,10 +430,10 @@ class Helper {
 
     /**
      * Conta a quantidade linhas em um arquivo CSV ou TXT
-     * @param type $file
+     * @param string $file
      * @return int
      */
-    public static function linhasEmArquivo($file) {
+    public static function linhasEmArquivo(string $file) {
         $l = 0;
         if ($f = fopen($file, "r")) {
             while ($d = fgets($f, 1000)) {
@@ -1053,5 +1073,4 @@ class Helper {
             $condition = array_merge($condition, $newConditions);
         }
     }
-
 }
