@@ -337,7 +337,7 @@ class Package {
     rmdir ' . $encodedFile . ' /s /q
 	';
         Helper::saveFile($ioncube_post, false, $contentIoncubepost, "SOBREPOR");
-        sleep(0.2);
+        sleep(1);
         echo ((file_exists($ioncube_post)) ? "OK!" : "Erro ao gerar arquivo $ioncube_post");
 
         echo "\n - Criando pacote ... ";
