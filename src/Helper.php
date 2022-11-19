@@ -184,23 +184,17 @@ class Helper {
         return (string) $out;
     }
 
-     /**
-      * Simple mkdir ignoring errors
-      *
-      * @param string $filename
-      * @return object
-      */
-    public static function createTreeDir(string $filename) : object {
-        $path = str_replace('/', DIRECTORY_SEPARATOR, $filename);
+    /**
+     * Cria a arvore de diretorios
+     * @param type $filename
+     * @return type
+     */
+    public static function createTreeDir($filename) {
+        $path = str_replace('/', DIRECTORY_SEPARATOR, (string) $filename);
         $parts = explode(DIRECTORY_SEPARATOR, $path);
         $file = array_pop($parts);
-        if (!is_file($file))   {
-            $parts[] = $file;
-        }
         $dir = implode(DIRECTORY_SEPARATOR, $parts);
-        if (!is_dir($dir) && !is_file($dir)) {
-            @mkdir($dir, 0777, true);
-        }
+        @mkdir($dir, 0777, true);
         return (object) ['path' => $dir, 'name' => $file];
     }
 
