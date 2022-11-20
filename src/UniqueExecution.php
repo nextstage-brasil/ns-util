@@ -16,7 +16,7 @@ class UniqueExecution {
         $this->con = new SQLite($db);
         $this->ref = $dbName;
         $this->createDB();
-        date_default_timezone_set('UTC');
+        // date_default_timezone_set('UTC');
 
         if ($user !== 'root')   {
             chmod($db, 0777);

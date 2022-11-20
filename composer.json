@@ -9,7 +9,8 @@
         "smottt/wideimage": "^1.1",
         "phpmailer/phpmailer": "^6.1", 
         "sendgrid/sendgrid" : "^7", 
-        "spatie/async": "^1.5"
+        "spatie/async": "^1.5",
+        "laravel/serializable-closure": "^1.2"
     },
     "license": "Apache-2.0",
     "autoload": {

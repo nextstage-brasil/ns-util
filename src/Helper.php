@@ -175,7 +175,7 @@ class Helper {
     public static function reverteName2CamelCase($string): string {
         $out = '';
         for ($i = 0; $i < strlen((string) $string); $i++) {
-            if ($string[$i] === mb_strtoupper($string[$i]) && $string[$i] !== '.') {
+            if ($string[$i] === mb_strtoupper((string)$string[$i]) && $string[$i] !== '.') {
                 $out .= (($i > 0) ? '_' : '');
                 $string[$i] = mb_strtolower($string[$i]);
             }
@@ -481,7 +481,7 @@ class Helper {
 
     public static function compareString($str1, $str2, $case = false) {
         if (!$case) {
-            return (mb_strtoupper($str1) === mb_strtoupper($str2));
+            return (mb_strtoupper((string)$str1) === mb_strtoupper((string)$str2));
         } else {
             return ($str1 === $str2);
         }
@@ -965,7 +965,7 @@ class Helper {
         $t = explode('.', $filename);
         $extensao = array_pop($t);
         $out = '';
-        switch (mb_strtoupper($extensao)) {
+        switch (mb_strtoupper((string)$extensao)) {
             case 'XLSX':
             case 'XLS':
                 $out = 'file-excel-o';

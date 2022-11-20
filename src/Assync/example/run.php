@@ -1,51 +1,28 @@
 <?php
 
-require ('../../../vendor/autoload.php');
-
 use NsUtil\Assync\Assync;
-use NsUtil\Eficiencia;
 
-$n = 10; // número de processos (atenção ao número de processadores disponíveis e memória
-$bg = new Assync($n);
-$ef = new Eficiencia();
-$cmd = 'php ' . __DIR__ . '/process.php';
-$bg->add($cmd)
-        ->add($cmd)
-        ->add($cmd)
-        ->add($cmd)
-        ->add($cmd)
-        ->add($cmd)
-        ->add($cmd)
-        ->add($cmd)
-        ->add($cmd)
-        ->add($cmd)
-        ->add($cmd)
-        ->add($cmd)
-        ->add($cmd)
-        ->add($cmd)
-        ->add($cmd)
-        ->add($cmd)
-        ->add($cmd)
-        ->add($cmd)
-;
+$autoload = __DIR__ . '/vendor/autoload.php';
+require $autoload;
 
-$bg->run();
-echo "Resultado com $n paralelos: " . $ef->end()->text . PHP_EOL;
+$assync = (new Assync())
+    ->setParallelProccess(100)
+    ->setShowLoader('Teste')
+    ->setAutoloader($autoload)
+    ->setLogfile(__DIR__ . '/test.log');
 
-
-
-die();
-
-/*
-$bg2 = new NsUtil\Assync();
-$command = 'php ' . __DIR__ . '/process.php';
-$bg->execute($command);
-sleep(1);
-$bg2->execute($command);
-
-while ($bg->isRunning() || $bg2->isRunning()) {
-    echo "Processo A: " . (($bg->isRunning()) ? 'Rodando' : 'Finalizado') . PHP_EOL;
-    echo "Processo B: " . (($bg2->isRunning()) ? 'Rodando' : 'Finalizado') . PHP_EOL;
-    sleep(1);
+// Adicionar closures
+$proccess = 100000;
+$rand = 10000000;
+for ($i = 0; $i < $proccess; $i++) {
+    $assync->addClosure('teste', function () use ($rand) {
+        $x = 0;
+        for ($i = 0; $i < $rand; $i++) {
+            $x += $i;
+        }
+        return "21-Finished: $x | RAND: $rand";
+    });
 }
-  */
+
+// Run
+$assync->run();
