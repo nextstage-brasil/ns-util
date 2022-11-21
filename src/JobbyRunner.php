@@ -4,6 +4,7 @@ namespace NsUtil;
 
 use Closure;
 use Exception;
+use NsUtil\Assync\Assync;
 use NsUtil\CrontabCheck;
 use NsUtil\Helper;
 use NsUtil\Log;
@@ -17,28 +18,27 @@ class JobbyRunner {
     private $pool;
     private $printSuccessLog = false;
 
-    public function __construct(string $pathToLog) {
+    public function __construct(?string $logfile = null) {
         // logError
-        $this->logError = $pathToLog . DIRECTORY_SEPARATOR . 'NS_JobbyRunner.log';
-        Log::rotate($this->logError, 5);
-        $this->pool = Pool::create();
-        $this->pool instanceof Pool;
+        // $this->logError = $pathToLog . DIRECTORY_SEPARATOR . 'NS_JobbyRunner.log';
+        // Log::rotate($this->logError, 5);
+        $this->pool = new Assync();
+        if (null !== $logfile) {
+            $this->pool->setLogfile($logfile);
+        }
 
         if (Helper::getSO() === 'windows') {
             die('ERROR: This class not running on windows');
         }
-        if (!$this->pool->isSupported()) {
-            die('ERROR: Check the extensions: pcntle posix');
-        }
     }
 
     public function setAutoload(string $path): JobbyRunner {
-        $this->pool->autoload($path);
+        $this->pool->setAutoloader($path);
         return $this;
     }
 
     public function setConcurrency(int $concurrency): JobbyRunner {
-        $this->pool->concurrency($concurrency);
+        $this->pool->setParallelProccess($concurrency);
         return $this;
     }
 
@@ -47,7 +47,17 @@ class JobbyRunner {
         return $this;
     }
 
-    public function run(): array {
+    public function setLogfile(string $logfile): JobbyRunner {
+        $this->pool->setLogfile($logfile);
+        return $this;
+    }
+
+
+    public function run(string $verboseTitle = null): array {
+        if (null !== $verboseTitle) {
+            $this->pool->setShowLoader($verboseTitle);
+        }
+
         // Executar os arquivos conforme regras
         $ja = [];
 
@@ -82,32 +92,25 @@ class JobbyRunner {
 
             // Programar a closure conforme chamado
             if ($closure instanceof \Closure) {
-                $this->pool->add(function () use ($name, $closure, $maxTimeExecution) {
-                            $onlyOne = new UniqueExecution(md5(__FILE__ . $name));
-                            if ($onlyOne->isRunning($maxTimeExecution * 60)) {
-                                return $onlyOne->getDefaultMessageIsRunning();
-                            } else {
-                                $onlyOne->start();
-                                $out = $closure();
-                                $onlyOne->end();
-                                return $out;
-                            }
-                        })
-                        ->then(function ($output) use ($now, $name, $description, $printSuccessLog) {
-                            if ($printSuccessLog) {
-                                Log::logTxt($this->logError, "[$now] [$description] SUCCESS:  $output");
-                            }
-                            (new UniqueExecution(md5(__FILE__ . $name)))->end();
-                        })
-                        ->catch(function (Exception $exception) use ($now, $name, $description) {
-                            Log::logTxt($this->logError, "[$now] [$description] ERROR: " . $exception->getMessage());
-                            (new UniqueExecution(md5(__FILE__ . $name)))->end();
-                        });
+                $this->pool->addClosure($name, function () use ($name, $closure, $maxTimeExecution) {
+                    $onlyOne = new UniqueExecution(md5(__FILE__ . $name));
+                    if ($onlyOne->isRunning($maxTimeExecution * 60)) {
+                        return $onlyOne->getDefaultMessageIsRunning();
+                    } else {
+                        $onlyOne->start();
+                        $out = $closure();
+                        $onlyOne->end();
+                        return $out;
+                    }
+                });
+
+                // fechar o processo unico de criação de nova closure
+                $onlyOne->end();
             }
             $ja[] = implode('|', array_values($out));
         }
 
-        $this->pool->wait();
+        $this->pool->run();
         return ['run' => date('c'), 'jobs' => count($this->jobs), 'result' => $ja];
     }
 
@@ -122,15 +125,14 @@ class JobbyRunner {
      * @return void
      */
     public function add(
-            string $name,
-            string $description,
-            int $maxTimeExecution,
-            string $schedule,
-            bool $isEnable,
-            \Closure $closure
+        string $name,
+        \Closure $closure,
+        string $description = '',
+        int $maxTimeExecution = 30,
+        string $schedule = '* * * * *',
+        bool $isEnable = true
     ): JobbyRunner {
         $this->jobs[] = [$name, $description, $maxTimeExecution, $schedule, $isEnable, $closure];
         return $this;
     }
-
 }

@@ -28,9 +28,10 @@ try {
 
     $task = Assync::decodeTask($serializedClosure);
     $output = call_user_func($task);
+    $output = (string) is_string($output) ? $output : json_encode($output);
 
     // Log
-    Log::logTxt($logfile . '-SUCCESS', "[$ref] " . $output);
+    Log::logTxt($logfile.'_success.log', "[$ref] " . $output);
 } catch (Exception $exception) {
-    Log::logTxt($logfile . '-ERROR', "[$ref] " . $exception->getMessage());
+    Log::logTxt($logfile.'_error.log', "[$ref] " . $exception->getMessage());
 }
