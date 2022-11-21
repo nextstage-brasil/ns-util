@@ -8,6 +8,7 @@ use NsUtil\Eficiencia;
 use NsUtil\Helper;
 use NsUtil\StatusLoader;
 use Laravel\SerializableClosure\SerializableClosure;
+use ReflectionClass;
 
 /**
  * Class that can execute a background job, and check if the
@@ -129,9 +130,46 @@ class Assync {
         }
         $cmd = implode(' ', [
             PHP_BINARY,
-            __DIR__ . '/Runtime.php',
+            __DIR__ . '/ClosureRuntime.php',
             $this->autoloaderPath,
             self::encodeTask($fn),
+            $this->logfile,
+            $name
+        ]);
+        $this->add($cmd);
+
+        return $this;
+    }
+
+    /**
+     * Undocumented function
+     *
+     * @param string $name
+     * @param ReflectionClass $class
+     * @param string $function
+     * @param array $params
+     * @return void
+     */
+    public function addClassRunner(string $name, string $className, string $function, array $params = []) {
+        if (!$this->autoloaderPath) {
+            throw new Exception("NSUtil Assync: autoload is not defined");
+        }
+
+        if (!class_exists($className)) {
+            throw new Exception("NSUtil Assync: class '$className' not found");
+        }
+        if (!method_exists($className, $function)) {
+            throw new Exception("NSUtil Assync: function '$function' not found on class '$className'");
+        }
+        $params = array_merge([
+            '__CLASS__' => $className,
+            '__FUNCTION__' => $function
+        ]);
+        $cmd = implode(' ', [
+            PHP_BINARY,
+            __DIR__ . '/ClassRuntime.php',
+            $this->autoloaderPath,
+            base64_encode(json_encode($params)),
             $this->logfile,
             $name
         ]);

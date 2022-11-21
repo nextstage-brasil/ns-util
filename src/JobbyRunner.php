@@ -64,6 +64,57 @@ class JobbyRunner {
         $now = date('c');
         $printSuccessLog = $this->printSuccessLog;
         foreach ($this->jobs as $job) {
+            list($name, $className, $functionName, $params, $maxTimeExecution, $schedule, $isEnable) = $job;
+            $onlyOne = new UniqueExecution(md5(__FILE__ . $name));
+            $out = [];
+            $out[] = $name;
+            $out[] = $schedule;
+            $out[] = 'Enabled: ' . $isEnable ? 'true' : 'false';
+
+            // Validação de execução
+            switch (true) {
+                case $onlyOne->isRunning($maxTimeExecution * 60):
+                    $out[] = $onlyOne->getDefaultMessageIsRunning();
+                    $className = null;
+                    break;
+                case (!$isEnable):
+                    $out[] = 'Não habilitado';
+                    $className = null;
+                    break;
+                case (!CrontabCheck::check($schedule)):
+                    $out[] = 'Fora do prazo';
+                    $className = null;
+                    break;
+                default:
+                    $out[] = 'Execução agendada';
+                    break;
+            }
+
+            // Programar a closure conforme chamado
+            if (class_exists($className)) {
+                $this->pool->addClassRunner($name, $className, $functionName, $params);
+            }
+            // fechar o processo unico de criação de nova closure
+            $onlyOne->end();
+            $ja[] = implode('|', array_values($out));
+        }
+
+        $this->pool->run();
+        return ['run' => date('c'), 'jobs' => count($this->jobs), 'result' => $ja];
+    }
+
+
+    public function runClosure(string $verboseTitle = null): array {
+        if (null !== $verboseTitle) {
+            $this->pool->setShowLoader($verboseTitle);
+        }
+
+        // Executar os arquivos conforme regras
+        $ja = [];
+
+        $now = date('c');
+        $printSuccessLog = $this->printSuccessLog;
+        foreach ($this->jobs as $job) {
             list($name, $description, $maxTimeExecution, $schedule, $isEnable, $closure) = $job;
             $onlyOne = new UniqueExecution(md5(__FILE__ . $name));
             $out = [];
@@ -114,6 +165,7 @@ class JobbyRunner {
         return ['run' => date('c'), 'jobs' => count($this->jobs), 'result' => $ja];
     }
 
+
     /**
      * 
      * @param string $name Referencia a ser localizada no arquivo config, caso necessario
@@ -124,7 +176,7 @@ class JobbyRunner {
      * @param Closure $closure Função para execução
      * @return void
      */
-    public function add(
+    public function addClosure(
         string $name,
         \Closure $closure,
         string $description = '',
@@ -133,6 +185,32 @@ class JobbyRunner {
         bool $isEnable = true
     ): JobbyRunner {
         $this->jobs[] = [$name, $description, $maxTimeExecution, $schedule, $isEnable, $closure];
+        return $this;
+    }
+
+
+    /**
+     * Undocumented function
+     *
+     * @param string $name
+     * @param string $className
+     * @param string $functionName
+     * @param array $params
+     * @param integer $maxTimeExecution
+     * @param string $schedule
+     * @param boolean $isEnable
+     * @return JobbyRunner
+     */
+    public function add(
+        string $name,
+        string $className,
+        string $functionName,
+        array $params = [],
+        int $maxTimeExecution = 30,
+        string $schedule = '* * * * *',
+        bool $isEnable = true
+    ): JobbyRunner {
+        $this->jobs[] = [$name, $className, $functionName, $params, $maxTimeExecution, $schedule, $isEnable];
         return $this;
     }
 }

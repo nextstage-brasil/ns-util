@@ -19,9 +19,9 @@ class UniqueExecution {
         // date_default_timezone_set('UTC');
 
         if ($user !== 'root')   {
-            chmod($db, 0777);
-            chown($db, 'root');
-            chgrp($db, 'root');
+            @chmod($db, 0777);
+            @chown($db, 'root');
+            // @chgrp($db, 'root');
         }
 
     }
