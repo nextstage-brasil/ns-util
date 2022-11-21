@@ -161,7 +161,7 @@ class Assync {
         if (!method_exists($className, $function)) {
             throw new Exception("NSUtil Assync: function '$function' not found on class '$className'");
         }
-        $params = array_merge([
+        $params = array_merge($params, [
             '__CLASS__' => $className,
             '__FUNCTION__' => $function
         ]);

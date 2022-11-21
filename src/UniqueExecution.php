@@ -20,7 +20,7 @@ class UniqueExecution {
 
         if ($user !== 'root')   {
             @chmod($db, 0777);
-            @chown($db, 'root');
+            // @chown($db, 'root');
             // @chgrp($db, 'root');
         }
 
