@@ -8,12 +8,12 @@ use stdClass;
 // Helper funcionrs
 class Helper {
 
-     /**
-      * Retorna um caminho absoluto de um arquivo
-      *
-      * @param string $dirArquivoSample
-      * @return void
-      */
+    /**
+     * Retorna um caminho absoluto de um arquivo
+     *
+     * @param string $dirArquivoSample
+     * @return void
+     */
     public static function nsIncludeConfigFile(string $dirArquivoSample) {
         $dirArquivoSample = realpath($dirArquivoSample);
         $temp = explode(DIRECTORY_SEPARATOR, $dirArquivoSample);
@@ -47,7 +47,7 @@ class Helper {
      * @param string $str
      * @return string
      */
-    public static function sanitize(string $str) : string {
+    public static function sanitize(string $str): string {
         $from = "áàãâéêíóôõúüçÁÀÃÂÉÊÍÓÔÕÚÜÇ";
         $to = "aaaaeeiooouucAAAAEEIOOOUUC";
         $keys = array();
@@ -120,14 +120,14 @@ class Helper {
         });
     }
 
-     /**
-      * Ira procurar num array multidimensional a chave e retornara um array correspondente aquela chave
-      *
-      * @param array $array
-      * @param string $chave
-      * @param string $valor
-      * @return array
-      */
+    /**
+     * Ira procurar num array multidimensional a chave e retornara um array correspondente aquela chave
+     *
+     * @param array $array
+     * @param string $chave
+     * @param string $valor
+     * @return array
+     */
     public static function arraySearchByKey(array &$array, string $chave, string $valor): array {
         if (!is_array($array)) {
             throw new Exception('NSUtil (NSH120): Variavel não é um array');
@@ -259,15 +259,15 @@ class Helper {
         return is_dir($pasta);
     }
 
-   
-     /**
-      * Remvoe um arquivop
-      *
-      * @param string $filepath
-      * @param boolean $apagarDiretorio
-      * @param boolean $trash
-      * @return void
-      */
+
+    /**
+     * Remvoe um arquivop
+     *
+     * @param string $filepath
+     * @param boolean $apagarDiretorio
+     * @param boolean $trash
+     * @return void
+     */
     public static function deleteFile(string $filepath, bool $apagarDiretorio = false, bool $trash = false) {
         ///echo $filename;
         $filename = (string) str_replace('/', DIRECTORY_SEPARATOR, $filepath);
@@ -301,7 +301,7 @@ class Helper {
      * @param int $timeout Timeout da chamada. Default 30 segundos
      * @return string
      */
-    public static function myFileGetContents(string $url, bool $ssl = false, int $timeout = 30) : string {
+    public static function myFileGetContents(string $url, bool $ssl = false, int $timeout = 30): string {
         $config = [
             'http' => [
                 'timeout' => $timeout
@@ -324,7 +324,7 @@ class Helper {
      */
     public static function curlCall($url, $params = [], $method = 'GET', $header = ['Content-Type:application/json'], $ssl = true, int $timeout = 30): object {
         // Remover cookie em excesso
-        $cookiefile = Helper::getTmpDir() . DIRECTORY_SEPARATOR .'NsUtilCurlCookie_'. md5((string) date('Ymd')) . '.txt';
+        $cookiefile = Helper::getTmpDir() . DIRECTORY_SEPARATOR . 'NsUtilCurlCookie_' . md5((string) date('Ymd')) . '.txt';
         $options = [
             CURLOPT_URL => trim((string) $url),
             CURLOPT_CUSTOMREQUEST => $method,
@@ -502,10 +502,9 @@ class Helper {
     public static function fileConvertToUtf8($filepath, $output = false) {
         if (file_exists($filepath)) {
             $enc = self::fileGetEncoding($filepath);
-            if ($enc !== 'utf-8' && stripos($enc, 'ascii') === false) {
+            if (strlen($enc)>0 && $enc !== 'utf-8' && stripos($enc, 'ascii') === false) {
                 $output = $output ? $output : $filepath;
                 $cmd = "iconv -f $enc -t utf-8 -o $output $filepath ";
-                //echo $cmd;
                 $ret = shell_exec($cmd);
                 if (strlen((string) $ret) > 0) {
                     throw new \Exception("Erro ao converter arquivo $filepath pata UTF-8: " . $ret);
@@ -675,11 +674,11 @@ class Helper {
     /**
      * 
      * @param type $array 
-     * @param type $filepath if false, retorna em text
+     * @param string $filepath if false, retorna em text
      * @param type $withBom
      * @return type
      */
-    public static function array2csv(array $array, $filepath = false, bool $withBom = true) {
+    public static function array2csv(array $array, ?string $filepath = null, bool $withBom = true) {
         // Manter o padrão entre as chaves
         $trataed = [];
         $keys = array_keys($array[0]);
@@ -693,7 +692,7 @@ class Helper {
         $array = $trataed;
 
         $delimiter = ';';
-        if ($filepath) {
+        if (null !== $filepath) {
             $fp = fopen($filepath, 'w');
             // BOM
             if ($withBom) {
@@ -722,6 +721,7 @@ class Helper {
                 fputcsv($handle, $line, $delimiter, '"');
             }
             rewind($handle);
+            $contents = '';
             while (!feof($handle)) {
                 $contents .= fread($handle, 8192);
             }

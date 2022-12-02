@@ -73,7 +73,7 @@ class Assync {
         $pidfile = '/tmp/' . hash('sha1', (string)$cmd);
         $this->list[] = ['command' => sprintf("%s > %s 2>&1 & echo $! > %s", $cmd, $outputfile, $pidfile), 'pidfile' => $pidfile, 'cmd' => $cmd];
         if ($this->verbose !== false) {
-            $this->status = new StatusLoader(count($this->list), $this->verbose);
+            $this->status = new StatusLoader(count($this->list), (string) $this->verbose);
             $this->status->setShowQtde(true);
         }
         return $this;

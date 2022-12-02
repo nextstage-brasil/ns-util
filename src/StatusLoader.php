@@ -7,7 +7,7 @@ class StatusLoader {
     private $startTime, $totalRegistros, $label, $size, $lastDone, $lastStatusBar;
     private $showQtde = false;
 
-    public function __construct($totalRegistros, $label = '', $size = 45) {
+    public function __construct(int $totalRegistros, string $label = '', int $size = 45) {
         $this->startTime = time();
         $this->totalRegistros = (int) $totalRegistros;
         $this->size = (int) $size;
@@ -23,7 +23,7 @@ class StatusLoader {
         return $this;
     }
 
-    public function setLabel($label) {
+    public function setLabel(string $label='') {
 
         $s = (int) round($this->size * 0.5);
         $label = str_pad($label, ($s + (int) round($this->size)));

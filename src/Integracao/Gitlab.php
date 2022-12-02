@@ -2,6 +2,9 @@
 
 namespace NsUtil\Integracao;
 
+use Exception;
+use NsUtil\Helper;
+
 class Gitlab {
 
     private $config, $depara, $project;
@@ -51,8 +54,12 @@ class Gitlab {
                 . $resource
                 . ((count($data) > 0) ? '?' . http_build_query($data) : '')
         ;
-        //echo $url . PHP_EOL; 
-        $ret = \NsUtil\Helper::curlCall($url, [], $method, $header);
+        $params = [];
+        $header = ['PRIVATE-TOKEN:' . $this->config->get('token')];
+        $ssl = false;
+        $timeout = 30;
+        $ret = Helper::curlCall($url, $params, $method, $header, $ssl, $timeout);
+        
         if ($ret->status >= 203) {
             throw new \Exception(PHP_EOL .
                             'ERROR: Chamada ao recurso ' . $resource . ' com status ' . $ret->status
