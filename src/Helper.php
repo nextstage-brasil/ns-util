@@ -194,7 +194,8 @@ class Helper {
         $parts = explode(DIRECTORY_SEPARATOR, $path);
         $file = array_pop($parts);
         $dir = implode(DIRECTORY_SEPARATOR, $parts);
-        @mkdir($dir, 0777, true);
+        self::mkdir($dir, 0777);
+        // @mkdir($dir, 0777, true);
         return (object) ['path' => $dir, 'name' => $file];
     }
 
