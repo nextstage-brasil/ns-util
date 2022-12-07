@@ -4,7 +4,7 @@
     "require": {
         "php": ">=7.2",
         "guzzlehttp/guzzle": "^6.5.8",
-        "league/flysystem-aws-s3-v3": "^1.0",
+        "league/flysystem-aws-s3-v3": ">=1.0",
         "nelexa/zip": "^3.3 || ^4.0", 
         "smottt/wideimage": "^1.1",
         "phpmailer/phpmailer": "^6.1", 
