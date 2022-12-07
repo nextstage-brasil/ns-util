@@ -2,6 +2,9 @@
 
 namespace NsUtil\Integracao;
 
+use Exception;
+use NsUtil\Helper;
+
 abstract class Adapter {
 
     protected $token, $endpoint, $appkey, $showLogs, $sessionName;
@@ -47,6 +50,44 @@ abstract class Adapter {
         return $this->_call($recurso, $params, $method, $header);
     }
 
+
+    /**
+     * Executa uma chamada a API conforme recurso. Ira verificar login valido antes de executar
+     * @param type $recurso
+     * @param type $params
+     * @param type $method
+     * @param type $header
+     * @return \stdClass
+     */
+    public function _callV2($recurso, $params = [], $method = 'POST', $header = []) {
+        $this->login();
+        try {
+            $url = $this->endpoint . '/' . $recurso;
+            $this->printLogsOnScreen('URL: ' . $url);
+            $headerNew = ['Token:' . $this->token];
+            foreach ($header as $key => $val) {
+                $headerNew[] = "$key:$val";
+            }
+            $ssl = false;
+            $timeout = 30;
+            $out = Helper::curlCall($url, $params, $method, $headerNew, $ssl, $timeout);
+            $body = json_decode($out->content);
+            $out->error = $out->error > 0;
+            $out->content->token = (($body->token) ? $body->token : false);
+            $out->errorText = (($body->content->error) ? $body->content->error : $body->error);
+
+            return $out;
+        } catch (Exception $exc) {
+            $out->error = (bool) true;
+            $out->content = $exc->getMessage();
+        } finally {
+            if ($this->atualLoginTime) {
+                $_SESSION[$this->sessionName] = $this->atualLoginTime;
+                $this->atualLoginTime = false;
+            }
+        }
+    }
+
     /**
      * Executa uma chamada a API conforme recurso. Ira verificar login valido antes de executar
      * @param type $recurso
@@ -73,7 +114,7 @@ abstract class Adapter {
 
             $out = new \stdClass();
             $out->status = $res->getStatusCode();
-            $out->error = (boolean) $body->error;
+            $out->error = (bool) $body->error;
             $out->content = $body->content;
             $out->content->token = (($body->token) ? $body->token : false);
             $out->errorText = (($body->content->error) ? $body->content->error : $body->error);
@@ -81,7 +122,7 @@ abstract class Adapter {
         } catch (Exception $exc) {
             $out = new \stdClass();
             $out->status = $res->getStatusCode();
-            $out->error = (boolean) true;
+            $out->error = (bool) true;
             $out->content = $exc->getMessage();
         } finally {
             if ($this->atualLoginTime) {
@@ -97,5 +138,4 @@ abstract class Adapter {
             echo $text . "<hr>";
         }
     }
-
 }

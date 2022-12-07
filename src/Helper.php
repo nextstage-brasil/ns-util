@@ -679,7 +679,7 @@ class Helper {
      * @param type $withBom
      * @return type
      */
-    public static function array2csv(array $array, ?string $filepath = null, bool $withBom = true) {
+    public static function array2csv(array $array, ?string $filepath = null, bool $withBom = true, string $delimiter=',') {
         // Manter o padrão entre as chaves
         $trataed = [];
         $keys = array_keys($array[0]);
@@ -692,7 +692,7 @@ class Helper {
         }
         $array = $trataed;
 
-        $delimiter = ';';
+        // $delimiter = ';';
         if (null !== $filepath) {
             $fp = fopen($filepath, 'w');
             // BOM
