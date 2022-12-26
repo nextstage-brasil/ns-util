@@ -674,11 +674,12 @@ class Helper {
 
     /**
      * 
-     * @param type $array 
+     * @param array $array 
      * @param string $filepath if false, retorna em text
-     * @param type $withBom
+     * @param bool $withBom
      * @return type
      */
+
     public static function array2csv(array $array, ?string $filepath = null, bool $withBom = true, string $delimiter=',') {
         // Manter o padrão entre as chaves
         $trataed = [];
