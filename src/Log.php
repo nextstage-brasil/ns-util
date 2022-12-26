@@ -56,6 +56,7 @@ class Log {
             if (is_null($item) || !is_array($item) || strlen((string) $item['class']) === 0) {
                 return '';
             }
+            $item['file'] = $item['file'] ? $item['file'] : '';
             $f = explode(DIRECTORY_SEPARATOR, $item['file']);
             return array_pop($f)
                 . '::'
