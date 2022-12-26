@@ -75,15 +75,15 @@ class JobbyRunner {
             switch (true) {
                 case $onlyOne->isRunning($maxTimeExecution * 60):
                     $out[] = $onlyOne->getDefaultMessageIsRunning();
-                    $className = null;
+                    $className = '';
                     break;
                 case (!$isEnable):
                     $out[] = 'Não habilitado';
-                    $className = null;
+                    $className = '';
                     break;
                 case (!CrontabCheck::check($schedule)):
                     $out[] = 'Fora do prazo';
-                    $className = null;
+                    $className = '';
                     break;
                 default:
                     $out[] = 'Execução agendada';
