@@ -155,7 +155,7 @@ class Validate {
         }
         $error = $this->getValidadeAsArray($data);
         if (count($error) > 0) {
-            $api->error($error);
+            $api->error($error, $errorCode);
         }
     }
 

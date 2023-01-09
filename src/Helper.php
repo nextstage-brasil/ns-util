@@ -812,10 +812,10 @@ class Helper {
 
     /**
      * Retorna um valor baseado em um tipo
-     * @param type $string
-     * @param type $type
+     * @param mixed $string
+     * @param string $type
      */
-    public static function getValByType($string, $type) {
+    public static function getValByType($string, string $type) {
         switch ($type) {
             case 'int':
             case 'serial':
