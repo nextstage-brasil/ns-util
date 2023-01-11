@@ -75,4 +75,39 @@ class Log {
         fwrite($fp, $date_message);
         fclose($fp);
     }
+
+    /**
+     * imprimir na tela o texto
+     */
+    public static function see($var, $html = true, $backtraceShow = true): void {
+        $backtrace = debug_backtrace();
+        switch (true) {
+            case is_object($var):
+                $out = json_encode(Helper::objectPHP2Array($var));
+                break;
+            case is_array($var):
+                $out = json_encode($var);
+                break;
+            case is_bool($var):
+                $out = $var ? 'TRUE' : 'FALSE';
+                break;
+            case is_string($var) && $var === '':
+                $out = 'Variavel não possui nenhum valor';
+                break;
+            default:
+                $out = $var;
+                break;
+        }
+
+        $out = "<hr/>
+        <h5>Log visualization:</h5>
+        <pre>$out</pre>
+        <h5>Backtrace</h5>
+        <pre></pre>
+        <hr/>";
+
+        echo !$html
+            ? Helper::filterSanitize($out)
+            : $out;
+    }
 }

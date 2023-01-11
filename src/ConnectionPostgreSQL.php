@@ -123,11 +123,13 @@ class ConnectionPostgreSQL {
 
     /**
      * Executa e retonar a query formatada com nameCase
-     * @param type $query
-     * @param type $log
-     * @return type
+     *
+     * @param string $query
+     * @param boolean $log
+     * @param boolean $keyCamelCaseFormat
+     * @return array
      */
-    public function execQueryAndReturn($query, $log = true, $keyCamelCaseFormat = true) {
+    public function execQueryAndReturn(string $query, bool $log = true, bool $keyCamelCaseFormat = true) : array {
         $this->open();
         $out = [];
         $this->executeQuery($query, $log);
@@ -142,7 +144,7 @@ class ConnectionPostgreSQL {
 
     /**
      * Define o que será utilizado em nullas ao executar o insertByCopy
-     * @param type $nullas
+     * @param string $nullas
      */
     public function setNullAs($nullAs = '') {
         $this->nullas = $nullAs;
@@ -210,13 +212,13 @@ class ConnectionPostgreSQL {
     public function insert($table, $array, $nomeCpoId, $onConflict = '') {
         $preValues = $update = $valores = [];
         foreach ($array as $key => $value) {
-            $keys[] = '"'.$key.'"';
+            $keys[] = '"' . $key . '"';
             $preValues[] = '?';
             $valores[] = $value;
         }
         $query = "INSERT INTO $table (" . implode(',', $keys) . ") VALUES (" . implode(',', $preValues) . ")"
-                . " $onConflict "
-                . " returning $nomeCpoId as nsnovoid";
+            . " $onConflict "
+            . " returning $nomeCpoId as nsnovoid";
         $this->open();
         $res = false;
         $this->numRows = 0;
@@ -271,5 +273,4 @@ class ConnectionPostgreSQL {
             throw new Exception($exc->getMessage() . $query);
         }
     }
-
 }
