@@ -30,6 +30,17 @@ class ConnectionPostgreSQL {
         $this->open();
     }
 
+
+    public static function getConnectionByEnv(): ConnectionPostgreSQL {
+        return new ConnectionPostgreSQL(
+            getenv('DBHOST'),
+            getenv('DBUSER'),
+            getenv('DBPASS'),
+            getenv('DBPORT'),
+            getenv('DBNAME')
+        );
+    }
+
     public function open() {
         if (!$this->con) {
             try {
@@ -129,7 +140,7 @@ class ConnectionPostgreSQL {
      * @param boolean $keyCamelCaseFormat
      * @return array
      */
-    public function execQueryAndReturn(string $query, bool $log = true, bool $keyCamelCaseFormat = true) : array {
+    public function execQueryAndReturn(string $query, bool $log = true, bool $keyCamelCaseFormat = true): array {
         $this->open();
         $out = [];
         $this->executeQuery($query, $log);
