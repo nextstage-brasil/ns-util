@@ -169,8 +169,8 @@ class Helper {
 
     /**
      * Revert a string camelCase para camel_case
-     * @param type $string
-     * @return type string
+     * @param string $string
+     * @return string
      */
     public static function reverteName2CamelCase($string): string {
         $out = '';
@@ -187,7 +187,7 @@ class Helper {
     /**
      * Cria a arvore de diretorios
      * @param type $filename
-     * @return type
+     * @return array
      */
     public static function createTreeDir($filename) {
         $path = str_replace('/', DIRECTORY_SEPARATOR, (string) $filename);
@@ -503,7 +503,7 @@ class Helper {
     public static function fileConvertToUtf8($filepath, $output = false) {
         if (file_exists($filepath)) {
             $enc = self::fileGetEncoding($filepath);
-            if (strlen($enc)>0 && $enc !== 'utf-8' && stripos($enc, 'ascii') === false) {
+            if (strlen($enc) > 0 && $enc !== 'utf-8' && stripos($enc, 'ascii') === false) {
                 $output = $output ? $output : $filepath;
                 $cmd = "iconv -f $enc -t utf-8 -o $output $filepath ";
                 $ret = shell_exec($cmd);
@@ -648,7 +648,7 @@ class Helper {
     /**
      * Ira filtrar um array de entrada de dados conforme os tipos identificados
      * @param type $var
-     * @return type
+     * @return string
      */
     public static function filterSanitize($var) {
         if (is_array($var)) {
@@ -677,10 +677,10 @@ class Helper {
      * @param array $array 
      * @param string $filepath if false, retorna em text
      * @param bool $withBom
-     * @return type
+     * @return mixed
      */
 
-    public static function array2csv(array $array, ?string $filepath = null, bool $withBom = true, string $delimiter=',') {
+    public static function array2csv(array $array, ?string $filepath = null, bool $withBom = true, string $delimiter = ',') {
         // Manter o padrão entre as chaves
         $trataed = [];
         $keys = array_keys($array[0]);
@@ -738,17 +738,18 @@ class Helper {
 
     /**
      * Remove all characters is not a number
-     * @param type $var
-     * @return type
+     *
+     * @param mixed $var
+     * @return integer
      */
-    public static function parseInt($var) {
+    public static function parseInt($var): int {
         return preg_replace("/[^0-9]/", "", (string) $var);
     }
 
     /**
      * json_dceo com tratamento de alguns carateres que causam sujeira
-     * @param type $json
-     * @return type
+     * @param string $json
+     * @return array
      */
     public static function jsonToArrayFromView($json) {
         return json_decode(str_replace('&#34;', '"', (string) $json), true);
@@ -775,7 +776,7 @@ class Helper {
      * Com base na data informaada, calcula a proxima data útil no calendario, com prazo N estabelecido
      * @param type $vencimento Data inicial, no formato yyyy-mm-dd
      * @param type $prazo Prazo em 
-     * @return type String, no formato yyyy-mm-dd
+     * @return string String, no formato yyyy-mm-dd
      */
     public static function calculaVencimentoUtil($vencimento, $prazo = 0) {
         if ($prazo > 0) {

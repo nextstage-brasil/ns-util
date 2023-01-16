@@ -132,7 +132,7 @@ class Config {
 
     /**
      * Retorna toda configuração contida no objeto
-     * @return type
+     * @return array
      */
     public function getAll(): array {
         return $this->settings;
