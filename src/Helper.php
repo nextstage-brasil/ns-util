@@ -740,9 +740,9 @@ class Helper {
      * Remove all characters is not a number
      *
      * @param mixed $var
-     * @return integer
+     * @return int
      */
-    public static function parseInt($var): int {
+    public static function parseInt($var) {
         return preg_replace("/[^0-9]/", "", (string) $var);
     }
 
