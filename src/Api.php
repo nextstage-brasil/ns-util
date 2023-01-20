@@ -74,9 +74,9 @@ class Api {
         $this->headers = $this->getAllHeaders();
 
         // Obtenção do verbo
-        $metodo = ((isset($_SERVER['REQUEST_METHOD'])) ? $_SERVER['REQUEST_METHOD'] : 'NULL' );
-//        $pathinfo = ((isset($_SERVER['PATH_INFO'])) ? $_SERVER['PATH_INFO'] : '-');
-//        $recurso = explode("/", mb_substr((string) $pathinfo, 1));
+        $metodo = ((isset($_SERVER['REQUEST_METHOD'])) ? $_SERVER['REQUEST_METHOD'] : 'NULL');
+        //        $pathinfo = ((isset($_SERVER['PATH_INFO'])) ? $_SERVER['PATH_INFO'] : '-');
+        //        $recurso = explode("/", mb_substr((string) $pathinfo, 1));
         $this->body = [];
 
         switch ($metodo) {
@@ -270,7 +270,7 @@ class Api {
 
     /**
      * Retorna o body da requisição
-     * @return type
+     * @return array
      */
     function getBody(): array {
         return $this->body;
@@ -278,7 +278,7 @@ class Api {
 
     /**
      * Retorna o headers da requisição
-     * @return type
+     * @return array
      */
     function getHeaders($keysToLower = false): array {
         if ($keysToLower) {
@@ -311,7 +311,7 @@ class Api {
     /**
      * Recebe um array com as configuração e seta a configuração estatica de Config 
      * @param array $config
-     * @param type $page404
+     * @param string $page404
      */
     public function setConfig(array $config = [], $page404 = ''): Api {
         $router = new Router($page404);
@@ -324,9 +324,8 @@ class Api {
     }
 
     /**
-     * Retorna configurações da API
-     * @param type $key
-     * @return type
+     * Retorna configurações da rota API
+     * @return string
      */
     public function getRota() {
         return $this->config['rota'];
@@ -356,7 +355,11 @@ class Api {
         return (string) trim(substr($auth, 6));
     }
 
-    function getResponseData() {
+    /**
+     *
+     * @return array
+     */
+    function getResponseData(): array {
         // Preparar saida padrão
         if (!isset($this->responseData['content'])) {
             $this->responseData['content'] = [];
@@ -374,11 +377,21 @@ class Api {
         return $this->responseData;
     }
 
-    function getResponseCode() {
+    /**
+     *
+     * @return integer
+     */
+    function getResponseCode(): int {
         return $this->responseCode;
     }
 
-    function setResponseCode(int $responseCode) {
+    /**
+     * Undocumented function
+     *
+     * @param integer $responseCode
+     * @return self
+     */
+    function setResponseCode(int $responseCode): self {
         $this->responseCode = (int) $responseCode;
         return $this;
     }
@@ -402,7 +415,7 @@ class Api {
 
     /**
      * Verifica se a classe existe no path indicado, cria o controller padrão e entrega conforme os verbos para execução
-     * @param type $namespace
+     * @param string $namespace
      * string $allowOrigin = '*', string $allowMethods = 'GET,PUT,POST,DELETE,OPTIONS', string $allowHeaders = 'Data,Cache-Control,Referer,User-Agent,Origin,Accept,X-Requested-With,Content-Type,Access-Control-Request-Method,Access-Control-Request-Headers,Token,Authorization'
      */
     public static function restFull(string $namespace, Api $api = null): void {
@@ -421,7 +434,7 @@ class Api {
             }
         }
 
-        $rest = (object) $api->getConfigData()['rest'];  // \NsUtil\Config::getData('rest');
+        $rest = (object) $api->getConfigData()['rest'];
         $class_name = $namespace . '\\' . ucwords((string) Helper::name2CamelCase($rest->resource));
         $class_name_controller = $class_name . 'Controller';
         switch (true) {
@@ -431,28 +444,96 @@ class Api {
             case (class_exists($class_name_controller)):
                 (new $class_name_controller($api))();
                 break;
+
+            case (class_exists($rest->resource . 'Controller')):
+                $CTR = $rest->resource . "Controller";
+                $aliases = [
+                    'read' => 'getById',
+                    'list' => 'getAll',
+                    'create' => 'save',
+                    'delete' => 'remove',
+                    'update' => 'save',
+                    'search' => 'getAll',
+                    'new' => 'getNew'
+                ];
+                switch (true) {
+                    case method_exists($CTR, "ws_" . $rest->action):
+                        $action = "ws_" . $rest->action;
+                        break;
+                    case method_exists($CTR, "ws_" . $aliases[$rest->action]):
+                        $action = "ws_" . $aliases[$rest->action];
+                        break;
+                    default:
+                        $api->error('Resource ' . $rest->action . ' in route ' . $rest->resource . ' is not found', 501);
+                        break;
+                }
+                $response = [];
+
+                $code = 200;
+                $controller = new $CTR();
+                $data = array_merge(['id' => $rest->id], $api->getBody());
+                $response['content'] = $controller->$action($data);
+
+                if (isset($response['content']['error'])) {
+                    $response['error'] = $response['content']['error'];
+                }
+
+                // se for getNew, remover os erros               
+                if (Helper::compareString('ws_read', $action) || Helper::compareString('ws_getById', $action)) {
+                    $response['error'] = false;
+                    $response['content']['error'] = false;
+                }
+
+                $api->response($response, $code);
+
+                break;
+
             default:
                 http_response_code(Api::HTTP_NOT_IMPLEMENTED);
                 die();
         }
     }
 
-    public function setSuccessCallback(\Closure $successCallback): Api {
+    /**
+     * Undocumented function
+     *
+     * @param \Closure $successCallback
+     * @return self
+     */
+    public function setSuccessCallback(\Closure $successCallback): self {
         $this->successCallback = $successCallback;
         return $this;
     }
 
-    public function onSuccess(\Closure $successCallback): Api {
+    /**
+     * Undocumented function
+     *
+     * @param \Closure $successCallback
+     * @return self
+     */
+    public function onSuccess(\Closure $successCallback): self {
         $this->successCallback = $successCallback;
         return $this;
     }
 
-    public function onError(\Closure $errorCallback): Api {
+    /**
+     * Undocumented function
+     *
+     * @param \Closure $successCallback
+     * @return self
+     */
+    public function onError(\Closure $errorCallback): self {
         $this->errorCallback = $errorCallback;
         return $this;
     }
 
-    public function validator(string $message, int $code, \Closure $rule): Api {
+    /**
+     * Undocumented function
+     *
+     * @param \Closure $successCallback
+     * @return self
+     */
+    public function validator(string $message, int $code, \Closure $rule): self {
         $ret = call_user_func($rule);
         if ($ret !== true) {
             $this->validators[] = function ($api) use ($code, $message) {
@@ -462,8 +543,13 @@ class Api {
         return $this;
     }
 
+    /**
+     * Undocumented function
+     *
+     * @param string $namespace
+     * @return void
+     */
     public function rest(string $namespace): void {
         self::restFull($namespace, $this);
     }
-
 }
