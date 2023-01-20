@@ -437,6 +437,7 @@ class Api {
         $rest = (object) $api->getConfigData()['rest'];
         $class_name = $namespace . '\\' . ucwords((string) Helper::name2CamelCase($rest->resource));
         $class_name_controller = $class_name . 'Controller';
+        $oldController = ucwords($rest->resource) . 'Controller';
         switch (true) {
             case (class_exists($class_name)):
                 (new $class_name($api))();
@@ -445,8 +446,7 @@ class Api {
                 (new $class_name_controller($api))();
                 break;
 
-            case (class_exists($rest->resource . 'Controller')):
-                $CTR = $rest->resource . "Controller";
+            case (class_exists($oldController)):
                 $aliases = [
                     'read' => 'getById',
                     'list' => 'getAll',
@@ -457,20 +457,20 @@ class Api {
                     'new' => 'getNew'
                 ];
                 switch (true) {
-                    case method_exists($CTR, "ws_" . $rest->action):
+                    case method_exists($oldController, "ws_" . $rest->action):
                         $action = "ws_" . $rest->action;
                         break;
-                    case method_exists($CTR, "ws_" . $aliases[$rest->action]):
+                    case method_exists($oldController, "ws_" . $aliases[$rest->action]):
                         $action = "ws_" . $aliases[$rest->action];
                         break;
                     default:
-                        $api->error('Resource ' . $rest->action . ' in route ' . $rest->resource . ' is not found', 501);
+                        $api->error('', Api::HTTP_NOT_IMPLEMENTED);
                         break;
                 }
                 $response = [];
 
                 $code = 200;
-                $controller = new $CTR();
+                $controller = new $oldController();
                 $data = array_merge(['id' => $rest->id], $api->getBody());
                 $response['content'] = $controller->$action($data);
 
