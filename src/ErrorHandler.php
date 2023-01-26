@@ -2,6 +2,8 @@
 
 namespace NsUtil;
 
+use Exception;
+
 class ErrorHandler {
 
     private $filename, $applicationName, $printError;
@@ -11,16 +13,27 @@ class ErrorHandler {
         $this->filename = $log_filename;
         $this->applicationName = $applicationName;
         $this->printError = $printError;
+
+        if (!file_exists($this->filename)) {
+            Helper::saveFile($this->filename, false, "appname,time,filename,line_num,error,message,backtrace");
+            chmod($this->filename, 0777);
+        }
+        
         set_error_handler([&$this, 'userErrorHandler']);
     }
 
     function userErrorHandler($errno, $errmsg, $filename, $linenum) {
         $log_file_error = $this->filename;
 
-        // Rotate File
-        Log::rotate($this->filename);
-        if (!file_exists($this->filename)) {
-            Helper::saveFile($this->filename, false, "appname,time,filename,line_num,error,message,backtrace");
+        try {
+            // Rotate File
+            Log::rotate($this->filename);
+        } catch (\Exception $ex) {
+            $msg = "ERROR: Could not create file "
+                . $this->filename
+                . '. Mssage: '
+                . $ex->getMessage();
+            throw new Exception($msg);
         }
 
         // Ignore notice
@@ -75,5 +88,4 @@ class ErrorHandler {
             }
         }
     }
-
 }

@@ -317,13 +317,17 @@ class Helper {
     }
 
     /**
-     * Método que encapsula uma chamada GET a uma url
+     * Método que encapsula uma chamada a uma URL
+     *
      * @param string $url
      * @param array $params
      * @param string $method
+     * @param array $header
+     * @param boolean $ssl
+     * @param integer $timeout
      * @return object
      */
-    public static function curlCall($url, $params = [], $method = 'GET', $header = ['Content-Type:application/json'], $ssl = true, int $timeout = 30): object {
+    public static function curlCall(string $url, array $params = [], string $method = 'GET', array $header = ['Content-Type:application/json'], bool $ssl = true, int $timeout = 30): object {
         // Remover cookie em excesso
         $cookiefile = Helper::getTmpDir() . DIRECTORY_SEPARATOR . 'NsUtilCurlCookie_' . md5((string) date('Ymd')) . '.txt';
         $options = [

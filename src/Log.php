@@ -71,7 +71,7 @@ class Log {
         // criação do diretorio caso não existe
         self::rotate($file);
         $fp = fopen($file, "a");
-        $date_message = "[" . date('d/m/Y H:i:s') . "] " . $message . PHP_EOL;
+        $date_message = "[" . gmdate('c') . "] " . $message . PHP_EOL;
         fwrite($fp, $date_message);
         fclose($fp);
     }
