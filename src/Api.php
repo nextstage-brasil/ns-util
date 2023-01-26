@@ -2,6 +2,8 @@
 
 namespace NsUtil;
 
+use Closure;
+
 class Api {
 
     private $body = [];
@@ -14,6 +16,7 @@ class Api {
     private $simpleReturn = false; // Utilizado para deinfir se aapenas retornar o conteudo ou encerrar a aplicação
     private $successCallback;
     private $errorCallback;
+    private $onResponse;
     private $authRequired;
     private $validators = [];
 
@@ -85,9 +88,8 @@ class Api {
                 // Obtenção do body
                 $this->body = $_POST;
                 $dd = json_decode(file_get_contents('php://input'), true);
-                if (is_array($dd)) {
-                    $this->body = array_merge($_POST, $dd);
-                }
+                $dd = is_array($dd) ? $dd : [];
+                $this->body = array_merge($_POST, $_GET, $dd);
                 break;
             case 'GET':
                 $this->body = $_GET;
@@ -105,13 +107,14 @@ class Api {
         $this->router = $router;
 
         // Variaveis adicionadas
+        $rest = [
+            'method' => (string) $metodo,
+            'id' => (int) $router->getAllParam(2),
+            'resource' => (string) $router->getAllParam(1),
+            'action' => (string) $router->getAllParam(3),
+        ];
         $this->config = [
-            'rest' => [
-                'method' => (string) $metodo,
-                'id' => (int) $router->getAllParam(2),
-                'resource' => (string) $router->getAllParam(1),
-                'action' => (string) $router->getAllParam(3),
-            ],
+            'rest' => $rest,
             'bodyOrigin' => $bodyOrigin,
             'headers' => $this->getHeaders(),
             'rota' => $router->getAllParam(1) . (($router->getAllParam(2)) ? '/' . $router->getAllParam(2) : ''), // '/' . $router->getAllParam(2),
@@ -121,6 +124,7 @@ class Api {
             'ParamsRouter' => $router->getAllParam(),
             'dados' => array_merge($this->getBody(), [
                 'idFromRoute' => (int) $router->getAllParam(3),
+                '_rest' => $rest
             ]),
         ];
 
@@ -136,7 +140,9 @@ class Api {
                 break;
             case 'PUT':
             case 'POST':
-                $this->config['rest']['action'] = (($this->config['rest']['id'] > 0) ? 'update' : 'save');
+                if (!$this->config['rest']['action']) {
+                    $this->config['rest']['action'] = (($this->config['rest']['id'] > 0) ? 'update' : 'save');
+                }
                 break;
             default:
                 $this->config['rest']['action'] = 'METHOD_NOT_FOUND';
@@ -155,6 +161,15 @@ class Api {
         } else {
             return getallheaders();
         }
+    }
+
+    /**
+     * Retorna os dados enviados pela api restfull
+     *
+     * @return object
+     */
+    public function getRest(): object {
+        return (object) $this->config['rest'];
     }
 
     /**
@@ -247,6 +262,12 @@ class Api {
 
         // Caso seja um desses códigos, nem imprimir nada
         if (array_search($this->responseCode, [501]) === false) {
+
+            // Executar função anonima caso exista
+            if (is_callable($this->onResponse)) {
+                call_user_func($this->onResponse, $this->responseData, $this->responseCode);
+            }
+
             echo json_encode($this->responseData, JSON_UNESCAPED_SLASHES);
 
             // Executar função anonima caso exista
@@ -551,5 +572,15 @@ class Api {
      */
     public function rest(string $namespace): void {
         self::restFull($namespace, $this);
+    }
+
+    /**
+     * Set the value of onResponse
+     *
+     * @return  self
+     */
+    public function onResponse(Closure $onResponse) {
+        $this->onResponse = $onResponse;
+        return $this;
     }
 }
