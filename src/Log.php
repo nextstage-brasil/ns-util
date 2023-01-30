@@ -83,10 +83,10 @@ class Log {
         $backtrace = debug_backtrace();
         switch (true) {
             case is_object($var):
-                $out = json_encode(Helper::objectPHP2Array($var));
+                $out = json_encode(Helper::objectPHP2Array($var), JSON_PRETTY_PRINT);
                 break;
             case is_array($var):
-                $out = json_encode($var);
+                $out = json_encode($var, JSON_PRETTY_PRINT);
                 break;
             case is_bool($var):
                 $out = $var ? 'TRUE' : 'FALSE';
