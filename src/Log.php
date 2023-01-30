@@ -99,8 +99,6 @@ class Log {
                 break;
         }
 
-        
-
         $out = "<hr/>
         <h5>Log visualization:</h5>
         <pre>$out</pre>
