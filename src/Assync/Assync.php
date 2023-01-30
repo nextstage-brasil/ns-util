@@ -29,26 +29,20 @@ class Assync {
     private $autoloaderPath;
     private $logfile;
     private $isStarted;
+    private $testMode = false;
 
     public function __construct(?int $parallelProcess = null, ?string $verboseTitle = null, ?string $autoloaderPath = null) {
-        // Caso não informe, orei pegar o numero de nucleos disponiveis
-        if (null === $parallelProcess) {
-            $parallelProcess = 3;
-            if (is_file('/proc/cpuinfo')) {
-                $cpuinfo = file_get_contents('/proc/cpuinfo');
-                preg_match_all('/^processor/m', $cpuinfo, $matches);
-                $parallelProcess = count($matches[0]);
-            }
-        }
-        $this->limit = $parallelProcess;
-        $this->verbose = $verboseTitle;
-        $this->setAutoloader($autoloaderPath);
-
         if (Helper::getSO() === 'windows') {
             throw new Exception('NSUtil::Assync ERROR: Only linux systems can use this class!');
         }
+        $this->setParallelProccess($parallelProcess);
+        $this->limit = $parallelProcess;
+        $this->verbose = $verboseTitle;
+        $this->setAutoloader($autoloaderPath);
         $this->status = new StatusLoader(count($this->list), 'NsPHPAssync');
     }
+
+
 
     /**
      * 
@@ -98,7 +92,7 @@ class Assync {
 
     public function setParallelProccess(?int $parallelProcess = null) {
         if (null === $parallelProcess) {
-            $parallelProcess = 3;
+            $parallelProcess = 1;
             if (is_file('/proc/cpuinfo')) {
                 $cpuinfo = file_get_contents('/proc/cpuinfo');
                 preg_match_all('/^processor/m', $cpuinfo, $matches);
@@ -136,6 +130,13 @@ class Assync {
             $this->logfile,
             $name
         ]);
+
+        if ($this->testMode) {
+            echo $cmd;
+            die();
+        }
+
+
         $this->add($cmd);
 
         return $this;
@@ -264,5 +265,16 @@ class Assync {
         } catch (Exception $e) {
         }
         return false;
+    }
+
+    /**
+     * Set the value of testMode
+     *
+     * @param boolean $testMode
+     * @return self
+     */
+    public function setTestMode(bool $testMode): self {
+        $this->testMode = $testMode;
+        return $this;
     }
 }

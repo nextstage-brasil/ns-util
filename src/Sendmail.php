@@ -23,25 +23,17 @@ class Sendmail {
     }
 
     /**
-     * 
-     * @param array $to ['Nome' => 'Email']
-     * @param type $subject
-     * @param type $text
-     * @param array $config [host=>'host', SMTPAuth, username, email, password, port, smtpSecure]
-     * @return boolean
+     * Envio de mensagem utilizando SMTP
+     *
+     * @param array $to Padrão ['Nome do recipiente' => 'email@notem.com]
+     * @param string $subject
+     * @param string $text
+     * @param array $config Retorno de getConfig
+     * @param integer $debug Nivel de debug, 0 a 5
+     * @param array $attach
+     * @return mixed
      */
-
-    /**
-     * 
-     * @param array $to array ['Nome descritivo' => 'email@notem.com]
-     * @param type $subject Assunto
-     * @param type $text Corpo do email
-     * @param array Use a função getConfig
-     * @param type $debug
-     * @param type $attach
-     * @return boolean
-     */
-    public static function send(array $to, string $subject, $text, array $config, int $debug = 0, array $attach = []) {
+    public static function send(array $to, string $subject, string $text, array $config, int $debug = 0, array $attach = []) {
 //        $mail = new \PHPMailer();
         $mail = new PHPMailer();
         $mail->IsSMTP(); // Define que a mensagem será SMTP
@@ -99,11 +91,24 @@ class Sendmail {
             } else {
                 return $mail->ErrorInfo;
             }
-        } catch (Exception $exc) {
+        } catch (\Exception $exc) {
             return $exc->getMessage();
         }
     }
 
+    /**
+     * Faz o envio de uma mensagem usando o Sendgrid como gateway
+     *
+     * @param string $apiKey
+     * @param string $fromAddress
+     * @param string $fromName
+     * @param string $toAddress
+     * @param string $toName
+     * @param string|null $subject
+     * @param string|null $template_id
+     * @param array $template_data
+     * @return mixed
+     */
     public static function sendBySendgrid(
             string $apiKey,
             string $fromAddress,
