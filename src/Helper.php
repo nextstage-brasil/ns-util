@@ -1120,4 +1120,47 @@ class Helper {
         }
         return is_array($out) ? $out : [];
     }
+
+    /**
+     * Método que retorna um array com as diferenças entre dois arrays
+     *
+     * @param array $arrayNew
+     * @param array $arrayOld
+     * @param array $keysToIgnore
+     * @return array
+     */
+    public static function arrayDiff(array $arrayNew, array $arrayOld, array $keysToIgnore = []) {
+        $out = [];
+
+        $alteradosNovo = array_diff_assoc($arrayNew, $arrayOld);
+        $alteradosAntigo = array_diff_assoc($arrayOld, $arrayNew);
+        unset($alteradosNovo['error']);
+
+        if (count($alteradosNovo) > 0) {
+            foreach ($alteradosNovo as $key => $value) {
+
+                if (array_search($key, $keysToIgnore) !== false) {
+                    continue;
+                }
+
+                $json = is_string($value) ? json_decode((string) $value, true) : null;
+
+                if (is_array($json) && is_string($alteradosAntigo[$key])) {
+                    if (array_search($key, $keysToIgnore) !== false) {
+                        continue;
+                    }
+                    $jsonOLD = json_decode((string) $alteradosAntigo[$key], true);
+                    $out = array_merge($out, self::arrayDiff($json, $jsonOLD));
+                } else {
+                    $out[] = [
+                        'field' => $key,
+                        'old' => isset($alteradosAntigo[$key]) ? $alteradosAntigo[$key] : null, 
+                        'new' => $value
+                    ];
+                }
+            }
+        }
+
+        return $out;
+    }
 }

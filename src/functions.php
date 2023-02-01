@@ -8,16 +8,17 @@ function ns_nextstage(): void {
 
 /**
  * JsonDecode, com tratamento das regras aplicadas no >php8
- * @param type $json
- * @param type $assoc
- * @param type $depth
- * @param type $options
- * @return type
+ *
+ * @param [type] $json
+ * @param boolean $assoc
+ * @param integer $depth
+ * @param integer $options
+ * @return mixed
  */
 function json_decode($json, bool $assoc = false, int $depth = 512, int $options = 0) {
     switch (true) {
         case is_null($json):
-            $data = \json_decode([], $assoc, $depth, $options);
+            $data = \json_decode('{}', $assoc, $depth, $options);
             break;
         case is_array($json):
         case is_object($json):
@@ -27,7 +28,12 @@ function json_decode($json, bool $assoc = false, int $depth = 512, int $options 
             $data = \json_decode($json, $assoc, $depth, $options);
             break;
     }
-    return $data;
+    return \json_decode(
+        json_encode($data),
+        $assoc,
+        $depth,
+        $options
+    );
 }
 
 /**
