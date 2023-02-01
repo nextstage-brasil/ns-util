@@ -10,8 +10,8 @@ class Filter {
 
     /**
      * Reproduz o comportamento do depreacted FILTER_SANITIZE_STRING
-     * @param type $string
-     * @return type
+     * @param string $string
+     * @return string
      */
     public static function string($string): string {
         $string = (string) $string;

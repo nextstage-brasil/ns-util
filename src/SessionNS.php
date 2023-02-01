@@ -49,7 +49,7 @@ class SessionNS {
 
     /**
      * Garante que todas chaves "ids" serão do tipo INT
-     * @param type $var
+     * @param mixed $var
      */
     private static function setIdToInt($var) {
         foreach ($var as $key => $item) {

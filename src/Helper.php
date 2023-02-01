@@ -187,7 +187,7 @@ class Helper {
     /**
      * Cria a arvore de diretorios
      * @param type $filename
-     * @return array
+     * @return object
      */
     public static function createTreeDir($filename) {
         $path = str_replace('/', DIRECTORY_SEPARATOR, (string) $filename);
@@ -212,22 +212,25 @@ class Helper {
     }
 
     public static function eficiencia_init() {
-        list($usec, $sec) = explode(' ', microtime());
-        $ef = new Helper();
-        $ef->start = (float) $sec + (float) $usec;
-        return $ef;
+        return "Method is disabled. Use class Eficiencia()";
+        // return new Eficiencia();
+        // list($usec, $sec) = explode(' ', microtime());
+        // $ef = new Helper();
+        // $ef->start = (float) $sec + (float) $usec;
+        // return $ef;
     }
 
     public function endEficiencia() {
-        // Terminamos o "contador" e exibimos
-        list($usec, $sec) = explode(' ', microtime());
-        $script_end = (float) $sec + (float) $usec;
-        $elapsed_time = round($script_end - $this->start, 2);
-        $minutos = (int) number_format((float) $elapsed_time / 60, 0);
+        return "Method is disabled. Use class Eficiencia()";
+        // // Terminamos o "contador" e exibimos
+        // list($usec, $sec) = explode(' ', microtime());
+        // $script_end = (float) $sec + (float) $usec;
+        // $elapsed_time = round($script_end - $this->start, 2);
+        // $minutos = (int) number_format((float) $elapsed_time / 60, 0);
 
-        return 'Elapsed '
-            . gmdate("H:i:s", (int) $elapsed_time)
-            . ' with ' . round(((memory_get_peak_usage(true) / 1024) / 1024), 2) . 'Mb';
+        // return 'Elapsed '
+        //     . gmdate("H:i:s", (int) $elapsed_time)
+        //     . ' with ' . round(((memory_get_peak_usage(true) / 1024) / 1024), 2) . 'Mb';
     }
 
     public static function directorySeparator(&$var): void {
@@ -350,25 +353,36 @@ class Helper {
             CURLOPT_VERBOSE => false,
         ];
         $options[CURLOPT_HTTPHEADER] = $header;
+
         if (count($params) > 0) {
-            switch ($method) {
-                case 'POST':
-                    $options[CURLOPT_POST] = true;
-                    $options[CURLOPT_POSTFIELDS] = $params;
-                    break;
-                default:
-                    $options[CURLOPT_POSTFIELDS] = json_encode($params);
+            $options[CURLOPT_POST] = $method === 'POST';
+            $options[CURLOPT_POSTFIELDS] = array_search(
+                'content-type:application/json',
+                array_map('mb_strtolower', $header)
+            ) !== false
+                ? json_encode($params)
+                : $params;
+
+            if ($method === 'GET') {
+                $options[CURLOPT_POSTFIELDS] = null;
+                $options[CURLOPT_URL] .= '?' . http_build_query($params);
             }
-            $options[CURLOPT_POSTFIELDS] = json_encode($params);
         }
         $ch = curl_init();
         curl_setopt_array($ch, $options);
         $output = curl_exec($ch);
-        $urlInfo = curl_getinfo($ch, CURLINFO_EFFECTIVE_URL) . '<br/>';
-        //echo 'error: ' . curl_errno($ch);
+        $urlInfo = curl_getinfo($ch, CURLINFO_EFFECTIVE_URL);
+
         // headers
         $header_size = curl_getinfo($ch, CURLINFO_HEADER_SIZE);
         $body = substr((string) $output, $header_size);
+
+        // echo $urlInfo . PHP_EOL;
+        // echo 'error: ' . curl_errno($ch);
+        // var_export($body);
+        // echo is_string($options[CURLOPT_POSTFIELDS]) ? $options[CURLOPT_POSTFIELDS] : json_encode($options[CURLOPT_POSTFIELDS]);
+        // echo PHP_EOL;
+
 
         $headers = [];
         $output = rtrim((string) $output);
@@ -643,6 +657,11 @@ class Helper {
         return preg_match("/(android|avantgo|blackberry|bolt|boost|cricket|docomo|fone|hiptop|mini|mobi|palm|phone|pie|tablet|up\.browser|up\.link|webos|wos)/i", (string) $_SERVER["HTTP_USER_AGENT"]);
     }
 
+    /**
+     * Retorna o IP em uso pelo cliente
+     *
+     * @return string
+     */
     public static function getIP(): string {
         $var = (($_SERVER['HTTP_X_FORWARDED_FOR']) ? 'HTTP_X_FORWARDED_FOR' : 'REMOTE_ADDR');
         $ip = filter_input(INPUT_SERVER, $var, FILTER_DEFAULT);
@@ -865,11 +884,13 @@ class Helper {
     }
 
     /**
-     * 
-     * @param type $texto String completa a ser alterada
-     * @param type $search termo a procurar e realçar
+     * Destaca um texto em string
+     *
+     * @param string $texto
+     * @param string $search
+     * @return void
      */
-    public static function highlightText($texto, $search) {
+    public static function highlightText(string $texto, string $search) {
         $searchsan = self::sanitize($search);
         $textosan = self::sanitize($texto);
         $inicio = stripos($textosan, $searchsan);
@@ -965,7 +986,8 @@ class Helper {
 
     /**
      * Return de icon name
-     * @param type $filename
+     *
+     * @param string $filename
      * @return string
      */
     public static function getThumbsByFilename(string $filename): string {
@@ -1073,5 +1095,29 @@ class Helper {
             }
             $condition = array_merge($condition, $newConditions);
         }
+    }
+
+
+    /**
+     * retorna o texto entre a tag selecionada
+     *
+     * @param string $msg
+     * @param string $tag
+     * @return array
+     */
+    public static function getTextByTag(string $msg, string $tag, string $tagOpen = '<', $tagClose = '>'): array {
+        $out = [];
+        $termOpen = $tagOpen . $tag . $tagClose;
+        $termClose = $tagOpen . '\/' . $tag . $tagClose;
+
+        if (stripos($msg, $termOpen) !== false) {
+            // preg_match('/' . $termOpen . '(.*?)' . $termClose . '/s', $msg, $match);
+            preg_match('/' . $termOpen . '(.*?)' . $termClose . '/s', $msg, $match);
+            unset($match[0]);
+            $out = array_map(function ($item) {
+                return trim(str_replace('\n', '<br/>', strip_tags((string)$item)));
+            }, $match);
+        }
+        return is_array($out) ? $out : [];
     }
 }
