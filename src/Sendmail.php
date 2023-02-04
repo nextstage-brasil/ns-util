@@ -156,7 +156,12 @@ class Sendmail {
      */
     public static function sendByAWS(string $to, string $subject, string $html_body, ?array $anexo = [],  array $template_data = [], ?string $template_id = null, ?Closure $success = null, ?Closure $error = null): bool {
         try {
-            Validate::validate(['AWS_KEY', 'AWS_SECRET', 'SENDMAIL_EMAIL'], getenv(), true);
+            Validate::validate(['AWS_KEY', 'AWS_SECRET', 'SENDMAIL_EMAIL'], [
+                'AWS_KEY' => getenv('AWS_KEY'),
+                'AWS_SECRET' => getenv('AWS_SECRET'),
+                'SENDMAIL_EMAIL' => getenv('SENDMAIL_EMAIL')
+            ], true);
+
 
             $SesClient = new SesClient([
                 'version' => '2010-12-01',
