@@ -7,6 +7,7 @@ use DOMDocument;
 class Phrases {
     public function phrase($autor = 'jesus_cristo', $page = 1): string {
         $page = $page <= 0 ? 1 : $page;
+        $url = "https://www.pensador.com/$autor/$page";
         $html = Helper::myFileGetContents("https://www.pensador.com/$autor/$page");
         $phrases = [];
 
@@ -33,6 +34,6 @@ class Phrases {
             }
         }
         return $phrases[rand(0, count($phrases) + 1)]
-            . " - $autorName";
+            . " - $autorName. Fonte: $url";
     }
 }
