@@ -2,12 +2,13 @@
 
 namespace NsUtil;
 
+use Exception;
+
 class Validate {
 
     private $obrigatorios = [];
 
     public function __construct() {
-        
     }
 
     public static function validaCpfCnpj($val) {
@@ -34,16 +35,18 @@ class Validate {
         }
         // Verifica se nenhuma das sequências invalidas abaixo 
         // foi digitada. Caso afirmativo, retorna falso
-        else if ($cpf == '00000000000' ||
-                $cpf == '11111111111' ||
-                $cpf == '22222222222' ||
-                $cpf == '33333333333' ||
-                $cpf == '44444444444' ||
-                $cpf == '55555555555' ||
-                $cpf == '66666666666' ||
-                $cpf == '77777777777' ||
-                $cpf == '88888888888' ||
-                $cpf == '99999999999') {
+        else if (
+            $cpf == '00000000000' ||
+            $cpf == '11111111111' ||
+            $cpf == '22222222222' ||
+            $cpf == '33333333333' ||
+            $cpf == '44444444444' ||
+            $cpf == '55555555555' ||
+            $cpf == '66666666666' ||
+            $cpf == '77777777777' ||
+            $cpf == '88888888888' ||
+            $cpf == '99999999999'
+        ) {
             return 'CPF Inválido: Número Sequencial';
             // Calcula os digitos verificadores para verificar se o
             // CPF é válido
@@ -85,7 +88,7 @@ class Validate {
                 // Laço para percorrer os item do cnpj
                 for ($i = 0; $i < strlen((string) $cnpj); $i++) {
                     // Cálculo mais posição do CNPJ * a posição
-                    $calculo = $calculo + ( $cnpj[$i] * $posicao );
+                    $calculo = $calculo + ($cnpj[$i] * $posicao);
                     // Decrementa a posição a cada volta do laço
                     $posicao--;
                     // Se a posição for menor que 2, ela se torna 9
@@ -96,7 +99,6 @@ class Validate {
                 // Retorna o cálculo
                 return $calculo;
             }
-
         }
 
         // Faz o primeiro cálculo
@@ -104,7 +106,7 @@ class Validate {
 
         // Se o resto da divisão entre o primeiro cálculo e 11 for menor que 2, o primeiro
         // Dígito é zero (0), caso contrário é 11 - o resto da divisão entre o cálculo e 11
-        $primeiro_digito = ( $primeiro_calculo % 11 ) < 2 ? 0 : 11 - ( $primeiro_calculo % 11 );
+        $primeiro_digito = ($primeiro_calculo % 11) < 2 ? 0 : 11 - ($primeiro_calculo % 11);
 
         // Concatena o primeiro dígito nos 12 primeiros números do CNPJ
         // Agora temos 13 números aqui
@@ -112,7 +114,7 @@ class Validate {
 
         // O segundo cálculo é a mesma coisa do primeiro, porém, começa na posição 6
         $segundo_calculo = multiplica_cnpj($primeiros_numeros_cnpj, 6);
-        $segundo_digito = ( $segundo_calculo % 11 ) < 2 ? 0 : 11 - ( $segundo_calculo % 11 );
+        $segundo_digito = ($segundo_calculo % 11) < 2 ? 0 : 11 - ($segundo_calculo % 11);
 
         // Concatena o segundo dígito ao CNPJ
         $cnpj = $primeiros_numeros_cnpj . $segundo_digito;
@@ -128,7 +130,7 @@ class Validate {
     // Define uma função que poderá ser usada para validar e-mails usando regexp
     public static function validaEmail($email) {
         return
-                $er = "/^(([0-9a-zA-Z]+[-._+&])*[0-9a-zA-Z]+@([-0-9a-zA-Z]+[.])+[a-zA-Z]{2,6}){0,1}$/";
+            $er = "/^(([0-9a-zA-Z]+[-._+&])*[0-9a-zA-Z]+@([-0-9a-zA-Z]+[.])+[a-zA-Z]{2,6}){0,1}$/";
         if (preg_match($er, $email)) {
             return true;
         } else {
@@ -136,8 +138,28 @@ class Validate {
         }
     }
 
-    public function addCampoObrigatorio(string $key, string $msg, string $type = 'string'): Validate {
-        $this->obrigatorios['list'][] = ['key' => $key, 'msg' => $msg, 'type' => $type];
+    /**
+     * Adiciona as chaves para validação
+     *
+     * @param array $keysToValidate
+     * @param array $valuesToValidate
+     * @return array
+     */
+    public static function validate(array $keysToValidate, array $valuesToValidate, $throwException = false): array {
+        $v = new Validate();
+        foreach ($keysToValidate as $item) {
+            $v->addCampoObrigatorio($item);
+        }
+        $errors = $v->getValidadeAsArray($valuesToValidate);
+        if ($throwException) {
+            throw new Exception(json_encode($errors));
+        }
+
+        return $errors;
+    }
+
+    public function addCampoObrigatorio(string $key, ?string $msg = null, string $type = 'string'): Validate {
+        $this->obrigatorios['list'][] = ['key' => $key, 'msg' => (null === $msg ? 'Param ' . $key . ' not found or invalid' : $msg), 'type' => $type];
         return $this;
     }
 
@@ -178,5 +200,4 @@ class Validate {
     public static function isImei(string $n): bool {
         return self::isLuhn($n) && strlen($n) == 15;
     }
-
 }

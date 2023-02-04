@@ -2,6 +2,10 @@
 
 namespace NsUtil;
 
+use Aws\Exception\AwsException;
+use Aws\Ses\SesClient;
+use Closure;
+use Exception;
 use NsUtil\Integracao\SendgridService;
 use PHPMailer\PHPMailer\PHPMailer;
 
@@ -34,7 +38,7 @@ class Sendmail {
      * @return mixed
      */
     public static function send(array $to, string $subject, string $text, array $config, int $debug = 0, array $attach = []) {
-//        $mail = new \PHPMailer();
+        //        $mail = new \PHPMailer();
         $mail = new PHPMailer();
         $mail->IsSMTP(); // Define que a mensagem será SMTP
 
@@ -110,14 +114,14 @@ class Sendmail {
      * @return mixed
      */
     public static function sendBySendgrid(
-            string $apiKey,
-            string $fromAddress,
-            string $fromName,
-            string $toAddress,
-            string $toName,
-            string $subject = null,
-            string $template_id = null,
-            array $template_data = []
+        string $apiKey,
+        string $fromAddress,
+        string $fromName,
+        string $toAddress,
+        string $toName,
+        string $subject = null,
+        string $template_id = null,
+        array $template_data = []
     ) {
         $sg = new SendgridService($apiKey);
         $headers = [
@@ -135,4 +139,74 @@ class Sendmail {
         return (($ret->statusCode() < 300) ? true : $ret->headers());
     }
 
+
+
+    /**
+     * Envio de email utilizando SES AWS
+     *
+     * @param string $to
+     * @param string $subject
+     * @param string $html_body
+     * @param array|null $anexo
+     * @param array $template_data
+     * @param string|null $template_id
+     * @param Closure|null $success
+     * @param Closure|null $error
+     * @return boolean
+     */
+    public static function sendByAWS(string $to, string $subject, string $html_body, ?array $anexo = [],  array $template_data = [], ?string $template_id = null, ?Closure $success = null, ?Closure $error = null): bool {
+        try {
+            Validate::validate(['AWS_KEY', 'AWS_SECRET', 'SENDMAIL_EMAIL'], getenv(), true);
+
+            $SesClient = new SesClient([
+                'version' => '2010-12-01',
+                'region' => getenv('AWS_REGION') ? getenv('AWS_REGION') : 'sa-east-1',
+                'credentials' => [
+                    'key' => getenv('AWS_KEY'),
+                    'secret' => getenv('AWS_SECRET')
+                ]
+            ]);
+            $sender_email = getenv('SENDMAIL_EMAIL');
+            $recipient_emails = [$to];
+            $type = stripos($html_body, '[PLAINTEXT]') !== false ? 'Text' : 'Html';
+            $html_body = str_replace('[PLAINTEXT]', '', $html_body);
+            $char_set = 'UTF-8';
+
+            $result = $SesClient->sendEmail([
+                'Destination' => [
+                    'ToAddresses' => $recipient_emails,
+                ],
+                'ReplyToAddresses' => [$sender_email],
+                'Source' => $sender_email,
+                'Message' => [
+                    'Body' => [
+                        $type => [
+                            'Charset' => $char_set,
+                            'Data' => $html_body,
+                        ],
+                    ],
+                    'Subject' => [
+                        'Charset' => $char_set,
+                        'Data' => $subject,
+                    ],
+                ],
+            ]);
+
+            if (is_callable($success)) {
+                call_user_func($success, $result['MessageId']);
+            }
+
+            return true;
+        } catch (AwsException $e) {
+            if (is_callable($error)) {
+                call_user_func($error, $e->getMessage());
+            }
+            return false;
+        } catch (Exception $e) {
+            if (is_callable($error)) {
+                call_user_func($error, $e->getMessage());
+            }
+            return false;
+        }
+    }
 }
