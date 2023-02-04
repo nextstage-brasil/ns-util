@@ -57,9 +57,8 @@ class Log {
                 return '';
             }
             $item['file'] = $item['file'] ? $item['file'] : '';
-            $f = explode(DIRECTORY_SEPARATOR, $item['file']);
-            return array_pop($f)
-                . '::'
+            return $item['file']
+                . ':'
                 . $item['line']
                 . ' > '
                 . $item['class']

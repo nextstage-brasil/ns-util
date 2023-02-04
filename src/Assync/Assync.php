@@ -8,6 +8,7 @@ use NsUtil\Eficiencia;
 use NsUtil\Helper;
 use NsUtil\StatusLoader;
 use Laravel\SerializableClosure\SerializableClosure;
+use Log;
 use ReflectionClass;
 
 /**
@@ -90,14 +91,27 @@ class Assync {
         return $this;
     }
 
-    public function setParallelProccess(?int $parallelProcess = null) {
+    public function setParallelProccess(?int $parallelProcess = null, $useAllProcessors = false) {
         if (null === $parallelProcess) {
-            $parallelProcess = 1;
+
+            // Deixar um nucleo livre para demais tarefas
+            $processors = 1;
             if (is_file('/proc/cpuinfo')) {
                 $cpuinfo = file_get_contents('/proc/cpuinfo');
                 preg_match_all('/^processor/m', $cpuinfo, $matches);
-                $parallelProcess = count($matches[0]);
+                $processors = count($matches[0]);
             }
+            $parallelProcess = $useAllProcessors
+                ? $processors
+                : ($processors >= 2 ? ($processors - 1) : 1);
+
+
+            // $parallelProcess = 1;
+            // if (is_file('/proc/cpuinfo')) {
+            //     $cpuinfo = file_get_contents('/proc/cpuinfo');
+            //     preg_match_all('/^processor/m', $cpuinfo, $matches);
+            //     $parallelProcess = count($matches[0]);
+            // }
         }
         $this->limit = $parallelProcess;
         return $this;
@@ -194,7 +208,7 @@ class Assync {
     /**
      * Executa os processos adicionados, limitando a N processos por vez, conforme configuração
      */
-    public function run() {
+    public function run(?\Closure $onRunning = null) {
         if (null === $this->isStarted) {
             $this->isStarted = true;
         }
@@ -217,9 +231,12 @@ class Assync {
         }
         if (count($this->emAndamento) > 0) {
             $this->verbosePrint();
-            // sleep(1);
+            if (is_callable($onRunning)) {
+                $percentExecution = round($this->done / count($this->list) * 100, 0, PHP_ROUND_HALF_UP);
+                call_user_func($onRunning, $percentExecution);
+            }
             $this->checkRunning();
-            return $this->run(); // looping até concluir
+            return $this->run($onRunning);
         } else {
             $this->verbosePrint();
             $this->list = [];
