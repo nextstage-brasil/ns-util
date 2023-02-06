@@ -17,11 +17,18 @@ class AbstractController {
      * @param string $resource
      * @param array $data
      */
-    protected function fetch(string $resource, array $data = [], array $headers = [], string $method = 'GET', $throwExceptionBasedStatus = true): array {
+    protected function fetch(
+        string $resource,
+        array $data = [],
+        array $headers = [],
+        string $method = 'GET',
+        $throwExceptionBasedStatus = true,
+        $ssl = true
+    ): array {
         $url = $this->config->get('url')
             . '/'
             . $resource;
-        $ret = \NsUtil\Helper::curlCall($url, $data, $method, $headers);
+        $ret = \NsUtil\Helper::curlCall($url, $data, $method, $headers, $ssl);
         if ($ret->status > 299 && $throwExceptionBasedStatus === true) {
             throw new \Exception('Chamada ao recurso ' . $resource . ' com status ' . $ret->status . "\n URL: $url \nMethod: $method \n");
         }
