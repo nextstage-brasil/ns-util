@@ -41,12 +41,16 @@ class Gitlab {
         return $this->project;
     }
 
-    /**
-     * Executa uma chamada ao gitlab e retorna um array
-     * @param string $resource
-     * @param array $data
-     */
-    private function fetch(string $resource, array $data = [], string $method = 'GET') {
+
+     /**
+      * Executa uma chamada ao gitlab e retorna um array
+      *
+      * @param string $resource
+      * @param array $data
+      * @param string $method
+      * @return object
+      */
+    private function fetch(string $resource, array $data = [], string $method = 'GET') : object {
         $header = ['PRIVATE-TOKEN:' . $this->config->get('token')];
 
         $url = $this->config->get('url')
