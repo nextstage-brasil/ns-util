@@ -74,7 +74,7 @@ class Log {
                 }
                 $item['file'] = $item['file'] ? $item['file'] : '';
                 return $item['file']
-                    . ':'
+                    . ' : '
                     . $item['line']
                     . ' > '
                     . $item['class']
