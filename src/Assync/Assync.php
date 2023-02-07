@@ -4,12 +4,12 @@ namespace NsUtil\Assync;
 
 use Closure;
 use Exception;
-use NsUtil\Eficiencia;
+use NsUtil\Log;
 use NsUtil\Helper;
+use ReflectionClass;
+use NsUtil\Eficiencia;
 use NsUtil\StatusLoader;
 use Laravel\SerializableClosure\SerializableClosure;
-use Log;
-use ReflectionClass;
 
 /**
  * Class that can execute a background job, and check if the
@@ -32,15 +32,21 @@ class Assync {
     private $isStarted;
     private $testMode = false;
 
-    public function __construct(?int $parallelProcess = null, ?string $verboseTitle = null, ?string $autoloaderPath = null) {
+    // public function __construct(?int $parallelProcess = null, ?string $verboseTitle = null, ?string $autoloaderPath = null) {
+    public function __construct(?string $verboseTitle = null) {
         if (Helper::getSO() === 'windows') {
-            throw new Exception('NSUtil::Assync ERROR: Only linux systems can use this class!');
+            throw new Exception('NSUtil::Assync ERROR: Only linux systems can use this class');
         }
-        $this->setParallelProccess($parallelProcess);
-        $this->limit = $parallelProcess;
         $this->verbose = $verboseTitle;
-        $this->setAutoloader($autoloaderPath);
         $this->status = new StatusLoader(count($this->list), 'NsPHPAssync');
+        $logfile = Log::getDefaultPathNSUtil() . DIRECTORY_SEPARATOR . debug_backtrace()[1]['function'];
+
+        $this->setParallelProccess();
+        $this->setAutoloader();
+        $this->setLogfile($logfile);
+        if ($verboseTitle) {
+            $this->setShowLoader($verboseTitle);
+        }
     }
 
 
@@ -60,11 +66,12 @@ class Assync {
 
     /**
      * Adiciona um processo a lista de execução
-     * @param type $cmd
-     * @param type $outputfile
-     * @return $this
+     *
+     * @param string $cmd
+     * @param string $outputfile
+     * @return Assync
      */
-    public function add($cmd, $outputfile = '/dev/null'): Assync {
+    public function add(string $cmd, string $outputfile = '/dev/null'): Assync {
         $pidfile = '/tmp/' . hash('sha1', (string)$cmd);
         $this->list[] = ['command' => sprintf("%s > %s 2>&1 & echo $! > %s", $cmd, $outputfile, $pidfile), 'pidfile' => $pidfile, 'cmd' => $cmd];
         if ($this->verbose !== false) {
@@ -74,19 +81,39 @@ class Assync {
         return $this;
     }
 
-    public function setAutoloader(?string $autoloaderPath = null) {
+    /**
+     * Seta o autoloader automaticamente, ou definido manualmente
+     *
+     * @param string|null $autoloaderPath
+     * @return self
+     */
+    public function setAutoloader(?string $autoloaderPath = null): self {
+        $options = [$autoloaderPath];
         if (!$autoloaderPath) {
-            $autoloaderPath = Helper::fileSearchRecursive('autoload.php', realpath(__DIR__ . '/../../'));
+            $options = [
+                Helper::getPathApp() . '/cron/autoload.php',
+                Helper::getPathApp() . '/run/autoload.php',
+                Helper::getPathApp() . '/vendor/autoload.php',
+            ];
         }
-        if (!file_exists($autoloaderPath)) {
-            throw new Exception("NSUtil Assync: autoload on '$autoloaderPath' is not find");
-        };
 
-        $this->autoloaderPath = $autoloaderPath;
-        return $this;
+        foreach ($options as $filename) {
+            if (file_exists($filename)) {
+                $this->autoloaderPath = $filename;
+                return $this;
+            }
+        }
+
+        throw new Exception("NSUtil Assync: autoload not find");
     }
 
-    public function setLogfile(string $file) {
+    /**
+     * Setter to logfile
+     *
+     * @param string $file
+     * @return self
+     */
+    public function setLogfile(string $file): self {
         $this->logfile = $file;
         return $this;
     }
@@ -104,14 +131,6 @@ class Assync {
             $parallelProcess = $useAllProcessors
                 ? $processors
                 : ($processors >= 2 ? ($processors - 1) : 1);
-
-
-            // $parallelProcess = 1;
-            // if (is_file('/proc/cpuinfo')) {
-            //     $cpuinfo = file_get_contents('/proc/cpuinfo');
-            //     preg_match_all('/^processor/m', $cpuinfo, $matches);
-            //     $parallelProcess = count($matches[0]);
-            // }
         }
         $this->limit = $parallelProcess;
         return $this;

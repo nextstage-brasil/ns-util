@@ -9,6 +9,13 @@ class Log {
     public function __construct() {
     }
 
+    public static function getDefaultPathNSUtil() {
+        $defaultPathNSUtil = '/var/log/ns-util';
+        return is_dir($defaultPathNSUtil)
+            ? $defaultPathNSUtil
+            : '/tmp';
+    }
+
     /**
      * 
      * @param string $file Path absoluto do arquivo

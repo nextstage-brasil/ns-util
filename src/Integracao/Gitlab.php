@@ -42,15 +42,15 @@ class Gitlab {
     }
 
 
-     /**
-      * Executa uma chamada ao gitlab e retorna um array
-      *
-      * @param string $resource
-      * @param array $data
-      * @param string $method
-      * @return object
-      */
-    private function fetch(string $resource, array $data = [], string $method = 'GET') : object {
+    /**
+     * Executa uma chamada ao gitlab e retorna um array
+     *
+     * @param string $resource
+     * @param array $data
+     * @param string $method
+     * @return object
+     */
+    private function fetch(string $resource, array $data = [], string $method = 'GET'): object {
         $header = ['PRIVATE-TOKEN:' . $this->config->get('token')];
 
         $url = $this->config->get('url')
@@ -143,6 +143,20 @@ class Gitlab {
         return $ret->content;
     }
 
+    /**
+     * Atualiza as labels atuais para as enviadas pelo array $labels
+     *
+     * @param integer $issue_iid
+     * @param array $labels
+     * @return array
+     */
+    public function setLabels(int $idProject, int $issue_iid, array $labels): array {
+        $this->setIdProject($idProject);
+        return $this->issueEdit($issue_iid, [
+            'labels' => implode(',', $labels)
+        ]);
+    }
+
     public function setEstimate($issue_iid, $estimate) {
         if (strlen((string)$estimate) <= 0) {
             return;
@@ -184,7 +198,6 @@ class Gitlab {
         } catch (\Exception $ex) {
             echo $ex->getMessage();
         }
-
         return $ret->content;
     }
 
