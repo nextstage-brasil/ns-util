@@ -23,7 +23,7 @@ class Gitlab {
     }
 
     private function getFromDePara($chave, $valor) {
-        return ( (isset($this->depara[$chave][$valor])) ? $this->depara[$chave][$valor] : $valor);
+        return ((isset($this->depara[$chave][$valor])) ? $this->depara[$chave][$valor] : $valor);
     }
 
     public function setIdProject(int $idProject) {
@@ -50,25 +50,24 @@ class Gitlab {
         $header = ['PRIVATE-TOKEN:' . $this->config->get('token')];
 
         $url = $this->config->get('url')
-                . '/'
-                . $resource
-                . ((count($data) > 0) ? '?' . http_build_query($data) : '')
-        ;
+            . '/'
+            . $resource
+            . ((count($data) > 0) ? '?' . http_build_query($data) : '');
         $params = [];
         $header = ['PRIVATE-TOKEN:' . $this->config->get('token')];
         $ssl = false;
         $timeout = 30;
         $ret = Helper::curlCall($url, $params, $method, $header, $ssl, $timeout);
-        
+
         if ($ret->status >= 203) {
             throw new \Exception(PHP_EOL .
-                            'ERROR: Chamada ao recurso ' . $resource . ' com status ' . $ret->status
-                            . PHP_EOL
-                            . 'URL: ' . $url
-                            . PHP_EOL
-                            . PHP_EOL
-                            . var_export($ret, true)
-                            . PHP_EOL);
+                'ERROR: Chamada ao recurso ' . $resource . ' com status ' . $ret->status
+                . PHP_EOL
+                . 'URL: ' . $url
+                . PHP_EOL
+                . PHP_EOL
+                . var_export($ret, true)
+                . PHP_EOL);
         } else {
             $ret->content = json_decode($ret->content, true);
         }
@@ -78,10 +77,11 @@ class Gitlab {
 
     /**
      * Obtem a lista full de registros do resouce solicitado
-     * @param type $resource
-     * @return type
+     *
+     * @param string $resource
+     * @return array
      */
-    public function list($resource) {
+    public function list(string $resource): array {
         $out = [];
         $page = 1;
         do {
@@ -90,7 +90,7 @@ class Gitlab {
             $out = array_merge($out, $ret->content);
         } while ($page > 0);
 
-        return $out;
+        return $out ?? [];
     }
 
     /**
@@ -265,9 +265,9 @@ class Gitlab {
 
             // Descrição
             $item['description'] = "*Importado do Trello em " . date('d/m/Y H:i:s') . "*\n\n"
-                    . (($created['action'] === 'updateCard') ? "*Obtido a data mais antiga de atualização pois a data de criação não estava disponível na importação*\n\n" : "")
-                    . PHP_EOL
-                    . $this->trelloSetMarkdown($item['description']);
+                . (($created['action'] === 'updateCard') ? "*Obtido a data mais antiga de atualização pois a data de criação não estava disponível na importação*\n\n" : "")
+                . PHP_EOL
+                . $this->trelloSetMarkdown($item['description']);
 
             // Project
             if (isset($this->depara['projectByLabel']['default'])) {
@@ -303,14 +303,13 @@ class Gitlab {
             foreach ($actions as $action) {
                 $dataActions = $action['text'];
                 switch ($action['action']) {
-                    case 'commentCard' :
+                    case 'commentCard':
                         $text = $dataActions['text'];
                         break;
                     case 'addAttachmentToCard':
                     case 'deleteAttachmentFromCard':
                         $text = 'ID: ' . $dataActions['attachment']['url'] . PHP_EOL
-                                . ((isset($dataActions['attachment']['url'])) ? 'URL: ' . $dataActions['attachment']['url'] : '')
-                        ;
+                            . ((isset($dataActions['attachment']['url'])) ? 'URL: ' . $dataActions['attachment']['url'] : '');
                         break;
                     default:
                         $text = false;
@@ -319,11 +318,11 @@ class Gitlab {
                 if ($text !== false) {
                     $nomeUsuario = \NsUtil\Helper::arraySearchByKey($data['members'], 'id', $action['id_member'])['name'];
                     $body = "*Importado do Trello. "
-                            . "Usuário: " . $nomeUsuario
-                            . ", ação: " . $action['action']
-                            . " em " . $format->setString($action['date'])->date('mostrar', true)
-                            . "* \n\n"
-                            . $this->trelloSetMarkdown($text);
+                        . "Usuário: " . $nomeUsuario
+                        . ", ação: " . $action['action']
+                        . " em " . $format->setString($action['date'])->date('mostrar', true)
+                        . "* \n\n"
+                        . $this->trelloSetMarkdown($text);
                     $createdAt = $action['date'];
                     $coments[] = ['body' => $body, 'createAt' => $createdAt, 'text' => $text, 'type' => 'comments'];
                 }
@@ -352,11 +351,10 @@ class Gitlab {
                 }
                 $nomeUsuario = \NsUtil\Helper::arraySearchByKey($data['members'], 'id', $checklist['items'][0]['id_member'])['name'];
                 $body = "*Importado do Trello. "
-                        . "Criador: " . $nomeUsuario
-                        . "* \r\n"
-                        . "### " . $checklist['name'] . "\r\n"
-                        . $text
-                ;
+                    . "Criador: " . $nomeUsuario
+                    . "* \r\n"
+                    . "### " . $checklist['name'] . "\r\n"
+                    . $text;
                 $createdAt = $checklist['date'];
                 $coments[] = ['body' => $body, 'createAt' => $createdAt, 'text' => $text, 'type' => 'checklist'];
             }
@@ -414,7 +412,7 @@ class Gitlab {
 
         return [
             'cronograma' => $tarefasPadrao,
-            'error' => $error
+            'error' => $error ?? false
         ];
     }
 
@@ -451,5 +449,4 @@ class Gitlab {
             return [];
         }
     }
-
 }
