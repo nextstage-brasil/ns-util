@@ -54,25 +54,35 @@ class Log {
         }
     }
 
-    public static function logTxt(string $file, string $message): void {
+    /**
+     * Registra um log de texto em um arquivo determinado
+     *
+     * @param string $file
+     * @param string $message
+     * @param boolean $ignoreBacktrace
+     * @return void
+     */
+    public static function logTxt(string $file, string $message, bool $ignoreBacktrace = false): void {
         if (is_array($message) || is_object($message)) {
             $message = var_export($message, true);
         }
 
-        $origem = array_map(function ($item) {
-            if (is_null($item) || !is_array($item) || strlen((string) $item['class']) === 0) {
-                return '';
-            }
-            $item['file'] = $item['file'] ? $item['file'] : '';
-            return $item['file']
-                . ':'
-                . $item['line']
-                . ' > '
-                . $item['class']
-                . '::' . $item['function']
-                . '()';
-        }, debug_backtrace());
-        $message .= "\n\t" . implode("\n\t", $origem);
+        if (!$ignoreBacktrace) {
+            $origem = array_map(function ($item) {
+                if (is_null($item) || !is_array($item) || strlen((string) $item['class']) === 0) {
+                    return '';
+                }
+                $item['file'] = $item['file'] ? $item['file'] : '';
+                return $item['file']
+                    . ':'
+                    . $item['line']
+                    . ' > '
+                    . $item['class']
+                    . '::' . $item['function']
+                    . '()';
+            }, debug_backtrace());
+            $message .= "\n\t" . implode("\n\t", $origem);
+        }
 
         // criação do diretorio caso não existe
         self::rotate($file);
