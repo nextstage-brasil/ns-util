@@ -2,6 +2,9 @@
 
 namespace NsUtil;
 
+use InvalidArgumentException;
+use RuntimeException;
+
 /*
  * This file is part of the Text_Template package.
  *
