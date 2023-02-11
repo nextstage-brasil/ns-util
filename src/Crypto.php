@@ -9,6 +9,10 @@ class Crypto {
 
     private $chave;
 
+    /**
+     *
+     * @param string $chave
+     */
     public function __construct($chave) {
         if (strlen((string) $chave) < 16) {
             throw new Exception('NsCrypto: Atenção: chave com menos de 16 caracteres considerada insegura');
@@ -56,16 +60,16 @@ class Crypto {
         return $output;
     }
 
-    /**
-     * Retorna um item cryptografado ou aberto (conforme $action) utilizando regra simples de AES-256-CBC com openssl_encrypt
-     * 
-     * Interessante uso para necessidades menores, pois é mais rápido e gera uma string menor
-     * @param type $action enum: 'encrypt' or 'decrypt'
-     * @param type $string
-     * @param type $chave
-     * @return type
-     */
-    public function simple(string $action, string $string, string $chave = '') {
+     /**
+      * Retorna um item cryptografado ou aberto (conforme $action) utilizando regra simples de AES-256-CBC com openssl_encrypt
+      *
+      * Interessante uso para necessidades menores, pois é mais rápido e gera uma string menor
+      * @param string $action
+      * @param string $string
+      * @param string $chave
+      * @return string
+      */
+    public function simple(string $action, string $string, string $chave = '') : string {
         $output = false;
 
         $encrypt_method = "AES-256-CBC";

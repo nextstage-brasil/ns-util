@@ -856,6 +856,9 @@ class Helper {
                     $out = null;
                 }
                 break;
+            case 'html':
+                $out = $string;
+                break;
             default:
                 $out = Filter::string($string);
                 break;
@@ -1154,7 +1157,7 @@ class Helper {
                 } else {
                     $out[] = [
                         'field' => $key,
-                        'old' => isset($alteradosAntigo[$key]) ? $alteradosAntigo[$key] : null, 
+                        'old' => isset($alteradosAntigo[$key]) ? $alteradosAntigo[$key] : null,
                         'new' => $value
                     ];
                 }
@@ -1162,5 +1165,12 @@ class Helper {
         }
 
         return $out;
+    }
+
+    public static function httpsForce() {
+        if ($_SERVER["HTTPS"] != "on") {
+            header("Location: https://" . $_SERVER["HTTP_HOST"] . $_SERVER["REQUEST_URI"]);
+            die();
+        }
     }
 }

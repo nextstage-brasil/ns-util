@@ -119,8 +119,11 @@ class Format {
      * @return string
      */
     public function decimal() {
-        $var = self::parseInt($this->string);
-        $var = substr((string) $var, 0, strlen((string) $var) - 2) . "." . substr((string) $var, strlen((string) $var) - 2, 2);
+        $var = $this->string;
+        if (stripos($var, ',') > -1) {
+            $var = self::parseInt($var);
+            $var = substr((string) $var, 0, strlen((string) $var) - 2) . "." . substr((string) $var, strlen((string) $var) - 2, 2);
+        }
         return $var;
     }
 
@@ -169,10 +172,10 @@ class Format {
 
         if ($prefixo) {
             $prefixo = '<strong><small>' .
-                    (($prefixo !== true) ? $prefixo : 'R$')
-                    . '</small> </strong> ';
+                (($prefixo !== true) ? $prefixo : 'R$')
+                . '</small> </strong> ';
         }
-        $out = $prefixo . number_format((double) $number, 2, ',', '.');
+        $out = $prefixo . number_format((float) $number, 2, ',', '.');
         if ($sinalNoFim) {
             $out = $prefixo . number_format(abs($number), 2, ',', '.') . (($number < 0) ? '-' : '+');
         }
@@ -182,5 +185,4 @@ class Format {
 
         return (string) $out;
     }
-
 }

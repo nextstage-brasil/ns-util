@@ -1,0 +1,39 @@
+version: "3"
+
+services:
+    postgres_img:
+        container_name: ${COMPOSE_PROJECT_NAME}_postgres${PGVERSION}
+        restart: always
+        build:
+            context: ./postgres
+            args:
+                - PGVERSION=${PGVERSION}
+        volumes:
+            - ${PERSISTPATH}/postgresql/${PGVERSION}/data:/var/lib/postgresql/data
+            - ${PERSISTPATH}/postgresql/${PGVERSION}/logs:/var/log/postgresql
+        ports:
+            - ${PGPORT}:5432                
+        environment:
+            - POSTGRES_PASSWORD=${PG_PASSWORD}
+            - POSTGRES_HOST_AUTH_METHOD=${PG_AUTHMODE}
+            - POSTGRES_INCLUDE_DIR=/etc/postgresql/${PGVERSION}/main/conf.d
+
+    pgbouncer_img:
+        container_name: ${COMPOSE_PROJECT_NAME}_pgbouncer
+        restart: always
+        build:
+            context: ./pgbouncer    
+        depends_on:
+            - postgres_img
+        ports:
+            - ${PGBOUNCER_EXPOSED_PORT}:6432                
+        environment:
+            - PGBOUNCER_LISTEN_ADDR=*
+            - PGBOUNCER_AUTH_TYPE=${PG_AUTHMODE}
+            - PGBOUNCER_MAX_CLIENT_CONN=4000
+            - PGBOUNCER_DEFAULT_POOL_SIZE=56
+            - PGBOUNCER_MIN_POOL_SIZE=10
+            - PGBOUNCER_LISTEN_PORT=6432
+            - PGBOUNCER_MAX_USER_CONNECTIONS=100
+            - PGBOUNCER_AUTH_FILE=/opt/pgbouncer/etc/userlist.txt
+            - DATABASES=*=host=postgres_img port=5432

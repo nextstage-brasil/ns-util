@@ -11,7 +11,6 @@ class Package {
     private static $dockerBuildParams = [];
 
     public function __construct() {
-        
     }
 
     public static function setCreateFrontendFiles(bool $createFrontendFiles): void {
@@ -109,12 +108,12 @@ class Package {
             'path' => $path_versionNew,
             'init' => (isset(($init)) ? $init . " &&" : ""),
             'bat' => ""
-            . (isset(($init)) ? $init . " &&" : "")
-            . " cd $path_versionNew &&"
-            . " git add .  &&"
-            . " git commit -m \"$message\" &&"
-            . (($createTag) ? " git tag $X.$Y.$Z HEAD &&" : "")
-            . "timeout /t 10",
+                . (isset(($init)) ? $init . " &&" : "")
+                . " cd $path_versionNew &&"
+                . " git add .  &&"
+                . " git commit -m \"$message\" &&"
+                . (($createTag) ? " git tag $X.$Y.$Z HEAD &&" : "")
+                . "timeout /t 10",
             'git' => [
                 'local' => (isset(($init)) ? true : false),
                 'cd' => "cd $path_versionNew",
@@ -145,34 +144,34 @@ class Package {
      * @param string $patch7zip Path para o aplicativo de ZIP
      */
     public static function run(
-            string $origem,
-            array $excluded_x,
-            string $dirOutput,
-            string $ioncube_post,
-            string $patch7zip = ''
+        string $origem,
+        array $excluded_x,
+        string $dirOutput,
+        string $ioncube_post,
+        string $patch7zip = ''
     ) {
 
         $cmdsConfig = [
             'linux' => [
-                'clearFiles' => 'find %1$s -name "*XPTO*" -delete && find %1$s/app/_45h -name "*.php" -delete && find %1$s/app/45h -name "*.php" -delete',
+                'clearFiles' => 'find %1$s -name "*__NEW__*" -delete && find %1$s -name "*XPTO*" -delete && find %1$s/app/_45h -name "*.php" -delete && find %1$s/app/45h -name "*.php" -delete',
                 'move' => 'mv'
             ],
             'windows' => [
-                'clearFiles' => 'del "%1$s\*XPTO*" /s /q > nul && del "%1$s\app\_45h\*.php" > nul && del "%1$s\app\45h\*.php" > nul',
+                'clearFiles' => 'del "%1$s\*__NEW__*" /s /q > nul && del "%1$s\*XPTO*" /s /q > nul && del "%1$s\app\_45h\*.php" > nul && del "%1$s\app\45h\*.php" > nul',
                 'move' => 'move'
             ]
         ];
 
-//        if (Helper::getSO() !== 'windows') {
-//            die('ERROR: Este método é exclusivo para uso em ambiente Windows');
-//        }
+        //        if (Helper::getSO() !== 'windows') {
+        //            die('ERROR: Este método é exclusivo para uso em ambiente Windows');
+        //        }
 
         if (strlen($patch7zip) === 0) {
             $patch7zip = ((\NsUtil\Helper::getSO() === 'windows') ? 'C:\Program Files\7-Zip\7z.exe' : 'zip');
         }
         if (
-                (\NsUtil\Helper::getSO() === 'windows' && !file_exists($patch7zip)) ||
-                (\NsUtil\Helper::getSO() === 'linux' && stripos(shell_exec('type ' . $patch7zip), 'not found') > -1 )
+            (\NsUtil\Helper::getSO() === 'windows' && !file_exists($patch7zip)) ||
+            (\NsUtil\Helper::getSO() === 'linux' && stripos(shell_exec('type ' . $patch7zip), 'not found') > -1)
         ) {
             die('ERROR: Executável do 7z não localizado. Path: ' . $patch7zip);
         }
@@ -227,28 +226,28 @@ class Package {
 
         // Nomes
         echo "\n### NSUtil Package Generator ###"
-        . "\n - Configurations: "
-        . "\n Running on $urlLocalApplication"
-        . "\n PHP Version: " . PHP_VERSION . " on " . Helper::getSO()
-        . "\n Package output: " . $dirOutput . DIRECTORY_SEPARATOR . $projectName . '-package.zip'
-        . "\n Create docker image?: " . ((count(self::$dockerBuildParams) > 0) ? 'yes' : 'no')
-        . "\n Copy frontend files?: " . ((self::$createFrontendFiles === true) ? 'yes' : 'no')
-        . "\n Alright, let's run!"
-        . "\n\n"
-        ;
+            . "\n - Configurations: "
+            . "\n Running on $urlLocalApplication"
+            . "\n PHP Version: " . PHP_VERSION . " on " . Helper::getSO()
+            . "\n Package output: " . $dirOutput . DIRECTORY_SEPARATOR . $projectName . '-package.zip'
+            . "\n Create docker image?: " . ((count(self::$dockerBuildParams) > 0) ? 'yes' : 'no')
+            . "\n Copy frontend files?: " . ((self::$createFrontendFiles === true) ? 'yes' : 'no')
+            . "\n Alright, let's run!"
+            . "\n\n";
 
         // composer
         $last = 0;
-        if (file_exists($buildDir . '/.lastComposerUpdate')) {
-            $last = (int) file_get_contents($buildDir . '/.lastComposerUpdate');
+        $composerLastUpdateFile = $buildDir . '/.lastComposerUpdateFromPackage';
+        if (file_exists($composerLastUpdateFile)) {
+            $last = (int) file_get_contents($composerLastUpdateFile);
         }
-        $composerIsOld = (!file_exists($buildDir . '/.lastComposerUpdate')) || $last < time() - (60 * 60 * 2);
+        $composerIsOld = (!file_exists($composerLastUpdateFile)) || $last < time() - (60 * 60 * 2);
         echo "\n - Atualizando pacotes via composer ... ";
         if (file_exists($origem . '/composer.json') && $composerIsOld) {
             shell_exec('composer update -q --prefer-dist --optimize-autoloader --no-dev --working-dir="' . $origem . '"');
-            file_put_contents($buildDir . '/.lastComposerUpdate', time());
+            file_put_contents($composerLastUpdateFile, time());
         }
-        echo "OK! Is updated at " . date('Y-m-d H:i:s', (int) file_get_contents($buildDir . '/.lastComposerUpdate'));
+        echo "OK! Is updated at " . date('Y-m-d H:i:s', (int) file_get_contents($composerLastUpdateFile));
 
         echo "\n - Construindo aplicacao ... ";
         $ret = Helper::curlCall("$urlLocalApplication/$build/builder.php?pack=true", [], 'GET', [], false, (60 * 10));
@@ -294,7 +293,7 @@ class Package {
             '*/demo/*',
             'info.php',
             '*teste.php',
-//            '*composer.lock*',
+            //            '*composer.lock*',
             '/.env',
             '/.env.example',
             '*serverless*'
@@ -308,7 +307,7 @@ class Package {
             'app/',
             'test/',
             '.gitlab/'
-                ], $excluded_x);
+        ], $excluded_x);
         $ex = $exCI = '';
         $command = '"' . $patch7zip . '"' . ' a ' . $zip . ' ' . $fontes . '\* ';
         foreach ($excluded_xr as $item) {
@@ -322,8 +321,8 @@ class Package {
 
         // Salvar o comando para gerar o ZIP limpo tbem no CI
         self::$zipExcluded = (object) [
-                    'zipCi' => "#!/bin/bash\nzip -qr \$CI_COMMIT_SHA.zip . $exCI",
-                    'ex' => $exCI
+            'zipCi' => "#!/bin/bash\nzip -qr \$CI_COMMIT_SHA.zip . $exCI",
+            'ex' => $exCI
         ];
         Helper::saveFile("$origem/$build/install/deploy/scripts/zipCommandToCI.sh", false, self::$zipExcluded->zipCi, 'SOBREPOR');
 
@@ -364,7 +363,7 @@ class Package {
         self::dockerBuilder();
 
         echo "\n\n ### Package '$versao' was created successfully!! ###"
-        . "\n--------------------------------------\n";
+            . "\n--------------------------------------\n";
         return $projectName;
     }
 
@@ -383,8 +382,8 @@ class Package {
     static function copyFilesToAppView(string $applicationPath, string $destPath, array $pathsToCopy = [], bool $clearOldVersion = true): void {
         echo "\n - Criando aplicação frontend local ...";
         $listToCopy = array_merge(
-                ['view/css', 'view/images', 'view/fonts', 'view/audio', 'view/angular-file-upload-full_3', 'auto/components', 'node_modules', 'package.json']
-                , $pathsToCopy
+            ['view/css', 'view/images', 'view/fonts', 'view/audio', 'view/angular-file-upload-full_3', 'auto/components', 'node_modules', 'package.json'],
+            $pathsToCopy
         );
 
         // Limpar instalações anteriores
@@ -445,15 +444,13 @@ class Package {
             // Gerar imagem Docker local
             echo "\n - Construindo imagem docker ... ";
             $dockerCMD = 'docker build '
-                    . $arguments
-                    . " --quiet"
-                    . ' -t ' . self::$dockerBuildParams['Username'] . ":" . self::$dockerBuildParams['Tag']
-                    . ' '
-                    . '"' . self::$dockerBuildParams['Dockerfile'] . '/."'
-            ;
+                . $arguments
+                . " --quiet"
+                . ' -t ' . self::$dockerBuildParams['Username'] . ":" . self::$dockerBuildParams['Tag']
+                . ' '
+                . '"' . self::$dockerBuildParams['Dockerfile'] . '/."';
             exec($dockerCMD);
             echo "OK!";
         }
     }
-
 }

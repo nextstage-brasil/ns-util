@@ -156,12 +156,15 @@ class Sendmail {
      */
     public static function sendByAWS(string $to, string $subject, string $html_body, ?array $anexo = [],  array $template_data = [], ?string $template_id = null, ?Closure $success = null, ?Closure $error = null): bool {
         try {
-            Validate::validate(['AWS_KEY', 'AWS_SECRET', 'SENDMAIL_EMAIL'], [
+
+            Validate::validate(['AWS_KEY', 'AWS_SECRET', 'SENDMAIL_EMAIL', 'to', 'subject', 'body'], [
                 'AWS_KEY' => getenv('AWS_KEY'),
                 'AWS_SECRET' => getenv('AWS_SECRET'),
-                'SENDMAIL_EMAIL' => getenv('SENDMAIL_EMAIL')
+                'SENDMAIL_EMAIL' => getenv('SENDMAIL_EMAIL'),
+                'to' => $to,
+                'subject' => $subject,
+                'body' => strlen($html_body) > 0 ?  $html_body : ($template_data[0] ?? '')
             ], true);
-
 
             $SesClient = new SesClient([
                 'version' => '2010-12-01',
@@ -204,14 +207,14 @@ class Sendmail {
             return true;
         } catch (AwsException $e) {
             if (is_callable($error)) {
-                call_user_func($error, $e->getMessage());
+                call_user_func($error, 'AwsException: ' . $e->getMessage());
             }
-            return false;
+            throw new Exception($e->getMessage());
         } catch (Exception $e) {
             if (is_callable($error)) {
-                call_user_func($error, $e->getMessage());
+                call_user_func($error, 'Exception: ' . $e->getMessage());
             }
-            return false;
+            throw new Exception($e->getMessage());
         }
     }
 }

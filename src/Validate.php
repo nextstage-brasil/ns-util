@@ -151,7 +151,8 @@ class Validate {
             $v->addCampoObrigatorio($item);
         }
         $errors = $v->getValidadeAsArray($valuesToValidate);
-        if ($throwException) {
+        if (count($errors) > 0 && $throwException) {
+            Log::logTxt('/tmp/nsutil-send-with-aws.log', 'VALIDATE: ' . json_encode($errors, JSON_PRETTY_PRINT));
             throw new Exception(json_encode($errors));
         }
 

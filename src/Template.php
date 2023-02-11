@@ -45,6 +45,10 @@ class Template {
      * @throws InvalidArgumentException
      */
     public function __construct($template_file_or_html, $values = [], $openDelimiter = '{', $closeDelimiter = '}') {
+        if (strlen($template_file_or_html) === 0) {
+            $template_file_or_html = 'TEMPLATE IS NOT DEFINED';
+        }
+
         if (file_exists($template_file_or_html)) {
             $this->setFile($template_file_or_html);
         } else {
@@ -77,7 +81,7 @@ class Template {
             $this->template = file_get_contents($distFile);
         } else {
             throw new InvalidArgumentException(
-                            'Template file could not be loaded.'
+                'Template file could not be loaded.'
             );
         }
     }
@@ -128,13 +132,16 @@ class Template {
         } else {
             $error = error_get_last();
             throw new RuntimeException(
-                            sprintf(
-                                    'Could not write to %s: %s', $target, substr((string)
-                                            $error['message'], strpos($error['message'], ':') + 2
-                                    )
-                            )
+                sprintf(
+                    'Could not write to %s: %s',
+                    $target,
+                    substr(
+                        (string)
+                        $error['message'],
+                        strpos($error['message'], ':') + 2
+                    )
+                )
             );
         }
     }
-
 }
