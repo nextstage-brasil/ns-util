@@ -120,7 +120,7 @@ class Package {
                 'add' => "git add . ",
                 'commit' => "git commit -m \"$message\" ",
                 'tag' => $tag,
-                'push' => "git push --tags",
+                'push' => "git push --follow-tags",
                 'timeout' => 'timeout /t 10'
             ]
         ];
@@ -128,9 +128,6 @@ class Package {
 
     public static function git($file, $message = 'default/Not defined', $major = null, $minor = null, $path = null) {
         $ret = self::setVersion($file, $message, $major, $minor, $path);
-        //        $template = implode(PHP_EOL, $ret['git']);
-        //        $filegit = $ret['path'] . '/__git.bat';
-        //        Helper::saveFile($filegit, false, $template, 'SOBREPOR');
         shell_exec($ret['bat']);
         return $ret;
     }
