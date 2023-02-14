@@ -18,12 +18,11 @@ class UniqueExecution {
         $this->createDB();
         // date_default_timezone_set('UTC');
 
-        if ($user !== 'root')   {
+        if ($user !== 'root') {
             @chmod($db, 0777);
             // @chown($db, 'root');
             // @chgrp($db, 'root');
         }
-
     }
 
     // Cria a tabela necessária para execução
@@ -41,14 +40,20 @@ class UniqueExecution {
     }
 
     /**
-     * Tempo limite de execução considerado "travado"
-     * @param type $timeLimit
-     * @return type
+     * Verifica se uma execução esta em processamento
+     *
+     * @param integer $timeLimit
+     * @param boolean $throwException
+     * @return boolean
      */
-    public function isRunning(int $timeLimit = 3600): bool {
+    public function isRunning(int $timeLimit = 3600, bool $throwException = false): bool {
         $query = 'SELECT COUNT(*) AS counter FROM "execution" WHERE ref="' . $this->ref . '" AND inited_at > ' . (time() - $timeLimit);
         $counter = $this->con->execQueryAndReturn($query)[0]['counter'];
-        return $counter > 0;
+        $isRunning =  $counter > 0;
+        if ($isRunning && $throwException) {
+            throw new Exception($this->getDefaultMessageIsRunning());
+        }
+        return $isRunning;
     }
 
     /**
@@ -88,9 +93,8 @@ class UniqueExecution {
      * Retorna mensagem padrão contendo a data de inicio do processo atual
      * @return string
      */
-    public function getDefaultMessageIsRunning() : string {
+    public function getDefaultMessageIsRunning(): string {
         $init = $this->getStartedAt();
         return 'There is another proccess running. Started at ' . date('c', $init);
     }
-
 }

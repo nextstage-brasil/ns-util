@@ -120,11 +120,13 @@ class SQLite {
 
     /**
      * Executa e retonar a query formatada com nameCase
-     * @param type $query
-     * @param type $log
-     * @return type
+     *
+     * @param string $query
+     * @param boolean $log
+     * @param boolean $keyCamelCaseFormat
+     * @return array
      */
-    public function execQueryAndReturn($query, $log = true, $keyCamelCaseFormat = true) {
+    public function execQueryAndReturn(string $query, bool $log = true, bool $keyCamelCaseFormat = true): array {
         $this->open();
         $out = [];
         $this->executeQuery($query, $log);
@@ -137,22 +139,10 @@ class SQLite {
         return $out;
     }
 
-    /**
-     * Define o que será utilizado em nullas ao executar o insertByCopy
-     * @param type $nullas
-     */
     public function setNullAs($nullAs = '') {
         $this->nullas = $nullAs;
     }
 
-    /**
-     * Executara um update na tabela com prepared. Os nomes do campos já devem estar no formato da tabela, sem camelcase
-     * @param type $table
-     * @param type $array
-     * @param type $cpoWhere
-     * @return boolean
-     * @throws SistemaException
-     */
     public function insert($table, $array, $nomeCpoId, $onConflict = null) {
         $preValues = $update = $valores = [];
         foreach ($array as $key => $value) {
@@ -161,8 +151,8 @@ class SQLite {
             $valores[] = $value;
         }
         $query = "INSERT INTO $table (" . implode(',', $keys) . ") VALUES (" . implode(',', $preValues) . ")"
-        . ((isset($onConflict)) ? " $onConflict " : "")
-        //. " returning $nomeCpoId as nsnovoid"
+            . ((isset($onConflict)) ? " $onConflict " : "")
+            //. " returning $nomeCpoId as nsnovoid"
         ;
         $this->open();
         $res = false;
@@ -185,14 +175,6 @@ class SQLite {
         }
     }
 
-    /**
-     * Executara um update na tabela com prepared. Os nomes do campos já devem estar no formato da tabela, sem camelcase
-     * @param type $table
-     * @param type $array
-     * @param type $cpoWhere
-     * @return boolean
-     * @throws SistemaException
-     */
     public function update($table, $array, $cpoWhere) {
         $update = $valores = [];
         $idWhere = $array[$cpoWhere];
@@ -221,5 +203,4 @@ class SQLite {
             throw new Exception($exc->getMessage() . $query);
         }
     }
-
 }
