@@ -238,29 +238,8 @@ class Helper {
     }
 
     public static function deleteDir($pasta) {
-        self::directorySeparator($pasta);
-        if (!is_dir($pasta)) {
-            return true;
-        }
-
-        $iterator = new \RecursiveDirectoryIterator($pasta, \FilesystemIterator::SKIP_DOTS);
-        $rec_iterator = new \RecursiveIteratorIterator($iterator, \RecursiveIteratorIterator::CHILD_FIRST);
-
-        foreach ($rec_iterator as $file) {
-            $file->isFile() ? unlink($file->getPathname()) : rmdir($file->getPathname());
-        }
-
-        /*
-          $files = array_diff(scandir($dir), array('.', '..'));
-          foreach ($files as $file) {
-          $todel = $dir . DIRECTORY_SEPARATOR . $file;
-          (is_dir($todel)) ? self::deleteDir($todel) : unlink($todel);
-          }
-          sleep(0.5);
-         * 
-         */
-        rmdir($pasta);
-        return is_dir($pasta);
+        // Apenas para organizacao e compatibilidade de versoes
+        return DirectoryManipulation::deleteDir($pasta);
     }
 
 

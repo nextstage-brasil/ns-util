@@ -2,6 +2,8 @@
 
 namespace NsUtil;
 
+use Exception;
+
 class DirectoryManipulation {
 
     public $total, $dir;
@@ -15,7 +17,7 @@ class DirectoryManipulation {
             while (false !== ($file = readdir($diretorio))) {
                 $path = $dir . DIRECTORY_SEPARATOR . $file;
                 //echo $path; die();
-                if (is_dir($path) and ( $file != ".") and ( $file != "..")) {
+                if (is_dir($path) and ($file != ".") and ($file != "..")) {
                     $this->getSizeOf($path);
                 } else if (is_file($path)) {
                     //echo $path . PHP_EOL;
@@ -42,10 +44,13 @@ class DirectoryManipulation {
      * Le um diretório em disco e retorna os arquivos constantes ali. Inclusive nome dos diretórios
      * 
      * Importante: não é recursivo.
-     * @param type $dir
-     * @return type
+     * @param string $dir
+     * @return array
      */
     public static function openDir($dir) {
+        if (!is_dir($dir)) {
+            throw new Exception("Parameter '$dir' is not a directory");
+        }
         $out = [];
         if ($handle = opendir($dir)) {
             while (false !== ($file = readdir($handle))) {
@@ -60,8 +65,8 @@ class DirectoryManipulation {
 
     public static function recurseCopy($src, $dst) {
         $dir = opendir($src);
-        while (false !== ( $file = readdir($dir))) {
-            if (( $file != '.' ) && ( $file != '..' )) {
+        while (false !== ($file = readdir($dir))) {
+            if (($file != '.') && ($file != '..')) {
                 if (is_dir($src . '/' . $file)) {
                     self::recurseCopy($src . '/' . $file, $dst . '/' . $file);
                 } else {
@@ -81,38 +86,48 @@ class DirectoryManipulation {
         closedir($dir);
     }
 
-}
 
-/** Exemplode uso: 
-$dir = new DirectoryManipulation();
-$dir->getSizeOf($argv[1]);
-$print = '';
-foreach ($dir->total as $key => $val) {
-    $size = (int) $val['size'];
-    $ext = 'bytes';
-    if ($size > 1000) {
-        $ext = 'KB';
-        $size = $size / 1024;
-        if ($size > 1000) {
-            $ext = 'MB';
-            $size = $size / 1024;
-        }
-        if ($size > 1000) {
-            $size = $size / 1024;
-            $ext = 'GB';
+    /**
+     * Realiza a remoção de todo conteúdo de um diretório. Não remove o diretório
+     *
+     * @param string $dir
+     * @param integer $days
+     * @return void
+     */
+    public static function clearDir(string $dir, int $days = 7) {
+        $files = self::openDir($dir);
+        $format = new Format();
+        foreach ($files as $file) {
+            $filename = $file;
+            if (is_dir($filename)) {
+                self::clearDir($filename, $days);
+            } else {
+                // Remove
+                $createdAt = filemtime($filename);
+                $removeAt = $format->setString(
+                    $format->setString(time())->subDays($days)
+                )->dateToMktime();
+
+                // validate rule and remove
+                $createdAt < $removeAt ? unlink($filename) : null;
+            }
         }
     }
 
-    $size = number_format($size, 0, ',', '.') . $ext;
+    public static function deleteDir($pasta) {
+        Helper::directorySeparator($pasta);
+        if (!is_dir($pasta)) {
+            return true;
+        }
 
-    $print .= "Tipo: ." . $key
-            . PHP_EOL
-            . "\tArquivos: " . $val['count']
-            . "\n\tTamanho: " . $size
-            . PHP_EOL
-    ;
+        $iterator = new \RecursiveDirectoryIterator($pasta, \FilesystemIterator::SKIP_DOTS);
+        $rec_iterator = new \RecursiveIteratorIterator($iterator, \RecursiveIteratorIterator::CHILD_FIRST);
+
+        foreach ($rec_iterator as $file) {
+            $file->isFile() ? unlink($file->getPathname()) : rmdir($file->getPathname());
+        }
+
+        rmdir($pasta);
+        return is_dir($pasta);
+    }
 }
-echo $print;
-
-file_put_contents(__DIR__ . '/contadir.txt', $print);
-**/
