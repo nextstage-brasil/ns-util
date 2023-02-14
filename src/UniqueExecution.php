@@ -65,6 +65,7 @@ class UniqueExecution {
         $query = "INSERT INTO execution(ref, inited_at) VALUES('" . $this->ref . "', " . time() . ")
                   ON CONFLICT(ref) DO UPDATE SET inited_at=" . time();
         $this->con->executeQuery($query);
+        return $this;
     }
 
     /**
@@ -74,6 +75,7 @@ class UniqueExecution {
     public function end(): void {
         $query = "DELETE FROM \"execution\" WHERE ref='" . $this->ref . "'";
         $this->con->executeQuery($query);
+        return $this;
     }
 
     /**

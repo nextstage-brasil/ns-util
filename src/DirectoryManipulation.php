@@ -98,15 +98,13 @@ class DirectoryManipulation {
         $files = self::openDir($dir);
         $format = new Format();
         foreach ($files as $file) {
-            $filename = $file;
+            $filename = $dir . DIRECTORY_SEPARATOR . $file;
             if (is_dir($filename)) {
                 self::clearDir($filename, $days);
             } else {
                 // Remove
                 $createdAt = filemtime($filename);
-                $removeAt = $format->setString(
-                    $format->setString(time())->subDays($days)
-                )->dateToMktime();
+                $removeAt = time() - (60 * 60 * 24 * $days);
 
                 // validate rule and remove
                 $createdAt < $removeAt ? unlink($filename) : null;
