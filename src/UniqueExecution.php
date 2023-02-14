@@ -56,11 +56,14 @@ class UniqueExecution {
         return $isRunning;
     }
 
-    /**
-     * Registra o inicio do processo unico a ser controlado
-     * @return void
-     */
-    public function start(int $timeTocheckAnotherExecution = 3600, bool $throwExceptionIfIsRunning = false): void {
+     /**
+      * Registra o inicio do processo unico a ser controlado
+      *
+      * @param integer $timeTocheckAnotherExecution
+      * @param boolean $throwExceptionIfIsRunning
+      * @return void
+      */
+    public function start(int $timeTocheckAnotherExecution = 3600, bool $throwExceptionIfIsRunning = false) {
         $this->isRunning($timeTocheckAnotherExecution, $throwExceptionIfIsRunning);
         $query = "INSERT INTO execution(ref, inited_at) VALUES('" . $this->ref . "', " . time() . ")
                   ON CONFLICT(ref) DO UPDATE SET inited_at=" . time();
@@ -75,7 +78,6 @@ class UniqueExecution {
     public function end(): void {
         $query = "DELETE FROM \"execution\" WHERE ref='" . $this->ref . "'";
         $this->con->executeQuery($query);
-        return $this;
     }
 
     /**
