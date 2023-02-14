@@ -60,7 +60,8 @@ class UniqueExecution {
      * Registra o inicio do processo unico a ser controlado
      * @return void
      */
-    public function start(): void {
+    public function start(int $timeTocheckAnotherExecution = 3600, bool $throwExceptionIfIsRunning = false): void {
+        $this->isRunning($timeTocheckAnotherExecution, $throwExceptionIfIsRunning);
         $query = "INSERT INTO execution(ref, inited_at) VALUES('" . $this->ref . "', " . time() . ")
                   ON CONFLICT(ref) DO UPDATE SET inited_at=" . time();
         $this->con->executeQuery($query);
