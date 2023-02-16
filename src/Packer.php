@@ -99,16 +99,16 @@ class Packer {
     }
 
     /**
-     * Aplica o Pack ao JS enviado
-     * 
-     * @param type $js Javascript a ser packer
-     * @param type $includeTagScript Se deve ser incluido as tags <script>$packed</script>
-     * @param type $removeConsole Se deve ser removido as informações de console do JS
-     * @return type
+     * Aplica PACKED ao JS enviado
+     *
+     * @param string  $js
+     * @param boolean $includeTagScript
+     * @param boolean $removeConsole
+     * @return string
      */
     public static function jsPack($js, $includeTagScript = true, $removeConsole = false) {
         if ($removeConsole) {
-            $js = str_replace('console', '//console', $js);
+            $js = str_replace('console.', '//console.', $js);
         }
         $packed = (new Packer($js, 'Normal', true, false, true))->pack();
         if ($includeTagScript) {
@@ -178,7 +178,9 @@ class Packer {
     private function _encodeSpecialChars($script) {
         $parser = new ParseMaster();
         // replace: $name -> n, $$name -> na
-        $parser->add('/((\\x24+)([a-zA-Z$_]+))(\\d*)/', array('fn' => '_replace_name')
+        $parser->add(
+            '/((\\x24+)([a-zA-Z$_]+))(\\d*)/',
+            array('fn' => '_replace_name')
         );
         // replace: _name -> _0, double-underscore (__name) is ignored
         $regexp = '/\\b_[A-Za-z\\d]\\w*/';
@@ -187,10 +189,12 @@ class Packer {
         // quick ref
         $encoded = $keywords['encoded'];
 
-        $parser->add($regexp, array(
-            'fn' => '_replace_encoded',
-            'data' => $encoded
-                )
+        $parser->add(
+            $regexp,
+            array(
+                'fn' => '_replace_encoded',
+                'data' => $encoded
+            )
         );
         return $parser->exec($script);
     }
@@ -209,10 +213,12 @@ class Packer {
         $encoded = $keywords['encoded'];
 
         // encode
-        $parser->add($regexp, array(
-            'fn' => '_replace_encoded',
-            'data' => $encoded
-                )
+        $parser->add(
+            $regexp,
+            array(
+                'fn' => '_replace_encoded',
+                'data' => $encoded
+            )
         );
         if (empty($script))
             return $script;
@@ -295,7 +301,8 @@ class Packer {
         return array(
             'sorted' => $_sorted,
             'encoded' => $_encoded,
-            'protected' => $_protected);
+            'protected' => $_protected
+        );
     }
 
     private $_count = array();
@@ -389,8 +396,17 @@ class Packer {
 
     // mmm.. ..which one do i need ??
     private function _getEncoder($ascii) {
-        return $ascii > 10 ? $ascii > 36 ? $ascii > 62 ?
-                '_encode95' : '_encode62' : '_encode36' : '_encode10';
+        switch (true) {
+            case  $ascii > 62:
+                $out = '_encode95';
+                break;
+            case  $ascii > 36:
+                $out = '_encode36';
+                break;
+            default:
+                $out = '_encode10';
+        }
+        return $out;
     }
 
     // zero encoding
@@ -446,7 +462,9 @@ class Packer {
     // protect high-ascii characters already in the script
     private function _escape95($script) {
         return preg_replace_callback(
-                '/[\\xa1-\\xff]/', array(&$this, '_escape95Bis'), $script
+            '/[\\xa1-\\xff]/',
+            array(&$this, '_escape95Bis'),
+            $script
         );
     }
 
@@ -490,9 +508,9 @@ class Packer {
      */
     // code-snippet inserted into the unpacker to speed up decoding
     const JSFUNCTION_decodeBody = //_decode = function() {
-// does the browser support String.replace where the
-//  replacement value is a function?
-            '    if (!\'\'.replace(/^/, String)) {
+    // does the browser support String.replace where the
+    //  replacement value is a function?
+    '    if (!\'\'.replace(/^/, String)) {
         // decode all the values we need
         while ($count--) {
             $decode[$encode($count)] = $keywords[$count] || $encode($count);
@@ -505,7 +523,7 @@ class Packer {
         $count = 1;
     }
 ';
-//};
+    //};
     /*
       '	if (!\'\'.replace(/^/, String)) {
       // decode all the values we need
@@ -541,7 +559,6 @@ class Packer {
     return ($charCode < _encoding ? \'\' : arguments.callee($charCode / _encoding)) +
         String.fromCharCode($charCode % _encoding + 161);
 }';
-
 }
 
 class ParseMaster {
@@ -611,10 +628,12 @@ class ParseMaster {
 
         $string = $this->_escape($string, $this->escapeChar);
         $string = preg_replace_callback(
-                $regexp, array(
-            &$this,
-            '_replacement'
-                ), $string
+            $regexp,
+            array(
+                &$this,
+                '_replacement'
+            ),
+            $string
         );
         $string = $this->_unescape($string, $this->escapeChar);
 
@@ -660,7 +679,7 @@ class ParseMaster {
                     return $arguments[$replacement + $i];
                 }
                 $delete = ($this->escapeChar == '' ||
-                        strpos($arguments[$i], $this->escapeChar) === false) ? '' : "\x01" . $arguments[$i] . "\x01";
+                    strpos($arguments[$i], $this->escapeChar) === false) ? '' : "\x01" . $arguments[$i] . "\x01";
                 return $delete . $replacement;
 
                 // skip over references to sub-expressions
@@ -699,7 +718,9 @@ class ParseMaster {
         if ($escapeChar) {
             $this->buffer = $escapeChar;
             return preg_replace_callback(
-                    '/\\' . $escapeChar . '(.)' . '/', array(&$this, '_escapeBis'), $string
+                '/\\' . $escapeChar . '(.)' . '/',
+                array(&$this, '_escapeBis'),
+                $string
             );
         } else {
             return $string;
@@ -716,9 +737,10 @@ class ParseMaster {
         if ($escapeChar) {
             $regexp = '/' . '\\' . $escapeChar . '/';
             $this->buffer = array('escapeChar' => $escapeChar, 'i' => 0);
-            return preg_replace_callback
-                    (
-                    $regexp, array(&$this, '_unescapeBis'), $string
+            return preg_replace_callback(
+                $regexp,
+                array(&$this, '_unescapeBis'),
+                $string
             );
         } else {
             return $string;
@@ -738,5 +760,4 @@ class ParseMaster {
     private function _internalEscape($string) {
         return preg_replace($this->ESCAPE, '', $string);
     }
-
 }
