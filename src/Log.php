@@ -58,11 +58,11 @@ class Log {
      * Registra um log de texto em um arquivo determinado
      *
      * @param string $file
-     * @param string $message
+     * @param string|array $message
      * @param boolean $ignoreBacktrace
      * @return void
      */
-    public static function logTxt(string $file, string $message, bool $ignoreBacktrace = false): void {
+    public static function logTxt(string $file, $message, bool $ignoreBacktrace = false): void {
         if (is_array($message) || is_object($message)) {
             $message = var_export($message, true);
         }

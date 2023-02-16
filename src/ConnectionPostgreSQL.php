@@ -2,6 +2,7 @@
 
 namespace NsUtil;
 
+use Closure;
 use Exception;
 use NsUtil\Helper;
 use PDO;
@@ -19,8 +20,10 @@ class ConnectionPostgreSQL {
     public $lastInsertId;
     private static $transaction_in_progress;
     private $nullas = '';
+    private $logfile = null;
 
-    public function __construct($host, $user, $pass, $port, $database) {
+    public function __construct($host, $user, $pass, $port, $database, string $logfile = null) {
+        $this->logfile = $logfile;
         $this->config = new stdClass();
         $this->config->host = $host;
         $this->config->port = $port;
@@ -30,6 +33,16 @@ class ConnectionPostgreSQL {
         $this->open();
     }
 
+    private function log($message) {
+        if (null !== $this->logfile) {
+            Log::logTxt(
+                $this->logfile,
+                '[' . $this->con->pgsqlGetPid() . '] ' .
+                    preg_replace('/(\\s)+/', ' ', $message),
+                true
+            );
+        }
+    }
 
     public static function getConnectionByEnv(): ConnectionPostgreSQL {
         return new ConnectionPostgreSQL(
@@ -47,6 +60,7 @@ class ConnectionPostgreSQL {
                 $stringConnection = "pgsql:host=" . $this->config->host . ";port=" . $this->config->port . ";dbname=" . $this->config->database . ";user=" . $this->config->user . ";password=" . $this->config->pwd;
                 $this->con = new PDO($stringConnection);
                 $this->con->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+                $this->log('Connection started');
             } catch (Exception $e) {
                 throw new Exception($e->getMessage());
             }
@@ -97,11 +111,12 @@ class ConnectionPostgreSQL {
         $this->result = false;
         $this->error = false;
         $this->query = $query;
-
+        $this->log($query);
         try {
             $this->result = $this->con->prepare($query);
             if (!$this->result->execute()) {
                 $this->error = $this->result->errorInfo()[2];
+                $this->log('   >> ERROR: ' . $this->result->errorInfo()[0] . $this->result->errorInfo()[2]);
                 throw new Exception($this->result->errorInfo()[0] . $this->result->errorInfo()[2], 0);
             }
             $this->numRows = $this->result->rowCount();
@@ -111,6 +126,7 @@ class ConnectionPostgreSQL {
             if (stripos($exc->getMessage(), 'ERROR:  function unaccent') > -1) {
                 die('DEV:  A EXTENSÃO UNNACCENT NÃO FOI INSTALADA');
             }
+            $this->log('   >> ERROR: ' . $exc->getMessage());
             throw new Exception($exc->getMessage());
         }
         return $res;
@@ -213,12 +229,13 @@ class ConnectionPostgreSQL {
     }
 
     /**
-     * Executara um update na tabela com prepared. Os nomes do campos já devem estar no formato da tabela, sem camelcase
-     * @param type $table
-     * @param type $array
-     * @param type $cpoWhere
-     * @return boolean
-     * @throws SistemaException
+     *Executara um update na tabela com prepared. Os nomes do campos já devem estar no formato da tabela, sem camelcase
+     *
+     * @param string $table
+     * @param array $array
+     * @param string $nomeCpoId
+     * @param string $onConflict
+     * @return bool
      */
     public function insert($table, $array, $nomeCpoId, $onConflict = '') {
         $preValues = $update = $valores = [];
@@ -235,15 +252,18 @@ class ConnectionPostgreSQL {
         $this->numRows = 0;
         $this->result = false;
         $this->error = false;
+        $this->log($query);
         try {
             $this->result = $this->con->prepare($query);
             if (!$this->result->execute($valores)) {
                 $this->error = $this->result->errorInfo()[2];
+                $this->log('   >> ERROR: ' . $this->result->errorInfo()[0] . $this->result->errorInfo()[2]);
                 throw new Exception($this->result->errorInfo()[0] . $this->result->errorInfo()[2], 0);
             }
             return $res;
         } catch (Exception $exc) {
             $this->result = false;
+            $this->log('   >> ERROR: ' . $exc->getMessage());
             throw new Exception($exc->getMessage() . $query);
         }
     }
@@ -272,16 +292,29 @@ class ConnectionPostgreSQL {
         $this->numRows = 0;
         $this->result = false;
         $this->error = false;
+        $this->log($query);
         try {
             $this->result = $this->con->prepare($query);
             if (!$this->result->execute($valores)) {
                 $this->error = $this->result->errorInfo()[2];
+                $this->log('   >> ERROR: ' . $this->result->errorInfo()[0] . $this->result->errorInfo()[2]);
                 throw new Exception($this->result->errorInfo()[0] . $this->result->errorInfo()[2], 0);
             }
             return $res;
         } catch (Exception $exc) {
             $this->result = false;
+            $this->log('   >> ERROR: ' . $exc->getMessage());
             throw new Exception($exc->getMessage() . $query);
         }
+    }
+
+    /**
+     * Set the value of logfile
+     *
+     * @return  self
+     */
+    public function setLogfile($logfile) {
+        $this->logfile = $logfile;
+        return $this;
     }
 }

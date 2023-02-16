@@ -919,6 +919,12 @@ class Helper {
         }
     }
 
+    /**
+     * Prepara um valor para o formato americano decimal
+     *
+     * @param mixed $var
+     * @return float|mixed
+     */
     public static function decimalFormat($var) {
         if (stripos($var, ',') > -1) { // se achar virgula, veio da view, com formato. da base, nao vem virgula
             $var = self::parseInt($var);
