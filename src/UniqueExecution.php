@@ -61,7 +61,7 @@ class UniqueExecution {
       *
       * @param integer $timeTocheckAnotherExecution
       * @param boolean $throwExceptionIfIsRunning
-      * @return void
+      * @return self
       */
     public function start(int $timeTocheckAnotherExecution = 3600, bool $throwExceptionIfIsRunning = false) {
         $this->isRunning($timeTocheckAnotherExecution, $throwExceptionIfIsRunning);
