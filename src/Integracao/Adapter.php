@@ -53,13 +53,13 @@ abstract class Adapter {
 
     /**
      * Executa uma chamada a API conforme recurso. Ira verificar login valido antes de executar
-     * @param type $recurso
-     * @param type $params
-     * @param type $method
-     * @param type $header
+     * @param string $recurso
+     * @param array $params
+     * @param string $method
+     * @param array $header
      * @return \stdClass
      */
-    public function _callV2($recurso, $params = [], $method = 'POST', $header = []) {
+    public function _call($recurso, $params = [], $method = 'POST', $header = []) {
         $this->login();
         try {
             $url = $this->endpoint . '/' . $recurso;
@@ -73,8 +73,8 @@ abstract class Adapter {
             $out = Helper::curlCall($url, $params, $method, $headerNew, $ssl, $timeout);
             $body = json_decode($out->content);
             $out->error = $out->error > 0;
-            $out->content->token = (($body->token) ? $body->token : false);
-            $out->errorText = (($body->content->error) ? $body->content->error : $body->error);
+            $out->content->token = $body->token ?? $body->content->token ?? null;
+            $out->errorText = $body->content->error ?? $body->error ?? '';
 
             return $out;
         } catch (Exception $exc) {
@@ -88,49 +88,49 @@ abstract class Adapter {
         }
     }
 
-    /**
-     * Executa uma chamada a API conforme recurso. Ira verificar login valido antes de executar
-     * @param type $recurso
-     * @param type $params
-     * @param type $method
-     * @param type $header
-     * @return \stdClass
-     */
-    public function _call($recurso, $params = [], $method = 'POST', $header = []) {
-        $this->login();
-        try {
-            $url = $this->endpoint . '/' . $recurso;
-            $this->printLogsOnScreen('URL: ' . $url);
+    // /**
+    //  * Executa uma chamada a API conforme recurso. Ira verificar login valido antes de executar
+    //  * @param type $recurso
+    //  * @param type $params
+    //  * @param type $method
+    //  * @param type $header
+    //  * @return \stdClass
+    //  */
+    // public function _call($recurso, $params = [], $method = 'POST', $header = []) {
+    //     $this->login();
+    //     try {
+    //         $url = $this->endpoint . '/' . $recurso;
+    //         $this->printLogsOnScreen('URL: ' . $url);
 
-            $client = new \GuzzleHttp\Client();
-            $res = $client->request($method, $url, [
-                'verify' => false,
-                'headers' => array_merge(['Token' => $this->token], $header),
-                'json' => $params
-            ]);
-            $this->printLogsOnScreen('Body: ' . json_encode(json_decode($res->getBody())));
-            $body = \json_decode($res->getBody());
+    //         $client = new \GuzzleHttp\Client();
+    //         $res = $client->request($method, $url, [
+    //             'verify' => false,
+    //             'headers' => array_merge(['Token' => $this->token], $header),
+    //             'json' => $params
+    //         ]);
+    //         $this->printLogsOnScreen('Body: ' . json_encode(json_decode($res->getBody())));
+    //         $body = \json_decode($res->getBody());
 
 
-            $out = new \stdClass();
-            $out->status = $res->getStatusCode();
-            $out->error = (bool) $body->error;
-            $out->content = $body->content;
-            $out->content->token = (($body->token) ? $body->token : false);
-            $out->errorText = (($body->content->error) ? $body->content->error : $body->error);
-            return $out;
-        } catch (Exception $exc) {
-            $out = new \stdClass();
-            $out->status = $res->getStatusCode();
-            $out->error = (bool) true;
-            $out->content = $exc->getMessage();
-        } finally {
-            if ($this->atualLoginTime) {
-                $_SESSION[$this->sessionName] = $this->atualLoginTime;
-                $this->atualLoginTime = false;
-            }
-        }
-    }
+    //         $out = new \stdClass();
+    //         $out->status = $res->getStatusCode();
+    //         $out->error = (bool) $body->error;
+    //         $out->content = $body->content;
+    //         $out->content->token = (($body->token) ? $body->token : false);
+    //         $out->errorText = (($body->content->error) ? $body->content->error : $body->error);
+    //         return $out;
+    //     } catch (Exception $exc) {
+    //         $out = new \stdClass();
+    //         $out->status = $res->getStatusCode();
+    //         $out->error = (bool) true;
+    //         $out->content = $exc->getMessage();
+    //     } finally {
+    //         if ($this->atualLoginTime) {
+    //             $_SESSION[$this->sessionName] = $this->atualLoginTime;
+    //             $this->atualLoginTime = false;
+    //         }
+    //     }
+    // }
 
     protected function printLogsOnScreen($text) {
         if ($this->showLogs) {

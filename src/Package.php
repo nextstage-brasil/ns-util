@@ -120,7 +120,8 @@ class Package {
                 'add' => "git add . ",
                 'commit' => "git commit -m \"$message\" ",
                 'tag' => $tag,
-                'push' => "git push --follow-tags",
+                'push-tags' => "git push --follow-tags",
+                'push' => "git push",
                 'timeout' => 'timeout /t 10'
             ]
         ];
