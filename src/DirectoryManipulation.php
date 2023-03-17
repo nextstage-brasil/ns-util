@@ -112,7 +112,7 @@ class DirectoryManipulation {
         }
     }
 
-    public static function deleteDir($pasta) {
+    public static function deleteDirectory($pasta) {
         Helper::directorySeparator($pasta);
         if (!is_dir($pasta)) {
             return true;

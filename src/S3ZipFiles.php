@@ -50,11 +50,11 @@ class S3ZipFiles {
         $this->config['tmpdir'] = $path;
     }
 
-    /**
-     * Montara o ZIPFILE em app/tmp e retorna o link para download
-     * @param type $dados - idPedido com  pedido a ser processado
-     * @return string
-     */
+     /**
+      * Montara o zipfile dos dos arquivo solicitados
+      *
+      * @return array
+      */
     public function run() {
         if (!$this->config['s3']) {
             die('Configuração S3 não definida (S3Z52)');

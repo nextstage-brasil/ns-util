@@ -4,12 +4,15 @@ namespace NsUtil;
 
 use ZipArchive;
 
-class Log {
+class Log
+{
 
-    public function __construct() {
+    public function __construct()
+    {
     }
 
-    public static function getDefaultPathNSUtil() {
+    public static function getDefaultPathNSUtil()
+    {
         $defaultPathNSUtil = '/var/log/ns-util';
         return is_dir($defaultPathNSUtil)
             ? $defaultPathNSUtil
@@ -22,7 +25,8 @@ class Log {
      * @param int $maxSize Em MB, tamanho máximo do arquivo para rotacionar
      * @return string
      */
-    public static function rotate(string $file, int $maxSize = 10, ?string $newPathPrefix = 'default'): void {
+    public static function rotate(string $file, int $maxSize = 10, ?string $newPathPrefix = 'default'): void
+    {
         Helper::directorySeparator($file);
         $parts = explode(DIRECTORY_SEPARATOR, $file);
         $filename = array_pop($parts);
@@ -62,26 +66,14 @@ class Log {
      * @param boolean $ignoreBacktrace
      * @return void
      */
-    public static function logTxt(string $file, $message, bool $ignoreBacktrace = false): void {
+    public static function logTxt(string $file, $message, bool $ignoreBacktrace = false): void
+    {
         if (is_array($message) || is_object($message)) {
             $message = var_export($message, true);
         }
 
         if (!$ignoreBacktrace) {
-            $origem = array_map(function ($item) {
-                if (is_null($item) || !is_array($item) || strlen((string) $item['class']) === 0) {
-                    return '';
-                }
-                $item['file'] = $item['file'] ? $item['file'] : '';
-                return $item['file']
-                    . ' : '
-                    . $item['line']
-                    . ' > '
-                    . $item['class']
-                    . '::' . $item['function']
-                    . '()';
-            }, debug_backtrace());
-            $message .= "\n\t" . implode("\n\t", $origem);
+            $message .= "\n\t" . implode("\n\t", self::getBacktrace());
         }
 
         // criação do diretorio caso não existe
@@ -95,8 +87,8 @@ class Log {
     /**
      * imprimir na tela o texto
      */
-    public static function see($var, $html = true, $backtraceShow = true): void {
-        $backtrace = debug_backtrace();
+    public static function see($var, $html = true, $backtraceShow = true): void
+    {
         switch (true) {
             case is_object($var):
                 $out = json_encode(Helper::objectPHP2Array($var), JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
@@ -119,11 +111,39 @@ class Log {
         <h5>Log visualization:</h5>
         <pre>$out</pre>
         <h5>Backtrace</h5>
-        <pre></pre>
-        <hr/>";
+        <pre>" . implode("\n\t", self::getBacktrace()) . "
+        </pre>
+        <hr/>
+        ";
+
+
 
         echo !$html
             ? Helper::filterSanitize($out)
             : $out;
+    }
+
+    /**
+     * Retorna o backtrace até aqui
+     *
+     * @return array
+     */
+    public static function getBacktrace()
+    {
+        $origem = array_map(function ($item) {
+            if (is_null($item) || !is_array($item) || strlen((string) $item['class']) === 0) {
+                return '';
+            }
+            $item['file'] = $item['file'] ? $item['file'] : '';
+            return $item['file']
+                . ' : '
+                . $item['line']
+                . ' > '
+                . $item['class']
+                . '::' . $item['function']
+                . '()';
+        }, debug_backtrace());
+
+        return $origem;
     }
 }

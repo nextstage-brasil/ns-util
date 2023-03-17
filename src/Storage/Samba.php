@@ -5,9 +5,9 @@ namespace NsUtil\Storage;
 use League\Flysystem\Filesystem;
 use NsUtil\Storage\Adapters\SmbAdapter;
 
-class Samba  {
+class Samba {
 
-    private $fs, $adapter;
+    private $fs, $adapter, $bucket;
     private $service, $username, $password, $smbver;
 
     public function __construct($service, $username, $password, $smbver = "") {
@@ -17,6 +17,10 @@ class Samba  {
         $this->smbver = $smbver;
         $this->adapter = new SmbAdapter($service, $username, $password, $smbver);
         $this->fs = new Filesystem($this->adapter);
+    }
+
+    public function init() {
+        return true;
     }
 
     public function setBucket($bucket) {
@@ -31,5 +35,4 @@ class Samba  {
     public function getAdapter(): SmbAdapter {
         return $this->adapter;
     }
-
 }

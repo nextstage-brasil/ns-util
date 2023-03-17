@@ -22,7 +22,7 @@ class SmbAdapter implements AdapterInterface {
     }
 
     public function copy($path, $saveToLocal): bool {
-        
+        return true;
     }
 
     public function createDir($dirname, Config $config) {
@@ -73,6 +73,7 @@ class SmbAdapter implements AdapterInterface {
         foreach ($list as $item) {
             $out[] = $this->mapFile($item, 'qwqco');
         }
+        return $out;
     }
 
     public function read($path) {

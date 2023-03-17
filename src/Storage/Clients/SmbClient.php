@@ -209,7 +209,7 @@ domain   = $this->_domain";
         //
         // all the commented-out code was designed to use this strategy, before
         // I found that it doesn't work.  :-(
-        //$tmp_remote_filename = $remote_filename . '.' . uniqid () . '.tmp';
+        // $tmp_remote_filename = $remote_filename . '.' . uniqid () . '.tmp';
         $tmp_local_filename = tempnam(sys_get_temp_dir(), 'safe_put');
 
         $local_crc = crc32(file_get_contents($local_filename));
@@ -228,27 +228,9 @@ domain   = $this->_domain";
                         self::log_msg("retrieved file matches CRC32");
                         $success = true;
                         return true;
-                        /*
-                          if ($this->rename ($tmp_remote_filename, $remote_filename))
-                          {
-                          $success = true;
-                          return true;
-                          }
-                          else
-                          {
-                          array_unshift ($this->_last_cmd_stderr,  "safe_put() failed to rename file");
-                          }
-                         */
                     } else {
                         self::log_msg("retrieved file does not match CRC32");
-                        array_unshift($this->_last_cmd_stderr, "safe_put() failed to validate checksum of $tmp_remote_filename");
-
-                        /*
-                          if (!$this->del ($tmp_remote_filename))
-                          {
-                          array_unshift ($this->_last_cmd_stderr, "safe_put() failed to validate checksum of $tmp_remote_filename and failed to delete it from remote machine: " . $this->_last_cmd_stderr);
-                          }
-                         */
+                        array_unshift($this->_last_cmd_stderr, "safe_put() failed to validate checksum of $remote_filename");
                     }
                     if (file_exists($tmp_local_filename)) {
                         unlink($tmp_local_filename);
@@ -460,7 +442,7 @@ domain   = $this->_domain";
         }
 
         if (function_exists('log_msg')) {
-            log_msg('[' . self::$debug_label . "] $msg");
+            \log_msg('[' . self::$debug_label . "] $msg");
         }
     }
 
