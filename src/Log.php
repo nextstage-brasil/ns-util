@@ -131,7 +131,11 @@ class Log
     public static function getBacktrace()
     {
         $origem = array_map(function ($item) {
-            if (is_null($item) || !is_array($item) || strlen((string) $item['class']) === 0) {
+            if (
+                is_null($item)
+                || !is_array($item)
+                || strlen((string) $item['class']) === 0
+            ) {
                 return '';
             }
             $item['file'] = $item['file'] ? $item['file'] : '';
