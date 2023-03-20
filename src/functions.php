@@ -2,7 +2,8 @@
 
 namespace NsUtil;
 
-function ns_nextstage(): void {
+function ns_nextstage(): void
+{
     echo "\n### NsUtil functions is loaded! ### \n";
 }
 
@@ -15,7 +16,8 @@ function ns_nextstage(): void {
  * @param integer $options
  * @return mixed
  */
-function json_decode($json, bool $assoc = false, int $depth = 512, int $options = 0) {
+function json_decode($json, bool $assoc = false, int $depth = 512, int $options = 0)
+{
     switch (true) {
         case is_null($json):
             $data = \json_decode('{}', $assoc, $depth, $options);
@@ -41,6 +43,40 @@ function json_decode($json, bool $assoc = false, int $depth = 512, int $options 
  * @param type $delimiter
  * @param type $string
  */
-function ns_explode($delimiter, $string) {
+function ns_explode($delimiter, $string)
+{
     return explode((string) $delimiter, (string) $string);
+}
+
+
+
+if (!function_exists('encrypt')) {
+    /**
+     * Encrypt the given value.
+     *
+     * @param array|string $value
+     * @param string $passphrase
+     * @param string|null $extraKey
+     * @return string
+     */
+    function encrypt($value, string $passphrase, string $extraKey = null): string
+    {
+        return (new Crypto($passphrase))->encrypt($value, $extraKey);
+    }
+}
+
+if (!function_exists('dd')) {
+
+    /**
+     * Display and die
+     *
+     * @param mixed $var
+     * @param boolean $isHtml
+     * @param boolean $showBacktrace
+     * @return void
+     */
+    function dd($var, bool $isHtml = true, bool $showBacktrace = true): void
+    {
+        echo Log::see($var, $isHtml, $showBacktrace);
+    }
 }
