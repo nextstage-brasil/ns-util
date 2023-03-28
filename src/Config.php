@@ -2,7 +2,8 @@
 
 namespace NsUtil;
 
-class Config {
+class Config
+{
 
     /**
      * @var array
@@ -20,7 +21,8 @@ class Config {
      *
      * @param array $settings
      */
-    public function __construct(array $settings = []) {
+    public function __construct(array $settings = [])
+    {
         $this->settings = $settings;
     }
 
@@ -32,7 +34,8 @@ class Config {
      *
      * @return mixed config setting or default when not found
      */
-    public function get($key, $default = null) {
+    public function get($key, $default = null)
+    {
         if (!array_key_exists($key, $this->settings)) {
             return $this->getDefault($key, $default);
         }
@@ -47,7 +50,8 @@ class Config {
      *
      * @return bool
      */
-    public function has($key) {
+    public function has($key)
+    {
         if (array_key_exists($key, $this->settings)) {
             return true;
         }
@@ -63,7 +67,8 @@ class Config {
      *
      * @return mixed config setting or default when not found
      */
-    protected function getDefault($key, $default) {
+    protected function getDefault($key, $default)
+    {
         if (!$this->fallback) {
             return $default;
         }
@@ -79,7 +84,8 @@ class Config {
      *
      * @return $this
      */
-    public function set($key, $value) {
+    public function set($key, $value)
+    {
         $this->settings[$key] = $value;
         return $this;
     }
@@ -90,7 +96,8 @@ class Config {
      * @param bool $merge
      * @return void
      */
-    public function setByArray(array $settings, bool $merge = true): void {
+    public function setByArray(array $settings, bool $merge = true): void
+    {
         if (!$merge) {
             $this->settings = [];
         }
@@ -99,10 +106,13 @@ class Config {
 
     /**
      * Faz a leitura de um arquivo tipo .env e insere nas configs atuais
-     * @param type $envFilePath
-     * @param type $merge
+     *
+     * @param string $envFilePath
+     * @param boolean $merge
+     * @return Config
      */
-    public function loadEnvFile(string $envFilePath, bool $merge = true): Config {
+    public function loadEnvFile(string $envFilePath, bool $merge = true): Config
+    {
         if (file_exists($envFilePath)) {
             $_CONFIG = parse_ini_file($envFilePath);
             if (!is_array($_CONFIG)) {
@@ -112,10 +122,10 @@ class Config {
         } else {
             throw new \Exception('File not found: ' . $envFilePath);
         }
-        
+
         return $this;
     }
-   
+
 
 
     /**
@@ -125,7 +135,8 @@ class Config {
      *
      * @return $this
      */
-    public function setFallback(Config $fallback) {
+    public function setFallback(Config $fallback)
+    {
         $this->fallback = $fallback;
         return $this;
     }
@@ -134,7 +145,8 @@ class Config {
      * Retorna toda configuração contida no objeto
      * @return array
      */
-    public function getAll(): array {
+    public function getAll(): array
+    {
         return $this->settings;
     }
 
@@ -142,7 +154,8 @@ class Config {
      * Init para utilização da classe de forma estatica
      * @param array $data
      */
-    public static function init(array $data = []) {
+    public static function init(array $data = [])
+    {
         self::$data = $data;
     }
 
@@ -152,7 +165,8 @@ class Config {
      * @param type $value
      * @param type $merge
      */
-    public static function setData($key1, $value, $merge = true) {
+    public static function setData($key1, $value, $merge = true)
+    {
         if ($merge && is_array($value) &&  isset(self::$data[$key1])) {
             self::$data[$key1] = array_merge(self::$data[$key1], $value);
         } else {
@@ -166,7 +180,8 @@ class Config {
      * @param type $key2
      * @return type
      */
-    public static function getData($key, $key2 = false) {
+    public static function getData($key, $key2 = false)
+    {
         if ($key2) {
             return self::$data[$key][$key2];
         } else {
@@ -174,11 +189,13 @@ class Config {
         }
     }
 
-    public static function getDataFull(): array {
+    public static function getDataFull(): array
+    {
         return self::$data;
     }
 
-    public static function getDBErrors(): array {
+    public static function getDBErrors(): array
+    {
         // Tratamento de erros de banco de dados
         return [
             'Undefined column' => 'Erro no sistema. (Cód Erro: ABS1001)',
@@ -194,7 +211,8 @@ class Config {
     /**
      * Busca pelo profile estabelcido na configuração os valores de key e secret
      */
-    public static function setAWSByProfile() {
+    public static function setAWSByProfile()
+    {
         if (!self::$data['fileserver']['S3']['credentials']['key']) {
             $env_vars = getenv();
             if ($env_vars['AWS_KEY']) {
@@ -209,5 +227,4 @@ class Config {
             }
         }
     }
-
 }

@@ -59,7 +59,7 @@ class Assync {
      */
     public function addByParams(string $path, string $recurso, array $params, string $className = null): Assync {
         $param['className'] = $className;
-        $cmd = "${path} ${recurso} " . base64_encode(json_encode($params));
+        $cmd = "{$path} {$recurso} " . base64_encode(json_encode($params));
         $this->add($cmd);
         return $this;
     }

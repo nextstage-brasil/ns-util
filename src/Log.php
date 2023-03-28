@@ -78,16 +78,17 @@ class Log
 
         // criação do diretorio caso não existe
         self::rotate($file);
-        $fp = fopen($file, "a");
-        $date_message = "[" . gmdate('c') . "] " . $message . PHP_EOL;
-        fwrite($fp, $date_message);
-        fclose($fp);
+        if ($fp = fopen($file, "a")) {
+            $date_message = "[" . gmdate('c') . "] " . $message . PHP_EOL;
+            fwrite($fp, $date_message);
+            fclose($fp);
+        }
     }
 
     /**
      * imprimir na tela o texto
      */
-    public static function see($var, $html = true, $backtraceShow = true): void
+    public static function see($var, $html = null, $backtraceShow = true): void
     {
         switch (true) {
             case is_object($var):
@@ -107,20 +108,31 @@ class Log
                 break;
         }
 
-        $out = "<hr/>
-        <h5>Log visualization:</h5>
-        <pre>$out</pre>
-        <h5>Backtrace</h5>
-        <pre>" . implode("\n\t", self::getBacktrace()) . "
-        </pre>
-        <hr/>
-        ";
+        // se não foi setado, e esta rodando em um servidor, aplique HTML
+        $html = is_null($html) && isset($_SERVER['HTTP_HOST']);
+
+        if ($html) {
+            $out = "<hr/>
+            <h5>Log visualization:</h5>
+            <pre>$out</pre>
+            <h5>Backtrace</h5>
+            <pre>" . implode("\n\t", self::getBacktrace()) . "
+            </pre>
+            <hr/>
+            ";
+        } else {
+            $out = str_replace('&#34;', '"', $out);
+            $out = "\n
+## Content
+$out
+\n## Backtrace
+" . implode("\n", self::getBacktrace()) . "
+";
+        }
 
 
 
-        echo !$html
-            ? Helper::filterSanitize($out)
-            : $out;
+        echo $out;
     }
 
     /**
@@ -140,7 +152,7 @@ class Log
             }
             $item['file'] = $item['file'] ? $item['file'] : '';
             return $item['file']
-                . ' : '
+                . ':'
                 . $item['line']
                 . ' > '
                 . $item['class']

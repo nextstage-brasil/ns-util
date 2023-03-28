@@ -4,38 +4,42 @@ namespace NsUtil;
 
 use Exception;
 
-class LoadCSVToArray {
+class LoadCSVToArray
+{
 
     private $file;
 
-    public function __construct($filename) {
+    public function __construct($filename)
+    {
         $this->file = realpath($filename);
     }
-    
-    public function getFile() {
+
+    public function getFile()
+    {
         return $this->file;
     }
 
-    
+
+
     /**
-     * 
-     * @param string $file_or_dir Diretorio ou CSV que deve ser ingerido
-     * @param string $tablename - Caso false, será utilizado o nome do arquivo CSV sanitizado
-     * @return boolean
+     * Executa a conversão e retorna um array o resultado
+     * @throws Exception Se ocorrer um erro durante a conversão.
+     * @return array
      */
-    public function run() {
+    public function run()
+    {
         $types = array('csv', 'xlsx');
         $ext = strtolower(pathinfo($this->file, PATHINFO_EXTENSION));
         if (in_array($ext, $types)) {
             // Caso seja xlsx, converter para CSV usando lib python
-            if ($ext === 'xlsx' || $ext==='xls') {
+            if ($ext === 'xlsx' || $ext === 'xls') {
                 $ret = shell_exec('type xlsx2csv');
                 if (stripos($ret, 'xlsx2csv is') === false) {
                     $error = "### ATENÇÃO ### \nBiblioteca xlsx2csv não esta instalada. "
-                            . "\nPara continuar, execute: 'sudo apt-get update && sudo apt-get install -y xlsx2csv'"
-                            . "\n"
-                            . "###############"
-                            . "\n\n\n";
+                        . "\nPara continuar, execute: 'sudo apt-get update && sudo apt-get install -y xlsx2csv'"
+                        . "\n"
+                        . "###############"
+                        . "\n\n\n";
                     throw new Exception($error);
                 }
                 $t = explode(DIRECTORY_SEPARATOR, $this->file);
@@ -77,5 +81,4 @@ class LoadCSVToArray {
             throw new Exception($error);
         }
     }
-
 }

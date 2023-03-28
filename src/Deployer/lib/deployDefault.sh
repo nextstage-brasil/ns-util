@@ -27,8 +27,8 @@ if [ ! -f $PACKAGE ]; then
 fi
 
 # directory create
-if [ ! -d ${RELEASES_DIR} ]; then
-    mkdir ${RELEASES_DIR}
+if [ ! -d {$RELEASES_DIR} ]; then
+    mkdir {$RELEASES_DIR}
 fi
 if [ ! -d "$DIR/app" ]; then
     mkdir "$DIR/app"
@@ -41,7 +41,7 @@ fi
 if [ ! -d "$DIR/storage" ]; then
     mkdir "$DIR/storage"
     chmod 0775 -R "$DIR/storage"
-    chown "${OWNER}:www-data" "$DIR/storage"
+    chown "{$OWNER}:www-data" "$DIR/storage"
 fi
 
 
@@ -52,7 +52,7 @@ rm -R "$DIR/app/cookie.txt"
 
 
 # Criando diretorio do release
-mkdir ${RELEASE};
+mkdir {$RELEASE};
 mkdir "$DIR/app/.tmp"
 mkdir "$DIR/app/file"
 
@@ -74,25 +74,25 @@ ln -nfs "../../storage" "$RELEASE/storage"
 ln -nfs "./releases/$RELEASE_NAME" "$DIR/www"
 
 # Permissoes de pastas
-chown -R "${OWNER}:www-data" "$RELEASE"
-chown "${OWNER}:www-data" "$DIR/app"
+chown -R "{$OWNER}:www-data" "$RELEASE"
+chown "{$OWNER}:www-data" "$DIR/app"
 chmod 0777 "$DIR/app" -R
 
 # Licenciamento e config
-# cp ${DIR}/cs_licence ${RELEASE}/.cs_licence.bkp
-# cp ${DIR}/cscfg ${RELEASE}/.cscfg.bkp
-if [ -f "${DIR}/.env" ]; then
+# cp {$DIR}/cs_licence {$RELEASE}/.cs_licence.bkp
+# cp {$DIR}/cscfg {$RELEASE}/.cscfg.bkp
+if [ -f "{$DIR}/.env" ]; then
     echo "- Arquivo de configuração"
-    cp ${DIR}/.env $RELEASE/.env
+    cp {$DIR}/.env $RELEASE/.env
 fi
 
 
 # crontab
-if [ -f "$DIR/www/cron/crontab" ] && [ "${INSTALL_CRONTAB}" = "yes" ]; then
+if [ -f "$DIR/www/cron/crontab" ] && [ "{$INSTALL_CRONTAB}" = "yes" ]; then
     echo "- Atualizar crontab"
     chmod -R 0775 "$RELEASE/cron"
-    crontab -l -u ${OWNER} | echo "" | crontab -u ${OWNER} -
-    crontab -l -u ${OWNER} | cat - "$DIR/www/cron/crontab" | crontab -u ${OWNER} -
+    crontab -l -u {$OWNER} | echo "" | crontab -u {$OWNER} -
+    crontab -l -u {$OWNER} | cat - "$DIR/www/cron/crontab" | crontab -u {$OWNER} -
 fi
 
 # Composer
@@ -120,7 +120,7 @@ fi
 # Manter somente as 2 ultimas versoes
 echo "- Remover releases anteriores"
 cd "$RELEASES_DIR"
-ls -dt ${RELEASES_DIR}/* | tail -n +3 | xargs -d "\n" rm -rf;
+ls -dt {$RELEASES_DIR}/* | tail -n +3 | xargs -d "\n" rm -rf;
 
 # finalizar
 echo "- Reiniciar serviços"

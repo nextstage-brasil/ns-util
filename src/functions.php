@@ -78,5 +78,6 @@ if (!function_exists('dd')) {
     function dd($var, bool $isHtml = true, bool $showBacktrace = true): void
     {
         echo Log::see($var, $isHtml, $showBacktrace);
+        die();
     }
 }

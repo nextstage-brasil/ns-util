@@ -18,8 +18,8 @@ functions:
         memorySize: 256
         timeout: 30 # in seconds (API Gateway has a timeout of 29 seconds)
         layers:
-            - ${bref:layer.php-74-fpm}
-            - ${bref-extra:gd-php-74}
+            - {$bref:layer.php-74-fpm}
+            - {$bref-extra:gd-php-74}
         events:
                 - http: 'ANY /{proxy+}'
 

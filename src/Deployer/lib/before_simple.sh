@@ -12,7 +12,7 @@ chmod 600 ~/.ssh/id_rsa
 apk add --no-cache python3 py3-pip && pip3 install --upgrade pip && pip3 install awscli
 rm -rf /var/cache/apk/*
 mkdir -p ~/.aws && chmod 700 ~/.aws
-if [ -z ${AWS_PROFILE+x} ]; then 
+if [ -z {$AWS_PROFILE+x} ]; then 
     AWS_PROFILE=default; 
 fi
 echo -e "[$AWS_PROFILE]\naws_access_key_id=$AWS_KEY\naws_secret_access_key=$AWS_SECRET" > ~/.aws/credentials

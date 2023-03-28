@@ -85,7 +85,8 @@ class Format {
                 $out = $date->format('c');
                 break;
             case 'extenso':
-                $out = strftime('%d de %B de %Y', $date->getTimestamp());
+                $out = $date->format('d \d\e F \d\e Y');
+                // $out = strftime('%d de %B de %Y', $date->getTimestamp());
                 break;
             case 'timestamp':
                 $out = $date->getTimestamp();

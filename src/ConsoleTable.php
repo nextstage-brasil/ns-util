@@ -2,7 +2,8 @@
 
 namespace NsUtil;
 
-class ConsoleTable {
+class ConsoleTable
+{
 
     const HEADER_INDEX = -1;
     const HR = 'HR';
@@ -35,8 +36,8 @@ class ConsoleTable {
       $tb->addRow(['Linha1', 'Linha2']);
       echo $tb->getTable();
      */
-    public function __construct() {
-        
+    public function __construct()
+    {
     }
 
     /**
@@ -44,7 +45,8 @@ class ConsoleTable {
      * @param  mixed  Header cell content
      * @return object LucidFrame\Console\ConsoleTable
      */
-    public function addHeader($content = '') {
+    public function addHeader($content = '')
+    {
         $this->data[self::HEADER_INDEX][] = $content;
 
         return $this;
@@ -55,7 +57,8 @@ class ConsoleTable {
      * @param  array  Array of header cell content
      * @return object LucidFrame\Console\ConsoleTable
      */
-    public function setHeaders(array $content) {
+    public function setHeaders(array $content)
+    {
         $this->data[self::HEADER_INDEX] = $content;
 
         return $this;
@@ -64,7 +67,8 @@ class ConsoleTable {
     /**
      * Get the row of header
      */
-    public function getHeaders() {
+    public function getHeaders()
+    {
         return isset($this->data[self::HEADER_INDEX]) ? $this->data[self::HEADER_INDEX] : null;
     }
 
@@ -73,7 +77,8 @@ class ConsoleTable {
      * @param  array  $data The row data to add
      * @return object LucidFrame\Console\ConsoleTable
      */
-    public function addRow(array $data = null) {
+    public function addRow(array $data = null)
+    {
         $this->rowIndex++;
 
         if (is_array($data)) {
@@ -92,7 +97,8 @@ class ConsoleTable {
      * @param  integer  $row     If starting row is not zero, specify it here
      * @return object LucidFrame\Console\ConsoleTable
      */
-    public function addColumn($content, $col = null, $row = null) {
+    public function addColumn($content, $col = null, $row = null)
+    {
         $row = $row === null ? $this->rowIndex : $row;
         if ($col === null) {
             $col = isset($this->data[$row]) ? count($this->data[$row]) : 0;
@@ -107,7 +113,8 @@ class ConsoleTable {
      * Show table border
      * @return object LucidFrame\Console\ConsoleTable
      */
-    public function showBorder() {
+    public function showBorder()
+    {
         $this->border = true;
 
         return $this;
@@ -117,7 +124,8 @@ class ConsoleTable {
      * Hide table border
      * @return object LucidFrame\Console\ConsoleTable
      */
-    public function hideBorder() {
+    public function hideBorder()
+    {
         $this->border = false;
 
         return $this;
@@ -127,7 +135,8 @@ class ConsoleTable {
      * Show all table borders
      * @return object LucidFrame\Console\ConsoleTable
      */
-    public function showAllBorders() {
+    public function showAllBorders()
+    {
         $this->showBorder();
         $this->allBorders = true;
 
@@ -139,7 +148,8 @@ class ConsoleTable {
      * @param  integer $value The integer value, defaults to 1
      * @return object LucidFrame\Console\ConsoleTable
      */
-    public function setPadding($value = 1) {
+    public function setPadding($value = 1)
+    {
         $this->padding = $value;
 
         return $this;
@@ -150,7 +160,8 @@ class ConsoleTable {
      * @param  integer $value The integer value, defaults to 1
      * @return object LucidFrame\Console\ConsoleTable
      */
-    public function setIndent($value = 0) {
+    public function setIndent($value = 0)
+    {
         $this->indent = $value;
 
         return $this;
@@ -160,7 +171,8 @@ class ConsoleTable {
      * Add horizontal border line
      * @return object LucidFrame\Console\ConsoleTable
      */
-    public function addBorderLine() {
+    public function addBorderLine()
+    {
         $this->rowIndex++;
         $this->data[$this->rowIndex] = self::HR;
 
@@ -171,11 +183,13 @@ class ConsoleTable {
      * Print the table
      * @return void
      */
-    public function display() {
+    public function display()
+    {
         echo $this->getTable();
     }
 
-    public function getCsv() {
+    public function getCsv()
+    {
         return Helper::array2csv($this->data);
     }
 
@@ -183,7 +197,8 @@ class ConsoleTable {
      * Get the printable table content
      * @return string
      */
-    public function getTable() {
+    public function getTable()
+    {
         $this->calculateColumnWidth();
 
         $output = $this->border ? $this->getBorderLine() : '';
@@ -226,7 +241,8 @@ class ConsoleTable {
      * Get the printable border line
      * @return string
      */
-    private function getBorderLine() {
+    private function getBorderLine()
+    {
         $output = '';
 
         if (isset($this->data[0])) {
@@ -256,7 +272,8 @@ class ConsoleTable {
      * @param array   $row   The table row
      * @return string
      */
-    private function getCellOutput($index, $row = null) {
+    private function getCellOutput($index, $row = null)
+    {
         $cell = $row ? $row[$index] : '-';
         $width = $this->columnWidths[$index];
         $pad = $row ? ($width - mb_strlen((string)$cell, 'UTF-8')) : $width;
@@ -289,7 +306,8 @@ class ConsoleTable {
      * Calculate maximum width of each column
      * @return array
      */
-    private function calculateColumnWidth() {
+    private function calculateColumnWidth()
+    {
         foreach ($this->data as $y => $row) {
             if (is_array($row)) {
                 foreach ($row as $x => $col) {
@@ -312,7 +330,8 @@ class ConsoleTable {
      * Multibyte version of str_pad() function
      * @source http://php.net/manual/en/function.str-pad.php
      */
-    private function strPadUnicode($str, $padLength, $padString = ' ', $dir = STR_PAD_RIGHT) {
+    private function strPadUnicode($str, $padLength, $padString = ' ', $dir = STR_PAD_RIGHT)
+    {
         $strLen = mb_strlen((string)$str, 'UTF-8');
         $padStrLen = mb_strlen((string)$padString, 'UTF-8');
 
@@ -336,14 +355,15 @@ class ConsoleTable {
             $length = ($padLength - $strLen) / 2;
             $repeat = ceil($length / $padStrLen);
             $result = mb_substr((string)str_repeat($padString, $repeat), 0, floor($length), 'UTF-8')
-                    . $str
-                    . mb_substr((string)str_repeat($padString, $repeat), 0, ceil($length), 'UTF-8');
+                . $str
+                . mb_substr((string)str_repeat($padString, $repeat), 0, ceil($length), 'UTF-8');
         }
 
         return $result;
     }
 
-    public static function getTableFromArray(array $list) {
+    public static function getTableFromArray(array $list)
+    {
         $table = new ConsoleTable();
         $table->setHeaders(array_keys($list[0]));
         foreach ($list as $item) {
@@ -352,4 +372,8 @@ class ConsoleTable {
         return $table->getTable();
     }
 
+    public static function printHeader($text, $size = 40)
+    {
+        echo shell_exec('header="' . $text . '" && width=' . $size . ' && padding=$((($width-${#header})/2)) && printf \'%*s\n\' "${COLUMNS:-' . $size . '}" "" | tr " " "-" | cut -c 1-"${width}" && printf "|%*s%s%*s|\n" $padding "" "$header" $padding "" && printf \'%*s\n\' "${COLUMNS:-' . ($size * 2) . '}" "" | tr " " "-" | cut -c 1-"${width}"');
+    }
 }

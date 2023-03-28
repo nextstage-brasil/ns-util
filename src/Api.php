@@ -4,7 +4,8 @@ namespace NsUtil;
 
 use Closure;
 
-class Api {
+class Api
+{
 
     private $body = [];
     private $headers;
@@ -68,7 +69,8 @@ class Api {
     const HTTP_GATEWAY_TIMEOUT = 504;
     const HTTP_VERSION_NOT_SUPPORTED = 505;
 
-    public function __construct($typeOut = 'json') {
+    public function __construct($typeOut = 'json')
+    {
         if ($typeOut === 'json') {
             header('Content-Type:application/json');
         }
@@ -149,7 +151,8 @@ class Api {
         }
     }
 
-    private function getAllHeaders() {
+    private function getAllHeaders()
+    {
         if (!function_exists('getallheaders')) {
             $headers = [];
             foreach ($_SERVER as $name => $value) {
@@ -168,7 +171,8 @@ class Api {
      *
      * @return object
      */
-    public function getRest(): object {
+    public function getRest(): object
+    {
         return (object) $this->config['rest'];
     }
 
@@ -176,7 +180,8 @@ class Api {
      * ATENÇÃO: Retorna o dado conforme foi enviado, sem nenhum tratamento de segurança. Use com atenção.
      * @param type $key
      */
-    public function getOriginalData($key) {
+    public function getOriginalData($key)
+    {
         // Obtenção do body
         $b = $_POST;
         $dd = json_decode(file_get_contents('php://input'), true);
@@ -192,7 +197,8 @@ class Api {
      * @param type $code
      * @return $this
      */
-    public function setError($mensagem, $code = 200) {
+    public function setError($mensagem, $code = 200)
+    {
         $this->responseData['error'] = $mensagem;
         $this->responseCode = $code;
         return $this;
@@ -203,7 +209,8 @@ class Api {
      * @param array $response
      * @return $this
      */
-    public function responseMerge(array $response) {
+    public function responseMerge(array $response)
+    {
         $this->responseData = array_merge($this->responseData, $response);
         return $this;
     }
@@ -214,7 +221,8 @@ class Api {
      * @param type $valor
      * @return $this
      */
-    public function addResponse($chave, $valor) {
+    public function addResponse($chave, $valor)
+    {
         $this->responseMerge([$chave => $valor]);
         return $this;
     }
@@ -223,7 +231,8 @@ class Api {
      * Irá retornar o body em array ao inves de imrprimr e encerrar
      * @return type
      */
-    public function getResponse() {
+    public function getResponse()
+    {
         return $this->response([], 0, false, true);
     }
 
@@ -232,7 +241,8 @@ class Api {
      * @param array $response
      * @param int $responseCode
      */
-    public function response(array $response = [], int $responseCode = 0) {
+    public function response(array $response = [], int $responseCode = 0)
+    {
         // Setar o codigo final de saida
         if ($responseCode > 0) {
             $this->responseCode = $responseCode;
@@ -284,7 +294,8 @@ class Api {
      * @param type $mensagem
      * @param int $code
      */
-    public function error($mensagem, int $code = 0) {
+    public function error($mensagem, int $code = 0)
+    {
         $this->setError($mensagem, $code);
         $this->response();
     }
@@ -293,7 +304,8 @@ class Api {
      * Retorna o body da requisição
      * @return array
      */
-    function getBody(): array {
+    function getBody(): array
+    {
         return $this->body;
     }
 
@@ -301,7 +313,8 @@ class Api {
      * Retorna o headers da requisição
      * @return array
      */
-    function getHeaders($keysToLower = false): array {
+    function getHeaders($keysToLower = false): array
+    {
         if ($keysToLower) {
             foreach ($this->headers as $key => $val) {
                 unset($this->headers[$key]);
@@ -311,11 +324,13 @@ class Api {
         return $this->headers;
     }
 
-    public function getConfigData() {
+    public function getConfigData()
+    {
         return $this->config;
     }
 
-    public function getRouter(): Router {
+    public function getRouter(): Router
+    {
         return $this->router;
     }
 
@@ -324,7 +339,8 @@ class Api {
      * @param int $code
      * @param array $response
      */
-    public static function result(int $code, array $response, $type = 'json') {
+    public static function result(int $code, array $response, $type = 'json')
+    {
         $api = new Api();
         $api->response($response, $code, $type);
     }
@@ -334,7 +350,8 @@ class Api {
      * @param array $config
      * @param string $page404
      */
-    public function setConfig(array $config = [], $page404 = ''): Api {
+    public function setConfig(array $config = [], $page404 = ''): Api
+    {
         $router = new Router($page404);
 
         // Config para aplicação
@@ -348,7 +365,8 @@ class Api {
      * Retorna configurações da rota API
      * @return string
      */
-    public function getRota() {
+    public function getRota()
+    {
         return $this->config['rota'];
     }
 
@@ -358,7 +376,8 @@ class Api {
      * Espera uma string em base64_encode contendo {username}:{password} no headers
      * @return array
      */
-    public function getUsernameAndPasswordFromAuthorizationHeaders(): array {
+    public function getUsernameAndPasswordFromAuthorizationHeaders(): array
+    {
         $dt = explode(':', base64_decode(mb_substr((string) $this->getHeaders()['Authorization'], 6)));
         return [
             'username' => $dt[0],
@@ -370,7 +389,8 @@ class Api {
      * Retorna a string enviada como Token no cabeçalho Authorization
      * @return string
      */
-    public function getTokenFromAuthorizationHeaders(): string {
+    public function getTokenFromAuthorizationHeaders(): string
+    {
         $headers = $this->getHeaders();
         $auth = ((isset($headers['Authorization'])) ? $headers['Authorization'] : '');
         return (string) trim(substr($auth, 6));
@@ -380,7 +400,8 @@ class Api {
      *
      * @return array
      */
-    function getResponseData(): array {
+    function getResponseData(): array
+    {
         // Preparar saida padrão
         if (!isset($this->responseData['content'])) {
             $this->responseData['content'] = [];
@@ -402,7 +423,8 @@ class Api {
      *
      * @return integer
      */
-    function getResponseCode(): int {
+    function getResponseCode(): int
+    {
         return $this->responseCode;
     }
 
@@ -412,7 +434,8 @@ class Api {
      * @param integer $responseCode
      * @return self
      */
-    function setResponseCode(int $responseCode): self {
+    function setResponseCode(int $responseCode): self
+    {
         $this->responseCode = (int) $responseCode;
         return $this;
     }
@@ -424,7 +447,8 @@ class Api {
      * @param string $allowHeaders
      * @return void
      */
-    public static function options(string $allowOrigin = '*', string $allowMethods = 'GET,PUT,POST,DELETE,OPTIONS', string $allowHeaders = 'Data,Cache-Control,Referer,User-Agent,Origin,Accept,X-Requested-With,Content-Type,Access-Control-Request-Method,Access-Control-Request-Headers,Token,Authorization'): void {
+    public static function options(string $allowOrigin = '*', string $allowMethods = 'GET,PUT,POST,DELETE,OPTIONS', string $allowHeaders = 'Data,Cache-Control,Referer,User-Agent,Origin,Accept,X-Requested-With,Content-Type,Access-Control-Request-Method,Access-Control-Request-Headers,Token,Authorization'): void
+    {
         ## CORS
         \header('Access-Control-Allow-Origin: *');
         \header("Access-Control-Allow-Methods: $allowMethods");
@@ -439,7 +463,8 @@ class Api {
      * @param string $namespace
      * string $allowOrigin = '*', string $allowMethods = 'GET,PUT,POST,DELETE,OPTIONS', string $allowHeaders = 'Data,Cache-Control,Referer,User-Agent,Origin,Accept,X-Requested-With,Content-Type,Access-Control-Request-Method,Access-Control-Request-Headers,Token,Authorization'
      */
-    public static function restFull(string $namespace, Api $api = null): void {
+    public static function restFull(string $namespace, Api $api = null): void
+    {
         self::options();
         if (null === $api) {
             $api = new Api();
@@ -521,7 +546,8 @@ class Api {
      * @param \Closure $successCallback
      * @return self
      */
-    public function setSuccessCallback(\Closure $successCallback): self {
+    public function setSuccessCallback(\Closure $successCallback): self
+    {
         $this->successCallback = $successCallback;
         return $this;
     }
@@ -532,7 +558,8 @@ class Api {
      * @param \Closure $successCallback
      * @return self
      */
-    public function onSuccess(\Closure $successCallback): self {
+    public function onSuccess(\Closure $successCallback): self
+    {
         $this->successCallback = $successCallback;
         return $this;
     }
@@ -543,7 +570,8 @@ class Api {
      * @param \Closure $successCallback
      * @return self
      */
-    public function onError(\Closure $errorCallback): self {
+    public function onError(\Closure $errorCallback): self
+    {
         $this->errorCallback = $errorCallback;
         return $this;
     }
@@ -554,7 +582,8 @@ class Api {
      * @param \Closure $successCallback
      * @return self
      */
-    public function validator(string $message, int $code, \Closure $rule): self {
+    public function validator(string $message, int $code, \Closure $rule): self
+    {
         $ret = call_user_func($rule);
         if ($ret !== true) {
             $this->validators[] = function ($api) use ($code, $message) {
@@ -570,7 +599,8 @@ class Api {
      * @param string $namespace
      * @return void
      */
-    public function rest(string $namespace): void {
+    public function rest(string $namespace): void
+    {
         self::restFull($namespace, $this);
     }
 
@@ -579,7 +609,8 @@ class Api {
      *
      * @return  self
      */
-    public function onResponse(Closure $onResponse) {
+    public function onResponse(Closure $onResponse)
+    {
         $this->onResponse = $onResponse;
         return $this;
     }
