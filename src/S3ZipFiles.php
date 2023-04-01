@@ -2,13 +2,15 @@
 
 namespace NsUtil;
 
+use Exception;
 use League\Flysystem\AdapterInterface;
 use NsUtil\Helper;
 use NsUtil\ResizeImage;
 use NsUtil\Storage\S3;
 use PhpZip\ZipFile;
 
-class S3ZipFiles {
+class S3ZipFiles
+{
 
     private $filename, $itens, $config;
 
@@ -23,7 +25,8 @@ class S3ZipFiles {
       "id_uploadfile": 4570 //  arquivo relacionado
       },
      */
-    public function __construct(string $filenameSave, array $itens) {
+    public function __construct(string $filenameSave, array $itens)
+    {
         $this->filename = str_replace('.zip', '', Helper::sanitize($filenameSave)) . '.zip';
         $this->itens = $itens;
         $this->config = [];
@@ -31,7 +34,8 @@ class S3ZipFiles {
         $this->setTempPath($path);
     }
 
-    public function setCredentials($key, $secret, $bucket, $bucket_public, $region, $version) {
+    public function setCredentials($key, $secret, $bucket, $bucket_public, $region, $version)
+    {
         $this->config['s3'] = [
             'key' => $key,
             'secret' => $secret,
@@ -43,19 +47,21 @@ class S3ZipFiles {
         return $this;
     }
 
-    public function setTempPath($path) {
+    public function setTempPath($path)
+    {
         if (!is_dir($path)) {
             throw new Exception('s3ZipFiles ERROR: Temp path is not a dir');
         }
         $this->config['tmpdir'] = $path;
     }
 
-     /**
-      * Montara o zipfile dos dos arquivo solicitados
-      *
-      * @return array
-      */
-    public function run() {
+    /**
+     * Montara o zipfile dos dos arquivo solicitados
+     *
+     * @return array
+     */
+    public function run()
+    {
         if (!$this->config['s3']) {
             die('Configuração S3 não definida (S3Z52)');
         }
@@ -100,8 +106,8 @@ class S3ZipFiles {
                 if ($item['resolucao']) {
                     // resize imagem
                     $resize->setFile($path)
-                            ->setResolucao($item['resolucao'])
-                            ->reduz();
+                        ->setResolucao($item['resolucao'])
+                        ->reduz();
                 }
 
                 $content = file_get_contents($path);
@@ -134,8 +140,8 @@ class S3ZipFiles {
         return $out;
     }
 
-    private function console($string) {
+    private function console($string)
+    {
         echo $string . PHP_EOL;
     }
-
 }

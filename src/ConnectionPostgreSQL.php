@@ -8,7 +8,8 @@ use NsUtil\Helper;
 use PDO;
 use stdClass;
 
-class ConnectionPostgreSQL {
+class ConnectionPostgreSQL
+{
 
     private $con; // garantir o singleton
     private $config;
@@ -22,7 +23,8 @@ class ConnectionPostgreSQL {
     private $nullas = '';
     private $logfile = null;
 
-    public function __construct($host, $user, $pass, $port, $database, string $logfile = null) {
+    public function __construct($host, $user, $pass, $port, $database, string $logfile = null)
+    {
         $this->logfile = $logfile;
         $this->config = new stdClass();
         $this->config->host = $host;
@@ -33,7 +35,8 @@ class ConnectionPostgreSQL {
         $this->open();
     }
 
-    private function log($message) {
+    private function log($message)
+    {
         if (null !== $this->logfile) {
             Log::logTxt(
                 $this->logfile,
@@ -44,7 +47,8 @@ class ConnectionPostgreSQL {
         }
     }
 
-    public static function getConnectionByEnv(): ConnectionPostgreSQL {
+    public static function getConnectionByEnv(): ConnectionPostgreSQL
+    {
         return new ConnectionPostgreSQL(
             getenv('DBHOST'),
             getenv('DBUSER'),
@@ -54,7 +58,8 @@ class ConnectionPostgreSQL {
         );
     }
 
-    public function open() {
+    public function open()
+    {
         if (!$this->con) {
             try {
                 $stringConnection = "pgsql:host=" . $this->config->host . ";port=" . $this->config->port . ";dbname=" . $this->config->database . ";user=" . $this->config->user . ";password=" . $this->config->pwd;
@@ -67,15 +72,18 @@ class ConnectionPostgreSQL {
         }
     }
 
-    public function getConn() {
+    public function getConn()
+    {
         return $this->con;
     }
 
-    public function close() {
+    public function close()
+    {
         $this->con = null;
     }
 
-    public function begin_transaction() {
+    public function begin_transaction()
+    {
         if (!self::$transaction_in_progress) {
             $this->executeQuery('START TRANSACTION');
             self::$transaction_in_progress = true;
@@ -83,28 +91,33 @@ class ConnectionPostgreSQL {
         }
     }
 
-    public function __shutdown_check() {
+    public function __shutdown_check()
+    {
         $this->con = null;
         if (self::$transaction_in_progress) {
             $this->rollback();
         }
     }
 
-    public function commit() {
+    public function commit()
+    {
         $this->executeQuery("COMMIT");
         self::$transaction_in_progress = false;
     }
 
-    public function rollback() {
+    public function rollback()
+    {
         $this->executeQuery("ROLLBACK");
         self::$transaction_in_progress = false;
     }
 
-    public function autocommit($boolean) {
+    public function autocommit($boolean)
+    {
         $this->con->autocommit($boolean);
     }
 
-    public function executeQuery($query) {
+    public function executeQuery($query)
+    {
         $this->open();
         $res = false;
         $this->numRows = 0;
@@ -132,7 +145,8 @@ class ConnectionPostgreSQL {
         return $res;
     }
 
-    public function next() {
+    public function next()
+    {
         try {
             if ($this->result) {
                 $dados = $this->result->fetch(PDO::FETCH_ASSOC);
@@ -156,7 +170,8 @@ class ConnectionPostgreSQL {
      * @param boolean $keyCamelCaseFormat
      * @return array
      */
-    public function execQueryAndReturn(string $query, bool $log = true, bool $keyCamelCaseFormat = true): array {
+    public function execQueryAndReturn(string $query, bool $log = true, bool $keyCamelCaseFormat = true): array
+    {
         $this->open();
         $out = [];
         $this->executeQuery($query, $log);
@@ -173,7 +188,8 @@ class ConnectionPostgreSQL {
      * Define o que será utilizado em nullas ao executar o insertByCopy
      * @param string $nullas
      */
-    public function setNullAs($nullAs = '') {
+    public function setNullAs($nullAs = '')
+    {
         $this->nullas = $nullAs;
     }
 
@@ -185,7 +201,8 @@ class ConnectionPostgreSQL {
      * @param array[] $records Two-demension array of cells (array of rows).
      * @return boolean
      */
-    public function insertByCopy($toTable, array $fields, array $records) {
+    public function insertByCopy($toTable, array $fields, array $records)
+    {
         $this->open();
         static $delimiter = "\t";
         $nullAs = $this->nullas;
@@ -214,7 +231,8 @@ class ConnectionPostgreSQL {
         return true;
     }
 
-    public function queryRunWithLoader($querys, $label, $showQueryOnLabel = false, $showQtde = false) {
+    public function queryRunWithLoader($querys, $label, $showQueryOnLabel = false, $showQtde = false)
+    {
         $loader = new StatusLoader(count($querys), $label);
         $loader->done(1);
         $loader->setShowQtde($showQtde);
@@ -237,7 +255,8 @@ class ConnectionPostgreSQL {
      * @param string $onConflict
      * @return bool
      */
-    public function insert($table, $array, $nomeCpoId, $onConflict = '') {
+    public function insert($table, $array, $nomeCpoId, $onConflict = '')
+    {
         $preValues = $update = $valores = [];
         foreach ($array as $key => $value) {
             $keys[] = '"' . $key . '"';
@@ -276,7 +295,8 @@ class ConnectionPostgreSQL {
      * @return boolean
      * @throws SistemaException
      */
-    public function update($table, $array, $cpoWhere) {
+    public function update($table, $array, $cpoWhere)
+    {
         $update = $valores = [];
         $idWhere = $array[$cpoWhere];
         unset($array[$cpoWhere]);
@@ -313,7 +333,8 @@ class ConnectionPostgreSQL {
      *
      * @return  self
      */
-    public function setLogfile($logfile) {
+    public function setLogfile($logfile)
+    {
         $this->logfile = $logfile;
         return $this;
     }
