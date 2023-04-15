@@ -5,7 +5,8 @@ namespace NsUtil;
 use Exception;
 use NsUtil\Crypto;
 
-class Licence {
+class Licence
+{
 
     private $crypto;
 
@@ -13,7 +14,8 @@ class Licence {
      * Classe para criação e leiturade licenças codificadas
      * @param type $chave: String para codificação. Mínimo de 16 digitos.
      */
-    public function __construct($chave) {
+    public function __construct($chave)
+    {
         $this->crypto = new Crypto($chave);
     }
 
@@ -24,7 +26,8 @@ class Licence {
      * @return type
      * @throws Exception
      */
-    public function create($filenameOrigem, $filenameDestino) {
+    public function create($filenameOrigem, $filenameDestino)
+    {
         $origem = realpath($filenameOrigem);
         $destino = $filenameDestino;
 
@@ -48,7 +51,8 @@ class Licence {
      * @param type $licenceFile Path do arquivo de licenca a ser lido. Ira buscar em 10 diretorios abaixo procurando este arquivo.
      * @return type
      */
-    public function read($licenceFile, $dieIfNotExists = true) {
+    public function read($licenceFile, $dieIfNotExists = true)
+    {
         if (!file_exists((string) $licenceFile)) {
             $filename = Helper::fileSearchRecursive($licenceFile, __DIR__, 20);
             if (!file_exists((string) $filename)) {
@@ -75,12 +79,12 @@ class Licence {
         return $code;
     }
 
-    public static function readFromIoncube($licenceName) {
+    public static function readFromIoncube($licenceName)
+    {
         if (function_exists('ioncube_license_properties')) {
-            return ioncube_license_properties()[$licenceName]['value'];
+            return ioncube_license_properties()[$licenceName]['value'] ?? null;
         } else {
             die('Obrigatório utilização do Ioncube (NS88)');
         }
     }
-
 }

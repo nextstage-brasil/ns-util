@@ -6,17 +6,20 @@ use DateTime;
 use DateTimeZone;
 use Exception;
 
-class Format {
+class Format
+{
 
     private $timezone;
     private $string;
 
-    public function __construct($string = false, $timezone = 'America/Sao_Paulo') {
+    public function __construct($string = false, $timezone = 'America/Sao_Paulo')
+    {
         $this->timezone = $timezone;
         $this->string = $string;
     }
 
-    public function setString($string) {
+    public function setString($string)
+    {
         $this->string = $string;
         return $this;
     }
@@ -29,7 +32,8 @@ class Format {
      * @param type $alterarTimeZone
      * @return boolean
      */
-    public function date($escolha = 'arrumar', $datahora = false, $alterarTimeZone = false) {
+    public function date($escolha = 'arrumar', $datahora = false, $alterarTimeZone = false)
+    {
         $data = $this->string;
         if ($data !== 'NOW') {
             if (strlen((string) $data) < 6) {
@@ -55,14 +59,8 @@ class Format {
             $date = new DateTime($data);
             if ($alterarTimeZone) {
                 $date->setTimezone(new DateTimeZone($this->timezone));
-            } else {
-                //$date->setTimezone(new DateTimeZone('+0300'));
-                //$date->setTimezone(new DateTimeZone());
             }
         } catch (Exception $e) {
-            //$backtrace = debug_backtrace();
-            //$origem = $backtrace[0]['file'] . ' [' . $backtrace[1]['class'] . '::' . $backtrace[1]['function'] . ' (' . $backtrace[0]['line'] . ')]';
-            //Log::logTxt('debug', 'ERROR DATE: ' . $e->getMessage() . '||' . $origem . __METHOD__ . __LINE__);
             return '';
         }
         switch ($escolha) {
@@ -99,7 +97,8 @@ class Format {
         return $out;
     }
 
-    public function fone() {
+    public function fone()
+    {
         $fone = self::parseInt($this->string);
         $ddd = '(' . substr((string) $fone, 0, 2) . ') ';
         $fone = substr((string) $fone, 2, strlen((string) $fone) - 2);
@@ -110,7 +109,8 @@ class Format {
         return $out;
     }
 
-    public function cep() {
+    public function cep()
+    {
         $cep = self::parseInt($this->string);
         return substr((string) $cep, 0, 5) . '-' . substr((string) $cep, 5, 8);
     }
@@ -119,7 +119,8 @@ class Format {
      * Retorna o valor ABS da string formatada em decimal americano
      * @return string
      */
-    public function decimal() {
+    public function decimal()
+    {
         $var = $this->string;
         if (stripos($var, ',') > -1) {
             $var = self::parseInt($var);
@@ -128,11 +129,13 @@ class Format {
         return $var;
     }
 
-    public function parseInt() {
-        return preg_replace("/[^0-9]/", "", $this->string);
+    public function parseInt(): int
+    {
+        return (int) preg_replace("/[^0-9]/", "", $this->string);
     }
 
-    public function dateToMktime() {
+    public function dateToMktime()
+    {
         $date = $this->string;
         if (!$date) {
             $date = time();
@@ -144,7 +147,8 @@ class Format {
         return $timestamp;
     }
 
-    public function subDays(int $days, $operacao = '-') {
+    public function subDays(int $days, $operacao = '-')
+    {
         $d = $this->date();
         $d = date_parse($d);
         $dia = $operacao === '-' ? $d['day'] - $days : $d['day'] + $days;
@@ -152,7 +156,8 @@ class Format {
         return date('Y-m-d H:i:s', $d);
     }
 
-    public function subMonths(int $months, $operacao = '-') {
+    public function subMonths(int $months, $operacao = '-')
+    {
         $d = $this->date();
         $d = date_parse($d);
         $mes = $operacao === '-' ? ($d['month'] - $months) : ($d['month'] + $months);
@@ -168,7 +173,8 @@ class Format {
      * @param type $color
      * @return string
      */
-    public function formatNumber(bool $sinalNoFim = false, bool $prefixo = true, bool $color = true): string {
+    public function formatNumber(bool $sinalNoFim = false, bool $prefixo = true, bool $color = true): string
+    {
         $number = $this->string;
 
         if ($prefixo) {

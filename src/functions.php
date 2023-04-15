@@ -40,8 +40,8 @@ function json_decode($json, bool $assoc = false, int $depth = 512, int $options 
 
 /**
  * Para manter compatibilidade sem typagem na chamada (legado)
- * @param type $delimiter
- * @param type $string
+ * @param string $delimiter
+ * @param string $string
  */
 function ns_explode($delimiter, $string)
 {
@@ -79,5 +79,18 @@ if (!function_exists('dd')) {
     {
         echo Log::see($var, $isHtml, $showBacktrace);
         die();
+    }
+}
+
+if (!function_exists('now')) {
+    /**
+     * Create a new Carbon instance for the current time.
+     *
+     * @param  string $tz
+     * @return Date
+     */
+    function now($tz = null)
+    {
+        return new Date('NOW', $tz);
     }
 }

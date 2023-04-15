@@ -143,6 +143,7 @@ $out
     public static function getBacktrace()
     {
         $origem = array_map(function ($item) {
+            $item['class'] ??= '';
             if (
                 is_null($item)
                 || !is_array($item)
