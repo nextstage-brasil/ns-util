@@ -17,7 +17,8 @@ use Laravel\SerializableClosure\SerializableClosure;
  * 
  * @package main
  */
-class Assync {
+class Assync
+{
 
     private $pid = 0;
     private $limit = 3;
@@ -33,13 +34,15 @@ class Assync {
     private $testMode = false;
 
     // public function __construct(?int $parallelProcess = null, ?string $verboseTitle = null, ?string $autoloaderPath = null) {
-    public function __construct(?string $verboseTitle = null) {
+    public function __construct(?string $verboseTitle = null)
+    {
         if (Helper::getSO() === 'windows') {
             throw new Exception('NSUtil::Assync ERROR: Only linux systems can use this class');
         }
         $this->verbose = $verboseTitle;
         $this->status = new StatusLoader(count($this->list), 'NsPHPAssync');
-        $logfile = Log::getDefaultPathNSUtil() . DIRECTORY_SEPARATOR . debug_backtrace()[1]['function'];
+        $db = debug_backtrace();
+        $logfile = Log::getDefaultPathNSUtil() . DIRECTORY_SEPARATOR . isset($db[1]['function']) ? $db[1]['function'] : '';
 
         $this->setParallelProccess();
         $this->setAutoloader();
@@ -57,7 +60,8 @@ class Assync {
      * @param string $recurso Chave do comando a ser localizado no arquivo.php
      * @param array $params parametros a ser enviado para o executor
      */
-    public function addByParams(string $path, string $recurso, array $params, string $className = null): Assync {
+    public function addByParams(string $path, string $recurso, array $params, string $className = null): Assync
+    {
         $param['className'] = $className;
         $cmd = "{$path} {$recurso} " . base64_encode(json_encode($params));
         $this->add($cmd);
@@ -71,7 +75,8 @@ class Assync {
      * @param string $outputfile
      * @return Assync
      */
-    public function add(string $cmd, string $outputfile = '/dev/null'): Assync {
+    public function add(string $cmd, string $outputfile = '/dev/null'): Assync
+    {
         $pidfile = '/tmp/' . hash('sha1', (string)$cmd);
         $this->list[] = ['command' => sprintf("%s > %s 2>&1 & echo $! > %s", $cmd, $outputfile, $pidfile), 'pidfile' => $pidfile, 'cmd' => $cmd];
         if ($this->verbose !== false) {
@@ -87,7 +92,8 @@ class Assync {
      * @param string|null $autoloaderPath
      * @return self
      */
-    public function setAutoloader(?string $autoloaderPath = null): self {
+    public function setAutoloader(?string $autoloaderPath = null): self
+    {
         $options = [$autoloaderPath];
         if (!$autoloaderPath) {
             $options = [
@@ -113,12 +119,14 @@ class Assync {
      * @param string $file
      * @return self
      */
-    public function setLogfile(string $file): self {
+    public function setLogfile(string $file): self
+    {
         $this->logfile = $file;
         return $this;
     }
 
-    public function setParallelProccess(?int $parallelProcess = null, $useAllProcessors = false) {
+    public function setParallelProccess(?int $parallelProcess = null, $useAllProcessors = false)
+    {
         if (null === $parallelProcess) {
 
             // Deixar um nucleo livre para demais tarefas
@@ -136,7 +144,8 @@ class Assync {
         return $this;
     }
 
-    public function setShowLoader(string $name) {
+    public function setShowLoader(string $name)
+    {
         $this->verbose = $name;
         return $this;
     }
@@ -151,7 +160,8 @@ class Assync {
      * @param Closure $fn Closure a ser executada
      * @return void
      */
-    public function addClosure(string $name, Closure $fn) {
+    public function addClosure(string $name, Closure $fn)
+    {
         if (!$this->autoloaderPath) {
             throw new Exception("NSUtil Assync: autoload is not defined to closure");
         }
@@ -184,7 +194,8 @@ class Assync {
      * @param array $params
      * @return void
      */
-    public function addClassRunner(string $name, string $className, string $function, array $params = []) {
+    public function addClassRunner(string $name, string $className, string $function, array $params = [])
+    {
         if (!$this->autoloaderPath) {
             throw new Exception("NSUtil Assync: autoload is not defined");
         }
@@ -212,14 +223,16 @@ class Assync {
         return $this;
     }
 
-    public static function encodeTask($task): string {
+    public static function encodeTask($task): string
+    {
         if ($task instanceof Closure) {
             $task = new SerializableClosure($task);
         }
         return base64_encode(serialize($task));
     }
 
-    public static function decodeTask(string $task) {
+    public static function decodeTask(string $task)
+    {
         return unserialize(base64_decode($task));
     }
 
@@ -227,7 +240,8 @@ class Assync {
     /**
      * Executa os processos adicionados, limitando a N processos por vez, conforme configuração
      */
-    public function run(?\Closure $onRunning = null) {
+    public function run(?\Closure $onRunning = null)
+    {
         if (null === $this->isStarted) {
             $this->isStarted = true;
         }
@@ -265,7 +279,8 @@ class Assync {
         }
     }
 
-    private function verbosePrint() {
+    private function verbosePrint()
+    {
         if ($this->verbose !== null) {
             $this->status->done($this->done);
         }
@@ -274,7 +289,8 @@ class Assync {
     /**
      * Verifica se a pilha tem processos concluidos e remove para inicio de outro processo
      */
-    private function checkRunning() {
+    private function checkRunning()
+    {
         $out = "\n Processos em andamento: ";
         foreach ($this->emAndamento as $key => $val) {
             $out .= '[' . $this->emAndamento[$key]['pid'] . '] ';
@@ -292,7 +308,8 @@ class Assync {
      * @param int $pid the process id to check for
      * @return boolean $res true if running or else false 
      */
-    private function isRunning($pid) {
+    private function isRunning($pid)
+    {
         try {
             $result = shell_exec(sprintf("ps %d", $pid));
             if (count(preg_split("/\n/", $result)) > 2) {
@@ -309,7 +326,8 @@ class Assync {
      * @param boolean $testMode
      * @return self
      */
-    public function setTestMode(bool $testMode): self {
+    public function setTestMode(bool $testMode): self
+    {
         $this->testMode = $testMode;
         return $this;
     }
