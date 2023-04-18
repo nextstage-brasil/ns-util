@@ -27,10 +27,12 @@ class UniqueExecution
         }
     }
 
-    public static function create(string $dbName = 'defaultApplication', string $pathToDB = '/tmp'): UniqueExecution
-    {
-        $ret = new UniqueExecution($dbName, $pathToDB);
-        $ret->start();
+    public static function create(
+        string $dbName = 'defaultApplication',
+        int $secondsLimit = 3600
+    ): UniqueExecution {
+        $ret = new UniqueExecution($dbName);
+        $ret->start($secondsLimit, true);
         return $ret;
     }
 
