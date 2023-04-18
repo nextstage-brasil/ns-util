@@ -1266,7 +1266,7 @@ class Helper
         }
     }
 
-    public static function commandPrintHeader($text, $size = 60)
+    public static function commandPrintHeader($text, $size = 40)
     {
         $cmd = "header=\"$text\" && width=$size && padding=\$(((\$width - \${#header}) / 2)) && printf '%*s\n' \"\${COLUMNS:-40}\" \"\" | tr ' ' '-' | cut -c 1-\"\${width}\" && printf \"|%*s%s%*s|\n\" \$padding \"\" \"\$header\" \$padding \"\" && printf '%*s\n' \"\${COLUMNS:-80}\" \"\" | tr ' ' '-' | cut -c 1-\"\${width}\"";
         self::shellExec($cmd);
