@@ -5,11 +5,13 @@ namespace NsUtil;
 use Exception;
 use NsUtil\Connection\SQLite;
 
-class UniqueExecution {
+class UniqueExecution
+{
 
     private $con, $ref;
 
-    public function __construct(string $dbName = 'defaultApplication', string $pathToDB = '/tmp') {
+    public function __construct(string $dbName = 'defaultApplication', string $pathToDB = '/tmp')
+    {
         $user = posix_getpwuid(posix_geteuid())['name'];
         $pathToDB = (($pathToDB === '/tmp') ? Helper::getTmpDir() : $pathToDB);
         $db = $pathToDB . '/' . 'NSUniqueExecution';
@@ -25,8 +27,16 @@ class UniqueExecution {
         }
     }
 
+    public static function create(string $dbName = 'defaultApplication', string $pathToDB = '/tmp'): UniqueExecution
+    {
+        $ret = new UniqueExecution($dbName, $pathToDB);
+        $ret->start();
+        return $ret;
+    }
+
     // Cria a tabela necessária para execução
-    private function createDB(): void {
+    private function createDB(): void
+    {
         $query = 'CREATE TABLE IF NOT EXISTS "execution" (
             "ref" TEXT PRIMARY KEY,
             "inited_at" INTEGER
@@ -46,7 +56,8 @@ class UniqueExecution {
      * @param boolean $throwException
      * @return boolean
      */
-    public function isRunning(int $timeLimit = 3600, bool $throwException = false): bool {
+    public function isRunning(int $timeLimit = 3600, bool $throwException = false): bool
+    {
         $query = 'SELECT COUNT(*) AS counter FROM "execution" WHERE ref="' . $this->ref . '" AND inited_at > ' . (time() - $timeLimit);
         $counter = $this->con->execQueryAndReturn($query)[0]['counter'];
         $isRunning =  $counter > 0;
@@ -56,14 +67,15 @@ class UniqueExecution {
         return $isRunning;
     }
 
-     /**
-      * Registra o inicio do processo unico a ser controlado
-      *
-      * @param integer $timeTocheckAnotherExecution
-      * @param boolean $throwExceptionIfIsRunning
-      * @return self
-      */
-    public function start(int $timeTocheckAnotherExecution = 3600, bool $throwExceptionIfIsRunning = false) {
+    /**
+     * Registra o inicio do processo unico a ser controlado
+     *
+     * @param integer $timeTocheckAnotherExecution
+     * @param boolean $throwExceptionIfIsRunning
+     * @return self
+     */
+    public function start(int $timeTocheckAnotherExecution = 3600, bool $throwExceptionIfIsRunning = false)
+    {
         $this->isRunning($timeTocheckAnotherExecution, $throwExceptionIfIsRunning);
         $query = "INSERT INTO execution(ref, inited_at) VALUES('" . $this->ref . "', " . time() . ")
                   ON CONFLICT(ref) DO UPDATE SET inited_at=" . time();
@@ -75,7 +87,8 @@ class UniqueExecution {
      * Registra o encerramento do processo unico
      * @return void
      */
-    public function end(): void {
+    public function end(): void
+    {
         $query = "DELETE FROM \"execution\" WHERE ref='" . $this->ref . "'";
         $this->con->executeQuery($query);
     }
@@ -84,7 +97,8 @@ class UniqueExecution {
      * Retorna o timestamp do inicio do processo em execução, ou 0 caso nenhum esteja em processamento
      * @return int
      */
-    public function getStartedAt(): int {
+    public function getStartedAt(): int
+    {
         $out = 0;
         $query = 'SELECT * FROM "execution" WHERE ref="' . $this->ref . '"';
         $list = $this->con->execQueryAndReturn($query);
@@ -98,7 +112,8 @@ class UniqueExecution {
      * Retorna mensagem padrão contendo a data de inicio do processo atual
      * @return string
      */
-    public function getDefaultMessageIsRunning(): string {
+    public function getDefaultMessageIsRunning(): string
+    {
         $init = $this->getStartedAt();
         return 'There is another proccess running. Started at ' . date('c', $init);
     }
