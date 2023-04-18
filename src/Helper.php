@@ -1224,4 +1224,51 @@ class Helper
             die();
         }
     }
+
+    public static function generateCode($string)
+    {
+        return strtoupper(substr($string, 0, 1) . substr($string, -1) . substr(md5($string), 0, 2));
+    }
+
+    public static function shellExec($command)
+    {
+
+        $descriptorspec = [
+            0 => ['pipe', 'r'], // stdin is a pipe that the child will read from
+            1 => ['pipe', 'w'], // stdout is a pipe that the child will write to
+            2 => ['pipe', 'w'], // stderr is a pipe that the child will write to
+        ];
+
+        $process = proc_open($command, $descriptorspec, $pipes);
+
+        if (is_resource($process)) {
+            fclose($pipes[0]); // Close the stdin pipe, since we won't be using it
+
+            // Read the output from stdout and stderr pipes
+            $output = '';
+            while (($buffer = fgets($pipes[1])) !== false || ($buffer = fgets($pipes[2])) !== false) {
+                $output .= $buffer;
+                echo $buffer; // Display the output in real-time
+                flush(); // Force the output to be sent to the browser
+
+                // If PHP output buffering is enabled, force it to be sent to the browser
+                if (ob_get_length() > 0) {
+                    ob_flush();
+                }
+            }
+
+            fclose($pipes[1]);
+            fclose($pipes[2]);
+
+            $return_value = proc_close($process);
+
+            // echo "Command returned: $return_value\n";
+        }
+    }
+
+    public static function commandPrintHeader($text, $size = 60)
+    {
+        $cmd = "header=\"$text\" && width=$size && padding=\$(((\$width - \${#header}) / 2)) && printf '%*s\n' \"\${COLUMNS:-40}\" \"\" | tr ' ' '-' | cut -c 1-\"\${width}\" && printf \"|%*s%s%*s|\n\" \$padding \"\" \"\$header\" \$padding \"\" && printf '%*s\n' \"\${COLUMNS:-80}\" \"\" | tr ' ' '-' | cut -c 1-\"\${width}\"";
+        self::shellExec($cmd);
+    }
 }
