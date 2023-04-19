@@ -129,9 +129,9 @@ class Format
         return $var;
     }
 
-    public function parseInt(): int
+    public function parseInt()
     {
-        return (int) preg_replace("/[^0-9]/", "", $this->string);
+        return preg_replace("/[^0-9]/", "", $this->string);
     }
 
     public function dateToMktime()
