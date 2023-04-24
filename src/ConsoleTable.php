@@ -2,6 +2,8 @@
 
 namespace NsUtil;
 
+use Closure;
+
 class ConsoleTable
 {
 
@@ -375,5 +377,39 @@ class ConsoleTable
     public static function printHeader($text, $size = 40)
     {
         echo shell_exec('header="' . $text . '" && width=' . $size . ' && padding=$((($width-${#header})/2)) && printf \'%*s\n\' "${COLUMNS:-' . $size . '}" "" | tr " " "-" | cut -c 1-"${width}" && printf "|%*s%s%*s|\n" $padding "" "$header" $padding "" && printf \'%*s\n\' "${COLUMNS:-' . ($size * 2) . '}" "" | tr " " "-" | cut -c 1-"${width}"');
+    }
+
+    public static function printTabularAndRunningCMD($message, $firstCMD, $pushCMD = "", $pushMessage = "")
+    {
+
+        echo "\r\033[K";
+        printf("%-40s%-20s", $message, '🏃‍♂️ Running ...');
+        shell_exec($firstCMD);
+        if ($pushCMD != "") {
+            echo "\r\033[K";
+            printf("%-40s%-20s", $message, '🚀 ' . $pushMessage . ' ...');
+            shell_exec($pushCMD);
+        }
+        echo "\r\033[K";
+        printf("%-40s%-20s", $message, '✔ Done');
+        echo "";
+    }
+
+    public static function printTabular($label, $message = "", ?Closure $closure = null)
+    {
+        if (null !== $closure) {
+            echo "\r\033[K";
+            printf("%-40s%-20s", $label, '🏃‍♂️ Running ...');
+            $ret = $closure();
+            echo "\r\033[K";
+            printf("%-40s%-20s", $label, '✔ Done');
+            echo "\n";
+            return $ret;
+        } else {
+            echo "\r\033[K";
+            printf("%-40s%-20s", $label, $message);
+            echo "\n";
+            return true;
+        }
     }
 }

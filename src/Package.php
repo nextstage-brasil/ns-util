@@ -2,7 +2,8 @@
 
 namespace NsUtil;
 
-class Package {
+class Package
+{
 
     static $zipExcluded = '';
     private static $urlLocalApplication = '';
@@ -10,10 +11,12 @@ class Package {
     private static $createFrontendFiles = false;
     private static $dockerBuildParams = [];
 
-    public function __construct() {
+    public function __construct()
+    {
     }
 
-    public static function setCreateFrontendFiles(bool $createFrontendFiles): void {
+    public static function setCreateFrontendFiles(bool $createFrontendFiles): void
+    {
         self::$createFrontendFiles = $createFrontendFiles;
     }
 
@@ -26,7 +29,8 @@ class Package {
      * @param array $args Argumentos para construção da imagem
      * @return void
      */
-    public static function setDockerBuildParams(string $pathDockerfile, string $dockerHubUser, string $packageName, string $tag = 'latest', array $args = []): void {
+    public static function setDockerBuildParams(string $pathDockerfile, string $dockerHubUser, string $packageName, string $tag = 'latest', array $args = []): void
+    {
         self::$dockerBuildParams = [
             'Dockerfile' => $pathDockerfile,
             'Username' => $dockerHubUser . ((strlen($dockerHubUser) > 0) ? '/' : '') . $packageName,
@@ -40,19 +44,23 @@ class Package {
      * @param string $urlLocalApplication URL local da aplicação (Completo, ex.: http://localhost:5088). Default: https://localhost/{PATH_APP}
      * @return void
      */
-    public static function setUrlLocalApplication(string $urlLocalApplication = ''): void {
+    public static function setUrlLocalApplication(string $urlLocalApplication = ''): void
+    {
         self::$urlLocalApplication = $urlLocalApplication;
     }
 
-    public static function getProjectName() {
+    public static function getProjectName()
+    {
         return self::$projectName;
     }
 
-    public static function setProjectName($projectName): void {
+    public static function setProjectName($projectName): void
+    {
         self::$projectName = $projectName;
     }
 
-    public static function setVersion($file, $message = 'default/Not defined', int $major_increment = null, int $minor_increment = null, int $path_increment = null) {
+    public static function setVersion($file, $message = 'default/Not defined', int $major_increment = null, int $minor_increment = null, int $path_increment = null)
+    {
         if (!file_exists($file)) {
             file_put_contents($file, '1.0.0');
         }
@@ -127,7 +135,8 @@ class Package {
         ];
     }
 
-    public static function git($file, $message = 'default/Not defined', $major = null, $minor = null, $path = null) {
+    public static function git($file, $message = 'default/Not defined', $major = null, $minor = null, $path = null)
+    {
         $ret = self::setVersion($file, $message, $major, $minor, $path);
         shell_exec($ret['bat']);
         return $ret;
@@ -151,7 +160,7 @@ class Package {
 
         $cmdsConfig = [
             'linux' => [
-                'clearFiles' => 'find %1$s -name "*__NEW__*" -delete && find %1$s -name "*XPTO*" -delete && find %1$s/app/_45h -name "*.php" -delete && find %1$s/app/45h -name "*.php" -delete',
+                'clearFiles' => 'find %1$s -name "*__NEW__*" -delete >/dev/null 2>&1 && find %1$s -name "*XPTO*" -delete >/dev/null 2>&1 && find %1$s/app/_45h -name "*.php" -delete >/dev/null 2>&1 && find %1$s/app/45h -name "*.php" -delete >/dev/null 2>&1',
                 'move' => 'mv'
             ],
             'windows' => [
@@ -222,16 +231,27 @@ class Package {
         Helper::deleteFile($zip);
         Helper::deleteFile($encodedFile);
 
-        // Nomes
-        echo "\n### NSUtil Package Generator ###"
-            . "\n - Configurations: "
-            . "\n Running on $urlLocalApplication"
-            . "\n PHP Version: " . PHP_VERSION . " on " . Helper::getSO()
-            . "\n Package output: " . $dirOutput . DIRECTORY_SEPARATOR . $projectName . '-package.zip'
-            . "\n Create docker image?: " . ((count(self::$dockerBuildParams) > 0) ? 'yes' : 'no')
-            . "\n Copy frontend files?: " . ((self::$createFrontendFiles === true) ? 'yes' : 'no')
-            . "\n Alright, let's run!"
-            . "\n\n";
+        // // Nomes
+        // echo "\n### NSUtil Package Generator ###"
+        //     . "\n - Configurations: "
+        //     . "\n Running on $urlLocalApplication"
+        //     . "\n PHP Version: " . PHP_VERSION . " on " . Helper::getSO()
+        //     . "\n Package output: " . $dirOutput . DIRECTORY_SEPARATOR . $projectName . '-package.zip'
+        //     . "\n Create docker image?: " . ((count(self::$dockerBuildParams) > 0) ? 'yes' : 'no')
+        //     . "\n Copy frontend files?: " . ((self::$createFrontendFiles === true) ? 'yes' : 'no')
+        //     . "\n Alright, let's run!"
+        //     . "\n\n";
+
+        ConsoleTable::printHeader("NSUtil Package Generator");
+        foreach ([
+            'Running on' => $urlLocalApplication,
+            'PHP Version' => PHP_VERSION . " on " . Helper::getSO(),
+            'Package output' => $dirOutput . DIRECTORY_SEPARATOR . $projectName . '-package.zip',
+            'Create docker image' => ((count(self::$dockerBuildParams) > 0) ? 'yes' : 'no'),
+            'Copy frontend files' => ((self::$createFrontendFiles === true) ? 'yes' : 'no')
+        ] as $label => $message) {
+            ConsoleTable::printTabular($label, $message);
+        }
 
         // composer
         $last = 0;
@@ -240,28 +260,45 @@ class Package {
             $last = (int) file_get_contents($composerLastUpdateFile);
         }
         $composerIsOld = (!file_exists($composerLastUpdateFile)) || $last < time() - (60 * 60 * 2);
-        echo "\n - Atualizando pacotes via composer ... ";
+        // echo "\n - Atualizando pacotes via composer ... ";
         if (file_exists($origem . '/composer.json') && $composerIsOld) {
-            shell_exec('composer update -q --prefer-dist --optimize-autoloader --no-dev --working-dir="' . $origem . '"');
+            ConsoleTable::printTabularAndRunningCMD('Composer Update', 'composer update -q --prefer-dist --optimize-autoloader --no-dev --working-dir="' . $origem . '"');
+            // shell_exec('composer update -q --prefer-dist --optimize-autoloader --no-dev --working-dir="' . $origem . '"');
             file_put_contents($composerLastUpdateFile, time());
+        } else {
+            ConsoleTable::printTabular('Composer Update', "Is updated at " . date('Y-m-d H:i:s', (int) file_get_contents($composerLastUpdateFile)));
         }
-        echo "OK! Is updated at " . date('Y-m-d H:i:s', (int) file_get_contents($composerLastUpdateFile));
+        // echo "OK! Is updated at " . date('Y-m-d H:i:s', (int) file_get_contents($composerLastUpdateFile));
 
-        echo "\n - Construindo aplicacao ... ";
-        $ret = Helper::curlCall("$urlLocalApplication/$build/builder.php?pack=true", [], 'GET', [], false, (60 * 10));
+        // construir aplicação
+        $ret = ConsoleTable::printTabular("Building", null, function () use ($urlLocalApplication, $build) {
+            return Helper::curlCall("$urlLocalApplication/$build/builder.php?pack=true", [], 'GET', [], false, (60 * 10));
+        });
+        // echo "\n - Construindo aplicacao ... ";
+        // $ret = Helper::curlCall("$urlLocalApplication/$build/builder.php?pack=true", [], 'GET', [], false, (60 * 10));
         if ((int) $ret->status !== 200 || stripos(json_encode($ret), 'Fatal error') !== false) {
-            var_export($ret);
-            die("\n################## ERROR!!: #################### \n\n STATUS BUILDER <> 200 \n\n###########################################\n");
+            Log::see($ret, false, false);
+            die();
+            // var_export($ret);
+            // die("\n################## ERROR!!: #################### \n\n STATUS BUILDER <> 200 \n\n###########################################\n");
         }
-        echo 'OK!';
+        // echo 'OK!';
 
-        echo "\n - Construindo JS e Componentes ... ";
-        $ret = Helper::curlCall("$urlLocalApplication/$build/compile.php?pack=true&compileToBuild=YES&recompile=ALL", [], 'GET', [], false, (60 * 10));
+        // compilar
+        $ret = ConsoleTable::printTabular("Buildind HTML and JS files", null, function () use ($urlLocalApplication, $build) {
+            return Helper::curlCall("$urlLocalApplication/$build/compile.php?pack=true&compileToBuild=YES&recompile=ALL", [], 'GET', [], false, (60 * 10));
+        });
+
+        // echo "\n - Construindo JS e Componentes ... ";
+        // $ret = Helper::curlCall("$urlLocalApplication/$build/compile.php?pack=true&compileToBuild=YES&recompile=ALL", [], 'GET', [], false, (60 * 10));
         if ((int) $ret->status !== 200 || stripos(json_encode($ret), 'Fatal error') !== false) {
-            var_export($ret);
-            die("\n################## ERROR!!: #################### \n\n STATUS COMPILE <> 200 \n\n###########################################\n");
+            Log::see($ret, false, false);
+            die();
+
+            // var_export($ret);
+            // die("\n################## ERROR!!: #################### \n\n STATUS COMPILE <> 200 \n\n###########################################\n");
         }
-        echo 'OK!';
+        // echo 'OK!';
 
         // Lista de exclusões que não devem constar em builds
         $excluded_xr = [
@@ -325,7 +362,7 @@ class Package {
         Helper::saveFile("$origem/$build/install/deploy/scripts/zipCommandToCI.sh", false, self::$zipExcluded->zipCi, 'SOBREPOR');
 
         // salvar o comand para o pos ioncube
-        echo "\n - Criando arquivo post encode para ioncube ... ";
+        // echo "\n - Criando arquivo post encode para ioncube ... ";
         Helper::directorySeparator($ioncube_post);
         Helper::deleteFile($ioncube_post);
         $contentIoncubepost = '@echo OFF
@@ -337,15 +374,17 @@ class Package {
         sleep(1);
         echo ((file_exists($ioncube_post)) ? "OK!" : "Erro ao gerar arquivo $ioncube_post");
 
-        echo "\n - Criando pacote ... ";
+        // echo "\n - Criando pacote ... ";
         $command .= $ex;
-        shell_exec($command);
-        echo "OK!";
+        ConsoleTable::printTabularAndRunningCMD('Package', $command);
+        // shell_exec($command);
+        // echo "OK!";
 
-        echo "\n - Limpando arquivos ... ";
+        // echo "\n - Limpando arquivos ... ";
         $cmd = sprintf($cmdsConfig[Helper::getSO()]['clearFiles'], $fontes);
-        shell_exec($cmd);
-        echo "OK!";
+        ConsoleTable::printTabularAndRunningCMD('Clear files', $cmd);
+        // shell_exec($cmd);
+        // echo "OK!";
 
         // Abrir diretorio de saida
         $zipdir = explode(DIRECTORY_SEPARATOR, $zip);
@@ -360,12 +399,15 @@ class Package {
         // Criação do Dockerfile
         self::dockerBuilder();
 
-        echo "\n\n ### Package '$versao' was created successfully!! ###"
-            . "\n--------------------------------------\n";
+        ConsoleTable::printTabular('Version', $versao);
+
+        // echo "\n\n ### Package '$versao' was created successfully!! ###"
+        //     . "\n--------------------------------------\n";
         return $projectName;
     }
 
-    static function getZipExcluded() {
+    static function getZipExcluded()
+    {
         return self::$zipExcluded;
     }
 
@@ -377,7 +419,8 @@ class Package {
      * @param bool $clearOldVersion Se deve limpar o diretório destino antes de iniciar
      * @return void
      */
-    static function copyFilesToAppView(string $applicationPath, string $destPath, array $pathsToCopy = [], bool $clearOldVersion = true): void {
+    static function copyFilesToAppView(string $applicationPath, string $destPath, array $pathsToCopy = [], bool $clearOldVersion = true): void
+    {
         echo "\n - Criando aplicação frontend local ...";
         $listToCopy = array_merge(
             ['view/css', 'view/images', 'view/fonts', 'view/audio', 'view/angular-file-upload-full_3', 'auto/components', 'node_modules', 'package.json'],
@@ -432,7 +475,8 @@ class Package {
         sleep(2);
     }
 
-    static function dockerBuilder(): void {
+    static function dockerBuilder(): void
+    {
         if (count(self::$dockerBuildParams) > 0) {
             $arguments = '';
             foreach (self::$dockerBuildParams['Args'] as $key => $val) {
