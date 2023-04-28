@@ -41,7 +41,8 @@ class Date
      */
     public function add(string $duration): self
     {
-        $this->item->add(new DateInterval($duration));
+
+        $this->item->add(DateInterval::createFromDateString($duration));
         return $this;
     }
 
@@ -53,7 +54,7 @@ class Date
      */
     public function sub(string $duration): self
     {
-        $this->item->sub(new DateInterval($duration));
+        $this->item->sub(DateInterval::createFromDateString($duration));
         return $this;
     }
 
