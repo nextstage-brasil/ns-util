@@ -71,11 +71,12 @@ if (!function_exists('dd')) {
      * Display and die
      *
      * @param mixed $var
-     * @param boolean $isHtml
+     * @param boolean|null $isHtml
      * @param boolean $showBacktrace
      * @return void
      */
-    function dd($var, bool $isHtml = true, bool $showBacktrace = true): void
+
+    function dd($var, ?bool $isHtml = null, bool $showBacktrace = true): void
     {
         echo Log::see($var, $isHtml, $showBacktrace);
         die();

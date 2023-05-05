@@ -374,7 +374,7 @@ class ConsoleTable
         return $table->getTable();
     }
 
-    public static function printHeader($text, $size = 40)
+    public static function printHeader($text, $size = 60)
     {
         echo shell_exec('header="' . $text . '" && width=' . $size . ' && padding=$((($width-${#header})/2)) && printf \'%*s\n\' "${COLUMNS:-' . $size . '}" "" | tr " " "-" | cut -c 1-"${width}" && printf "|%*s%s%*s|\n" $padding "" "$header" $padding "" && printf \'%*s\n\' "${COLUMNS:-' . ($size * 2) . '}" "" | tr " " "-" | cut -c 1-"${width}"');
     }
