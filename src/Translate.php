@@ -21,7 +21,7 @@ class Translate
             self::addKey($key, $key, $lang);
         }
 
-        return self::$langs[$lang][$key];
+        return self::$langs[$lang][$key] ?? '';
     }
 
     private static function loadFile($lang)

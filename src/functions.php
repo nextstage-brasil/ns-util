@@ -95,3 +95,17 @@ if (!function_exists('now')) {
         return new Date('NOW', $tz);
     }
 }
+
+if (!function_exists('__tr')) {
+    /**
+     * Get translate of key
+     *
+     * @param string $key
+     * @param string $lang
+     * @return void
+     */
+    function __tr($key, $lang = 'pt_BR')
+    {
+        return Translate::get($key, $lang);
+    }
+}
