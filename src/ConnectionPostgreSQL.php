@@ -116,7 +116,7 @@ class ConnectionPostgreSQL
         $this->con->autocommit($boolean);
     }
 
-    public function executeQuery($query)
+    public function executeQuery($query, $params = null)
     {
         $this->open();
         $res = false;
@@ -127,7 +127,12 @@ class ConnectionPostgreSQL
         $this->log($query);
         try {
             $this->result = $this->con->prepare($query);
-            if (!$this->result->execute()) {
+            if (null !== $params && is_array($params)) {
+                $res = $this->result->execute($params);
+            } else {
+                $res = $this->result->execute();
+            }
+            if (!$res) {
                 $this->error = $this->result->errorInfo()[2];
                 $this->log('   >> ERROR: ' . $this->result->errorInfo()[0] . $this->result->errorInfo()[2]);
                 throw new Exception($this->result->errorInfo()[0] . $this->result->errorInfo()[2], 0);
