@@ -17,14 +17,15 @@ class Translate
     public static function get($key, $lang): string
     {
         self::loadFile($lang);
-        if (!isset(self::$langs[$lang][$key])) {
+        $mykey = mb_strtolower($key);
+        if (!isset(self::$langs[$lang][$mykey])) {
             self::addKey($key, $key, $lang);
         }
 
-        return self::$langs[$lang][$key] ?? '';
+        return self::$langs[$lang][$mykey] ?? '';
     }
 
-    private static function loadFile($lang)
+    private static function getFilename($lang)
     {
         $path = (getenv('TRANSLATE_PATH') ? getenv('TRANSLATE_PATH') : Helper::getPathApp() . '/lang')
             . '/nsutil-translate-files';
@@ -35,15 +36,21 @@ class Translate
             Helper::saveFile($path . '/.htaccess', '', 'require all denied', 'SOBREPOR');
         }
 
-        self::$langs[$lang] = json_decode(file_get_contents($file), true);
+        return $file;
+    }
+
+    private static function loadFile($lang)
+    {
+
+        self::$langs[$lang] = json_decode(file_get_contents(
+            self::getFilename($lang)
+        ), true);
     }
 
     private static function updateFile($lang): void
     {
-        $path = getenv('TRANSLATE_PATH');
-        $file = $path . '/' . $lang . '.json';
-        self::$langs[$lang] = Helper::saveFile(
-            $file,
+        $ret = Helper::saveFile(
+            self::getFilename($lang),
             '',
             json_encode(self::$langs[$lang], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE),
             'SOBREPOR'
@@ -52,6 +59,7 @@ class Translate
 
     private static function addKey($key, $value = null, $lang): void
     {
+        $key = mb_strtolower($key);
         if ($value === null) {
             if (isset(self::$langs[$lang])) {
                 unset(self::$langs[$lang][$key]);
@@ -59,7 +67,6 @@ class Translate
         } else {
             self::$langs[$lang][$key] = $value;
         }
-
         self::updateFile($lang);
     }
 }
