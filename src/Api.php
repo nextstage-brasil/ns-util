@@ -595,6 +595,19 @@ class Api
     }
 
     /**
+     * Just to compatibility
+     *
+     * @param string $message
+     * @param integer $code
+     * @param \Closure $rule
+     * @return self
+     */
+    public function middleware(string $message, int $code, \Closure $rule): self
+    {
+        return self::validator($message, $code, $rule);
+    }
+
+    /**
      * Undocumented function
      *
      * @param string $namespace
