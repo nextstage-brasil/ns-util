@@ -102,7 +102,7 @@ if (!function_exists('__tr')) {
      *
      * @param string $key
      * @param string $lang
-     * @return void
+     * @return string
      */
     function __tr($key, $lang = 'pt_BR')
     {
