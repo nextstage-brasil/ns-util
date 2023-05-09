@@ -885,7 +885,7 @@ class Helper
                 $out = $string;
                 break;
             default:
-                $out = Filter::string($string);
+                $out = null === $string ? null : Filter::string($string);
                 break;
         }
         return $out;
