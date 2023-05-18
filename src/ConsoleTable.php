@@ -412,4 +412,36 @@ class ConsoleTable
             return true;
         }
     }
+
+    public static function setColor($text, $color)
+    {
+        $colorCode = '';
+        switch ($color) {
+            case 'red':
+                $colorCode = "\033[31m"; // Red color
+                break;
+            case 'blue':
+                $colorCode = "\033[34m"; // Blue color
+                break;
+            case 'green':
+                $colorCode = "\033[32m"; // Green color
+                break;
+            case 'yellow':
+                $colorCode = "\033[33m"; // Yellow color
+                break;
+            case 'cyan':
+                $colorCode = "\033[36m"; // Cyan color
+                break;
+            default:
+                // Default color (no modification)
+                break;
+        }
+
+        $resetCode = "\033[0m"; // Reset color
+
+        // Apply the color to the text
+        $coloredText = $colorCode . $text . $resetCode;
+
+        return $coloredText;
+    }
 }

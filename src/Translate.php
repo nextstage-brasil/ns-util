@@ -49,12 +49,14 @@ class Translate
 
     private static function updateFile($lang): void
     {
-        $ret = Helper::saveFile(
-            self::getFilename($lang),
-            '',
-            json_encode(self::$langs[$lang], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE),
-            'SOBREPOR'
-        );
+        if (is_writable(self::getFilename($lang))) {
+            $ret = Helper::saveFile(
+                self::getFilename($lang),
+                '',
+                json_encode(self::$langs[$lang], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE),
+                'SOBREPOR'
+            );
+        }
     }
 
     private static function addKey($key, $value = null, $lang): void

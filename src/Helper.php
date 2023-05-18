@@ -181,22 +181,26 @@ class Helper
      * @param string $string
      * @return string
      */
-    public static function reverteName2CamelCase($string): string
+    public static function reverteName2CamelCase($string)
     {
         $out = '';
-        for ($i = 0; $i < strlen((string) $string); $i++) {
-            if ($string[$i] === mb_strtoupper((string)$string[$i]) && $string[$i] !== '.') {
-                $out .= (($i > 0) ? '_' : '');
-                $string[$i] = mb_strtolower($string[$i]);
+        $length = strlen((string) $string);
+
+        for ($i = 0; $i < $length; $i++) {
+            $currentChar = $string[$i];
+
+            if (ctype_upper($currentChar) && $string[$i] !== '.' && $string[$i] !== '|') {
+                $out .= $i > 0 ? '_' : '';
+                $currentChar = mb_strtolower($currentChar);
             }
-            $out .= $string[$i];
+            $out .= $currentChar;
         }
-        return (string) $out;
+        return $out;
     }
 
     /**
      * Cria a arvore de diretorios
-     * @param type $filename
+     * @param string $filename
      * @return object
      */
     public static function createTreeDir($filename)
@@ -226,25 +230,11 @@ class Helper
     public static function eficiencia_init()
     {
         return "Method is disabled. Use class Eficiencia()";
-        // return new Eficiencia();
-        // list($usec, $sec) = explode(' ', microtime());
-        // $ef = new Helper();
-        // $ef->start = (float) $sec + (float) $usec;
-        // return $ef;
     }
 
     public function endEficiencia()
     {
         return "Method is disabled. Use class Eficiencia()";
-        // // Terminamos o "contador" e exibimos
-        // list($usec, $sec) = explode(' ', microtime());
-        // $script_end = (float) $sec + (float) $usec;
-        // $elapsed_time = round($script_end - $this->start, 2);
-        // $minutos = (int) number_format((float) $elapsed_time / 60, 0);
-
-        // return 'Elapsed '
-        //     . gmdate("H:i:s", (int) $elapsed_time)
-        //     . ' with ' . round(((memory_get_peak_usage(true) / 1024) / 1024), 2) . 'Mb';
     }
 
     public static function directorySeparator(&$var): void
