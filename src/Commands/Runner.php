@@ -8,29 +8,18 @@ use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
 use ReflectionClass;
 
+use function NsUtil\dd;
+
 class Runner
 {
     public static function getNamespaceFromFile($filePath)
     {
-        $fileContents = file_get_contents($filePath);
-        $namespace = '';
-        $tokens = token_get_all($fileContents);
-
-        foreach ($tokens as $token) {
-            if (is_array($token) && $token[0] === T_NAMESPACE) {
-                $namespace = '';
-            }
-
-            if (is_array($token) && $token[0] === T_STRING) {
-                $namespace .= '\\' . $token[1];
-            }
-
-            if ($token === ';') {
-                break;
-            }
-        }
-
-        return trim($namespace, '\\');
+        Helper::directorySeparator($filePath);
+        $parts = explode(DIRECTORY_SEPARATOR,  explode('src/', $filePath)[1]);
+        $file = array_pop($parts);
+        return (stripos($filePath, 'ns-util') === false ? Helper::getPsr4Name() : 'NsUtil')
+            . '\\'
+            . implode('\\', $parts);
     }
 
     public static function loadClassNamesFromPath($path)
