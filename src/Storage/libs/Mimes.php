@@ -2,7 +2,8 @@
 
 namespace NsUtil\Storage\libs;
 
-class Mimes {
+class Mimes
+{
     /*
      * To change this license header, choose License Headers in Project Properties.
      * To change this template file, choose Tools | Templates
@@ -48,7 +49,8 @@ class Mimes {
      * @param boolean $encoding Define se também será retornado a codificação do arquivo
      * @return string
      */
-    public static function getMimeType($file, $encoding = true) {
+    public static function getMimeType($file, $encoding = true)
+    {
         if (function_exists('finfo_open') && is_file($file) && is_readable($file)) {
             $finfo = new \finfo($encoding ? FILEINFO_MIME : FILEINFO_MIME_TYPE);
             $out = explode(';', $finfo->file($file))[0];
@@ -58,7 +60,6 @@ class Mimes {
             $out = array_search($extensao, self::$_MIMES);
         }
         $out = str_replace('.', '-', $out);
-        return self::$_MIMES[$out];
+        return self::$_MIMES[$out] ?? 'not-found';
     }
-
 }

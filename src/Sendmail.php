@@ -11,9 +11,11 @@ use PHPMailer\PHPMailer\PHPMailer;
 
 //require __DIR__ . '/lib/phpmailer/class.phpmailer.php';
 
-class Sendmail {
+class Sendmail
+{
 
-    public static function getConfig(string $host, string $email, string $username, string $password, int $port = 465, string $smtpSecure = 'ssl', bool $smtpAuth = true, bool $isTLSv1_2 = false): array {
+    public static function getConfig(string $host, string $email, string $username, string $password, int $port = 465, string $smtpSecure = 'ssl', bool $smtpAuth = true, bool $isTLSv1_2 = false): array
+    {
         return [
             'host' => $host,
             'email' => $email,
@@ -37,7 +39,8 @@ class Sendmail {
      * @param array $attach
      * @return mixed
      */
-    public static function send(array $to, string $subject, string $text, array $config, int $debug = 0, array $attach = []) {
+    public static function send(array $to, string $subject, string $text, array $config, int $debug = 0, array $attach = [])
+    {
         //        $mail = new \PHPMailer();
         $mail = new PHPMailer();
         $mail->IsSMTP(); // Define que a mensagem será SMTP
@@ -48,13 +51,13 @@ class Sendmail {
         $mail->Port = $config['port'];
         $mail->SMTPSecure = $config['smtpSecure'];
 
-        if ($config['email']) {
-            $mail->Username = $config['email'];
-            $mail->Password = $config['password'];
-            $mail->SetFrom($mail->Username, (string) $config['username']);
+        if (isset($config['email'])) {
+            $mail->Username = $config['email'] ?? '';
+            $mail->Password = $config['password'] ?? '';
+            $mail->SetFrom($mail->Username, (string) ($config['username'] ?? ''));
         }
 
-        if ($config['isTLSv1_2'] === true) {
+        if (($config['isTLSv1_2'] ?? false) === true) {
             define('STREAM_CRYPTO_METHOD_TLSv1_2_CLIENT', true);
         }
 
@@ -154,7 +157,8 @@ class Sendmail {
      * @param Closure|null $error
      * @return boolean
      */
-    public static function sendByAWS(string $to, string $subject, string $html_body, ?array $anexo = [],  array $template_data = [], ?string $template_id = null, ?Closure $success = null, ?Closure $error = null): bool {
+    public static function sendByAWS(string $to, string $subject, string $html_body, ?array $anexo = [],  array $template_data = [], ?string $template_id = null, ?Closure $success = null, ?Closure $error = null): bool
+    {
         try {
 
             Validate::validate(['AWS_KEY', 'AWS_SECRET', 'SENDMAIL_EMAIL', 'to', 'subject', 'body'], [
