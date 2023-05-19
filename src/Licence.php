@@ -12,18 +12,18 @@ class Licence
 
     /**
      * Classe para criação e leiturade licenças codificadas
-     * @param type $chave: String para codificação. Mínimo de 16 digitos.
+     * @param string $chave: String para codificação. Mínimo de 16 digitos.
      */
     public function __construct($chave)
     {
-        $this->crypto = new Crypto($chave);
+        $this->crypto = new Crypto(trim($chave));
     }
 
     /**
      * Le o arquivo origem, codifica e salva no destino
-     * @param type $filenameOrigem
-     * @param type $filenameDestino
-     * @return type
+     * @param string $filenameOrigem
+     * @param string $filenameDestino
+     * @return bool
      * @throws Exception
      */
     public function create($filenameOrigem, $filenameDestino)
@@ -48,8 +48,8 @@ class Licence
 
     /**
      * Le o arquivo de licenca e retorna decodificado
-     * @param type $licenceFile Path do arquivo de licenca a ser lido. Ira buscar em 10 diretorios abaixo procurando este arquivo.
-     * @return type
+     * @param string $licenceFile Path do arquivo de licenca a ser lido. Ira buscar em 10 diretorios abaixo procurando este arquivo.
+     * @return mixed
      */
     public function read($licenceFile, $dieIfNotExists = true)
     {
@@ -82,7 +82,11 @@ class Licence
     public static function readFromIoncube($licenceName)
     {
         if (function_exists('ioncube_license_properties')) {
-            return ioncube_license_properties()[$licenceName]['value'] ?? null;
+            $lic = ioncube_license_properties()[$licenceName]['value'] ?? null;
+            if (null !== $lic) {
+                $lic = trim($lic);
+            }
+            return $lic;
         } else {
             die('Obrigatório utilização do Ioncube (NS88)');
         }
