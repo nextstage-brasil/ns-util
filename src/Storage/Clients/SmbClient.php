@@ -2,6 +2,8 @@
 
 namespace NsUtil\Storage\Clients;
 
+use NsUtil\Log;
+
 /**
  * Class for interacting with an SMB server using the system command "smbclient".
  * Of course this assumes that you have the smbclient executable installed and
@@ -22,7 +24,8 @@ namespace NsUtil\Storage\Clients;
  * smbclient even when the exit status is 0 to see if there are codes like
  * NT_STATUS_NO_SUCH_FILE or NT_STATUS_OBJECT_NAME_NOT_FOUND
  */
-class SmbClient {
+class SmbClient
+{
 
     // when doing "safe" puts, how many times are we willing to retry if we
     // fail to send?  And how long (in ms) to wait between retries
@@ -43,7 +46,8 @@ class SmbClient {
      *
      * @return string
      */
-    public function get_last_cmd() {
+    public function get_last_cmd()
+    {
         return $this->_cmd;
     }
 
@@ -56,7 +60,8 @@ class SmbClient {
      *
      * @return array each line of stdout is one string in the array
      */
-    public function get_last_cmd_stdout() {
+    public function get_last_cmd_stdout()
+    {
         return $this->_last_cmd_stdout;
     }
 
@@ -67,7 +72,8 @@ class SmbClient {
      *
      * @return array each line of stderr is one string in the array
      */
-    public function get_last_cmd_stderr() {
+    public function get_last_cmd_stderr()
+    {
         return $this->_last_cmd_stderr;
     }
 
@@ -78,7 +84,8 @@ class SmbClient {
      *
      * @return int
      */
-    public function get_last_cmd_exit_code() {
+    public function get_last_cmd_exit_code()
+    {
         return $this->_last_cmd_exit_code;
     }
 
@@ -90,7 +97,8 @@ class SmbClient {
      *
      * @return int
      */
-    public function get_safe_retry_count() {
+    public function get_safe_retry_count()
+    {
         return $this->_safe_retry_count;
     }
 
@@ -102,7 +110,8 @@ class SmbClient {
      * @param string $password the password to use when connecting
      * @param string $smbver the version of SMB to use when connecting (optional)
      */
-    public function __construct($service, $username, $password, $domain = '', $smbver = "") {
+    public function __construct($service, $username, $password, $domain = '', $smbver = "")
+    {
         $this->_service = $service;
         $this->_username = $username;
         $this->_password = $password;
@@ -111,7 +120,8 @@ class SmbClient {
         $this->credentialsSet();
     }
 
-    private function credentialsSet() {
+    private function credentialsSet()
+    {
         // precisa ser desse jeito pra nao gerar erro na criação do arquivo
         $credential = "username = $this->_username
 password = $this->_password
@@ -119,7 +129,8 @@ domain   = $this->_domain";
         file_put_contents($this->_credentialFile, $credential);
     }
 
-    public function __destruct() {
+    public function __destruct()
+    {
         if (file_exists($this->_credentialFile)) {
             unlink($this->_credentialFile);
         }
@@ -132,7 +143,8 @@ domain   = $this->_domain";
      * @param string $local_filename the full path to the local filename
      * @return bool true if successful, false otherwise
      */
-    public function get($remote_filename, $local_filename) {
+    public function get($remote_filename, $local_filename)
+    {
         // convert to windows-style backslashes
         $remote_filename = str_replace(DIRECTORY_SEPARATOR, '\\', $remote_filename);
 
@@ -150,7 +162,8 @@ domain   = $this->_domain";
      * @param bool $safe use safe_put() instead of put ()
      * @return bool true if successful, false otherwise
      */
-    public function mput($local_files, $remote_path, $safe = false) {
+    public function mput($local_files, $remote_path, $safe = false)
+    {
         foreach ($local_files as $local_file) {
             $pi = pathinfo($local_file);
 
@@ -177,7 +190,8 @@ domain   = $this->_domain";
      * @param string $remote_filename (use the local system's directory separators)
      * @return bool true if successful, false otherwise
      */
-    public function put($local_filename, $remote_filename) {
+    public function put($local_filename, $remote_filename)
+    {
         // convert to windows-style backslashes
         $remote_filename = str_replace(DIRECTORY_SEPARATOR, '\\', $remote_filename);
 
@@ -197,7 +211,8 @@ domain   = $this->_domain";
      * @param string $remote_filename (use the local system's directory separators)
      * @return bool true if successful, false otherwise
      */
-    public function safe_put($local_filename, $remote_filename) {
+    public function safe_put($local_filename, $remote_filename)
+    {
         // I wanted to write to a temp file on the remote system, then rename the
         // file, but Windows won't let you do that.  So all I can do is write to
         // the permanent file, then check its contents immediately.  Two problems
@@ -259,7 +274,8 @@ domain   = $this->_domain";
      * @param string $dest_filename the remote destination file (use the local system's directory separators)
      * @return bool true if successful, false otherwise
      */
-    public function rename($source_filename, $dest_filename) {
+    public function rename($source_filename, $dest_filename)
+    {
         // convert to windows-style backslashes
         $source_filename = str_replace(DIRECTORY_SEPARATOR, '\\', $source_filename);
         $dest_filename = str_replace(DIRECTORY_SEPARATOR, '\\', $dest_filename);
@@ -281,7 +297,8 @@ domain   = $this->_domain";
      * @param string $remote_filename (use the local system's directory separators)
      * @return bool true if successful, false otherwise
      */
-    public function del($remote_filename) {
+    public function del($remote_filename)
+    {
         $pi = pathinfo($remote_filename);
         $remote_path = $pi['dirname'];
         $basename = $pi['basename'];
@@ -304,7 +321,8 @@ domain   = $this->_domain";
      * @param string $remote_path (use the local system's directory separators)
      * @return bool true if successful, false otherwise
      */
-    public function mkdir($remote_path) {
+    public function mkdir($remote_path)
+    {
         $remote_path = str_replace(DIRECTORY_SEPARATOR, '\\', $remote_path);
         $cmd = "mkdir \"$remote_path\"";
 
@@ -328,7 +346,8 @@ domain   = $this->_domain";
      * @param string $remote_path
      * @return mixed array of results if successful, false otherwise
      */
-    public function dir($remote_path = '', $remote_filename = '') {
+    public function dir($remote_path = '', $remote_filename = '')
+    {
         // convert to windows-style backslashes
         if ($remote_path) {
             $remote_path = str_replace(DIRECTORY_SEPARATOR, '\\', $remote_path);
@@ -347,7 +366,7 @@ domain   = $this->_domain";
 
         $retval = $this->execute($cmd);
         if (!$retval) {
-            return $retval;
+            return [];
         }
 
         $xary = array();
@@ -356,7 +375,7 @@ domain   = $this->_domain";
                 continue;
             }
 
-            list ($junk, $filename, $status, $size, $mtime) = $matches;
+            list($junk, $filename, $status, $size, $mtime) = $matches;
             $filename = trim((string)$filename);
             $status = trim((string)$status);
             $mtime = strtotime($mtime);
@@ -369,7 +388,8 @@ domain   = $this->_domain";
         return $xary;
     }
 
-    private function execute($cmd) {
+    private function execute($cmd)
+    {
         $this->build_full_cmd($cmd);
 
         self::log_msg($this->_cmd);
@@ -413,16 +433,17 @@ domain   = $this->_domain";
         return true;
     }
 
-    private function build_full_cmd($cmd = '') {
+    private function build_full_cmd($cmd = '')
+    {
 
 
         $this->_cmd = "smbclient "
-                . " -A " . $this->_credentialFile
-                . " '" . $this->_service . "'";
+            . " -A " . $this->_credentialFile
+            . " '" . $this->_service . "'";
 
         $this->_cmd .= ""
-                //. " -U '" . $this->_username . "%" . $this->_password . "'"
-                . ($this->_smbver ? " -m " . $this->_smbver : "");
+            //. " -U '" . $this->_username . "%" . $this->_password . "'"
+            . ($this->_smbver ? " -m " . $this->_smbver : "");
 
         if ($cmd) {
             if (stripos($cmd, 'get') > -1) {
@@ -436,14 +457,12 @@ domain   = $this->_domain";
      * Logs a message if debug_mode is true and if there is a global "log_msg" function.
      * @param string $msg the message to log
      */
-    private static function log_msg($msg) {
+    private static function log_msg($msg)
+    {
         if (self::$debug_mode === false) {
             return true;
         }
 
-        if (function_exists('log_msg')) {
-            \log_msg('[' . self::$debug_label . "] $msg");
-        }
+        Log::logTxt('/tmp/smbclient.log', $msg);
     }
-
 }

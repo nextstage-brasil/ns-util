@@ -109,7 +109,7 @@ class Log
         }
 
         // se não foi setado, e esta rodando em um servidor, aplique HTML
-        $html ??= strlen($_SERVER['HTTP_HOST'] > 0);
+        $html ??= isset($_SERVER['HTTP_HOST'])  ? strlen($_SERVER['HTTP_HOST']) > 0 : false;
 
         if ($html) {
             $out = "<hr/>
