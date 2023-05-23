@@ -4,6 +4,7 @@ namespace NsUtil\Storage\Adapters;
 
 use League\Flysystem\AdapterInterface;
 use League\Flysystem\Config;
+use NsUtil\Helper;
 use NsUtil\Storage\Clients\SmbClient;
 
 use function NsUtil\dd;
@@ -95,7 +96,7 @@ class SmbAdapter implements AdapterInterface
     public function read($path)
     {
         if ($this->has($path)) {
-            $local = realpath($this->tmp_dir . '/' . md5((string)$path));
+            $local = $this->tmp_dir . DIRECTORY_SEPARATOR . md5((string) $path);
             $this->smbclient->get($path, $local);
             $this->pathCache[md5((string)$path)]['contents'] = fopen($local, 'r');
             unlink($local);
