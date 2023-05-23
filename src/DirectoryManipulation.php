@@ -4,15 +4,18 @@ namespace NsUtil;
 
 use Exception;
 
-class DirectoryManipulation {
+class DirectoryManipulation
+{
 
     public $total, $dir;
 
-    public function __construct() {
+    public function __construct()
+    {
         $this->total = [];
     }
 
-    public function getSizeOf($dir) {
+    public function getSizeOf($dir)
+    {
         if ($diretorio = opendir($dir)) {
             while (false !== ($file = readdir($diretorio))) {
                 $path = $dir . DIRECTORY_SEPARATOR . $file;
@@ -35,7 +38,8 @@ class DirectoryManipulation {
         }
     }
 
-    public function getSize($dir, $type) {
+    public function getSize($dir, $type)
+    {
         $this->getSizeOf($dir);
         return $this->total[mb_strtolower($type)];
     }
@@ -47,7 +51,8 @@ class DirectoryManipulation {
      * @param string $dir
      * @return array
      */
-    public static function openDir($dir) {
+    public static function openDir($dir)
+    {
         if (!is_dir($dir)) {
             throw new Exception("Parameter '$dir' is not a directory");
         }
@@ -63,7 +68,8 @@ class DirectoryManipulation {
         return $out;
     }
 
-    public static function recurseCopy($src, $dst) {
+    public static function recurseCopy($src, $dst)
+    {
         $dir = opendir($src);
         while (false !== ($file = readdir($dir))) {
             if (($file != '.') && ($file != '..')) {
@@ -94,7 +100,8 @@ class DirectoryManipulation {
      * @param integer $days
      * @return void
      */
-    public static function clearDir(string $dir, int $days = 7) {
+    public static function clearDir(string $dir, int $days = 7)
+    {
         $files = self::openDir($dir);
         $format = new Format();
         foreach ($files as $file) {
@@ -112,7 +119,8 @@ class DirectoryManipulation {
         }
     }
 
-    public static function deleteDirectory($pasta) {
+    public static function deleteDirectory($pasta)
+    {
         Helper::directorySeparator($pasta);
         if (!is_dir($pasta)) {
             return true;
@@ -127,5 +135,42 @@ class DirectoryManipulation {
 
         rmdir($pasta);
         return is_dir($pasta);
+    }
+
+    /**
+     * Obtém o timestamp do último arquivo criado no path
+     *
+     * @param string $path
+     * @return integer|null
+     */
+    public static function getLastFileCreated(string $path): ?int
+    {
+        // Obtém a lista de arquivos no diretório
+        $arquivos = scandir($path);
+
+        // Remove os diretórios "." e ".." da lista
+        $arquivos = array_diff($arquivos, array('.', '..'));
+
+        // Inicializa a variável para armazenar a data do último arquivo
+        $dataUltimoArquivo = null;
+
+        // Percorre a lista de arquivos
+        foreach ($arquivos as $arquivo) {
+            $caminhoCompleto = $path . $arquivo;
+
+            // Verifica se é um arquivo
+            if (is_file($caminhoCompleto)) {
+                // Obtém o tempo de modificação do arquivo
+                $dataModificacao = filemtime($caminhoCompleto);
+
+                // Verifica se é o primeiro arquivo ou se a data é mais recente
+                if ($dataUltimoArquivo === null || $dataModificacao > $dataUltimoArquivo) {
+                    $dataUltimoArquivo = $dataModificacao;
+                }
+            }
+        }
+
+        // Verifica se foi encontrado algum arquivo
+        return $dataUltimoArquivo;
     }
 }
