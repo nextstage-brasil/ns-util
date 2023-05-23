@@ -45,11 +45,13 @@ class SmbAdapter implements AdapterInterface
 
     public function getMetadata($path)
     {
-        if (!$this->pathCache[md5((string)$path)]['type']) {
+        if (!isset($this->pathCache[md5((string)$path)]['type'])) {
             $dir_ret = $this->smbclient->dir('', $path);
-            $this->mapFile($dir_ret[0], $path);
+            if (isset($dir_ret[0])) {
+                $this->mapFile($dir_ret[0], $path);
+            }
         }
-        return $this->pathCache[md5((string)$path)];
+        return $this->pathCache[md5((string)$path)] ?? [];
     }
 
     public function getMimetype($path)
@@ -148,13 +150,13 @@ class SmbAdapter implements AdapterInterface
     protected function mapFile($returnOfDir, $path)
     {
         $this->pathCache[md5((string)$path)] = [
-            'type' => $returnOfDir['isdir'] ? 'dir' : 'file',
+            'type' => isset($returnOfDir['isdir']) ? 'dir' : 'file',
             'path' => $returnOfDir['filename'],
             //'contents' => '',
             //'stream' => '',
             'visibility' => 'public',
             'timestamp' => (int) ($returnOfDir['mtime'] ?? 0),
-            'size' => (int) ((!$returnOfDir['isdir']) ? $returnOfDir['size'] : 0),
+            'size' => (int) (isset($returnOfDir['isdir']) ? $returnOfDir['size'] : 0),
             'mimetype' => \NsUtil\Storage\libs\Mimes::getMimeType($returnOfDir['filename'])
         ];
         return $this->pathCache[md5((string)$path)];
