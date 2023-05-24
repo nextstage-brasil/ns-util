@@ -109,3 +109,32 @@ if (!function_exists('__tr')) {
         return Translate::get($key, $lang);
     }
 }
+
+if (!function_exists('nsCommand')) {
+
+    /**
+     * Execute the functions on commands
+     *
+     * @param string $command
+     * @param string $logfile
+     * @param boolean $withNohup
+     * @return void
+     */
+    function nsCommand(
+        $command,
+        $logfile = null,
+        $withNohup = false
+
+    ) {
+        if (!file_exists(Helper::getPathApp() . '/nsutil')) {
+            throw new \Exception("File 'nsutil' not found");
+        }
+
+        $cmd = "cd " . Helper::getPathApp() . " && ";
+        $cmd .= $withNohup ? '/usr/bin/nohup ' : '';
+        $cmd .= '/usr/bin/php nsutil ' . $command;
+        $cmd .= $logfile ? " >> $logfile " : '';
+        $cmd .= $withNohup ? ' & ' : '';
+        return shell_exec($cmd);
+    }
+}
