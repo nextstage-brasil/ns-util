@@ -2,6 +2,9 @@
 
 namespace NsUtil;
 
+use NsUtil\Financial\Round;
+use NsUtil\Financial\Rounders\ABNT_NBR_5891;
+
 function ns_nextstage(): void
 {
     echo "\n### NsUtil functions is loaded! ### \n";
@@ -136,5 +139,25 @@ if (!function_exists('nsCommand')) {
         $cmd .= $logfile ? " >> $logfile " : '';
         $cmd .= $withNohup ? ' & ' : '';
         return shell_exec($cmd);
+    }
+}
+
+if (!function_exists('roundMoneyABNT5891')) {
+
+    /**
+     * Execute the functions on commands
+     *
+     * @param string $command
+     * @param string $logfile
+     * @param boolean $withNohup
+     * @return void
+     */
+    function roundMoneyABNT5891(
+        $value,
+        $precision = 2
+    ) {
+        return Round::handle(
+            new ABNT_NBR_5891($value, $precision)
+        );
     }
 }
