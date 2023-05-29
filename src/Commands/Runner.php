@@ -47,6 +47,7 @@ class Runner
     {
         try {
             $pathToCommands ??= Helper::getPathApp() . '/src/Console/Commands';
+            Helper::mkdir($pathToCommands);
             $command = $argv[1] ?? null;
 
             if (null == $command) {
