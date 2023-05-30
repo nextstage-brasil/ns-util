@@ -2,8 +2,11 @@
 
 namespace NsUtil\Integracao\Gitlab;
 
+use Exception;
 use NsUtil\Exceptions\ModelNotFoundException;
 use NsUtil\Integracao\Gitlab;
+
+use function NsUtil\dd;
 
 class Issue
 {
@@ -31,7 +34,12 @@ class Issue
             $data = $this->client->read(
                 "projects/" . $this->client->getIdProject() . "/issues",
                 $this->iid
-            )->content;
+            );
+
+            if ([] === $data || null === $data) {
+                throw new Exception('Issue not found: ' . $this->iid . ' on project ' . $this->client->getIdProject());
+            }
+
             $this->setIssue($data, false);
         } catch (\Exception $exc) {
             throw new ModelNotFoundException($exc->getMessage());

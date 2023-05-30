@@ -5,11 +5,13 @@ namespace NsUtil\Integracao;
 use Exception;
 use NsUtil\Helper;
 
-class Gitlab {
+class Gitlab
+{
 
     private $config, $depara, $project;
 
-    public function __construct(string $token, string $url = 'https://gitlab.com/api/v4') {
+    public function __construct(string $token, string $url = 'https://gitlab.com/api/v4')
+    {
         $this->config = new \NsUtil\Config([
             'token' => $token,
             'url' => $url
@@ -22,21 +24,25 @@ class Gitlab {
         $this->config->set('gl-version', $ret->content['version']);
     }
 
-    private function getFromDePara($chave, $valor) {
+    private function getFromDePara($chave, $valor)
+    {
         return ((isset($this->depara[$chave][$valor])) ? $this->depara[$chave][$valor] : $valor);
     }
 
-    public function setIdProject(int $idProject) {
+    public function setIdProject(int $idProject)
+    {
         $this->config->set('idProject', $idProject);
         $this->config->set('rProject', 'projects/' . $idProject);
         return $this;
     }
 
-    public function getIdProject() {
+    public function getIdProject()
+    {
         return $this->config->get('idProject');
     }
 
-    public function projectRead() {
+    public function projectRead()
+    {
         $this->project = $this->fetch('projects/' . $this->getIdProject())->content;
         return $this->project;
     }
@@ -50,7 +56,8 @@ class Gitlab {
      * @param string $method
      * @return object
      */
-    private function fetch(string $resource, array $data = [], string $method = 'GET'): object {
+    private function fetch(string $resource, array $data = [], string $method = 'GET'): object
+    {
         $header = ['PRIVATE-TOKEN:' . $this->config->get('token')];
 
         $url = $this->config->get('url')
@@ -85,7 +92,8 @@ class Gitlab {
      * @param string $resource
      * @return array
      */
-    public function list(string $resource): array {
+    public function list(string $resource): array
+    {
         $out = [];
         $page = 1;
         do {
@@ -99,16 +107,19 @@ class Gitlab {
 
     /**
      * Faz a a leitura de um item especifico do resource
-     * @param type $resource
-     * @param type $id
-     * @param type $action
-     * @return type
+     *
+     * @param string $resource
+     * @param id $id
+     * @param string $action
+     * @return array
      */
-    public function read($resource, $id, $action = null) {
+    public function read($resource, $id, $action = null)
+    {
         return $this->fetch($resource . '/' . $id . (($action !== null) ? '/' . $action : ''))->content;
     }
 
-    private function issueSetDateFormat(&$data) {
+    private function issueSetDateFormat(&$data)
+    {
         $format = new \NsUtil\Format();
         if (isset($data['due_date'])) {
             $data['due_date'] = $format->setString($data['due_date'])->date('arrumar', false, true);
@@ -121,7 +132,8 @@ class Gitlab {
         }
     }
 
-    public function issueAdd($title, array $data = []) {
+    public function issueAdd($title, array $data = [])
+    {
         $this->issueSetDateFormat($data);
         $resource = $this->config->get('rProject') . '/issues';
         $data['title'] = substr((string)$title, 0, 255);
@@ -135,7 +147,8 @@ class Gitlab {
         }
     }
 
-    public function issueEdit($issue_iid, array $data) {
+    public function issueEdit($issue_iid, array $data)
+    {
         $this->issueSetDateFormat($data);
         $resource = $this->config->get('rProject') . '/issues/' . $issue_iid;
         $method = 'PUT';
@@ -150,14 +163,16 @@ class Gitlab {
      * @param array $labels
      * @return array
      */
-    public function setLabels(int $idProject, int $issue_iid, array $labels): array {
+    public function setLabels(int $idProject, int $issue_iid, array $labels): array
+    {
         $this->setIdProject($idProject);
         return $this->issueEdit($issue_iid, [
             'labels' => implode(',', $labels)
         ]);
     }
 
-    public function setEstimate($issue_iid, $estimate) {
+    public function setEstimate($issue_iid, $estimate)
+    {
         if (strlen((string)$estimate) <= 0) {
             return;
         }
@@ -168,7 +183,8 @@ class Gitlab {
         return $ret->content;
     }
 
-    public function clearSpentTime($issue_iid) {
+    public function clearSpentTime($issue_iid)
+    {
         $resource = $this->config->get('rProject') . '/issues/' . $issue_iid . '/reset_spent_time';
         $data = [];
         $method = 'POST';
@@ -176,7 +192,8 @@ class Gitlab {
         return $ret;
     }
 
-    public function setSpend($issue_iid, $spend) {
+    public function setSpend($issue_iid, $spend)
+    {
         if (strlen((string)$spend) <= 0) {
             return;
         }
@@ -188,7 +205,8 @@ class Gitlab {
         return $ret->content;
     }
 
-    public function addComments($issue_iid, $body, $createdAt = false) {
+    public function addComments($issue_iid, $body, $createdAt = false)
+    {
         $resource = $this->config->get('rProject') . '/issues/' . $issue_iid . '/notes';
         $data = ['body' => $body, 'created_at' => $createdAt];
         $this->issueSetDateFormat($data);
@@ -201,7 +219,8 @@ class Gitlab {
         return $ret->content;
     }
 
-    private function trelloSetMarkdown($text) {
+    private function trelloSetMarkdown($text)
+    {
         $from = ["\n"];
         $to = ["\n\n"];
         foreach (['*', '**'] as $val) {
@@ -222,7 +241,8 @@ class Gitlab {
      * @param type $ignoreClosedList Caso true, os cards em listas arquivadas não serão importados
      * @return string
      */
-    public function importFromJsonTrello(string $fileJson, array $depara, string $timeEstimatedName, string $timeSpendName, $ignoreClosedList = true) {
+    public function importFromJsonTrello(string $fileJson, array $depara, string $timeEstimatedName, string $timeSpendName, $ignoreClosedList = true)
+    {
         if (!file_exists($fileJson)) {
             return 'Arquivo não localizado: ' . $fileJson;
         }
@@ -433,7 +453,8 @@ class Gitlab {
         ];
     }
 
-    public function milestoneAdd($title, $description = '', $local = 'projects', $startDate = '', $dueDate = '') {
+    public function milestoneAdd($title, $description = '', $local = 'projects', $startDate = '', $dueDate = '')
+    {
         switch ($local) {
             case 'projects':
                 $resource = 'projects/' . $this->getIdProject() . '/milestones';
