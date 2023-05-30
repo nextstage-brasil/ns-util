@@ -13,7 +13,7 @@ function ns_nextstage(): void
 /**
  * JsonDecode, com tratamento das regras aplicadas no >php8
  *
- * @param [type] $json
+ * @param mixed $json
  * @param boolean $assoc
  * @param integer $depth
  * @param integer $options
@@ -30,11 +30,13 @@ function json_decode($json, bool $assoc = false, int $depth = 512, int $options 
             $data = $json;
             break;
         default:
+            $json = str_replace(['&#34;'], ['"'], $json);
             $data = \json_decode($json, $assoc, $depth, $options);
             break;
     }
+
     return \json_decode(
-        json_encode($data),
+        \json_encode($data),
         $assoc,
         $depth,
         $options
