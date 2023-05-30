@@ -53,6 +53,12 @@ class Issue
         return $this->issue;
     }
 
+    public function update(array $data)
+    {
+        $this->client->issueEdit($this->iid, $data);
+        return $this->load();
+    }
+
     /**
      *
      * @param array $data
