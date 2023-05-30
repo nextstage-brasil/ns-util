@@ -40,6 +40,11 @@ class Issue
         return $this;
     }
 
+    public function getData()
+    {
+        return $this->issue;
+    }
+
     /**
      *
      * @param array $data
