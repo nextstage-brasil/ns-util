@@ -102,9 +102,9 @@ class Issue
         return $this;
     }
 
-    public function setEstimate(int $estimate)
+    public function setEstimate(int $estimateInSeconds)
     {
-        $this->client->setEstimate($this->issue['iid'], $estimate);
+        $this->client->setEstimate($this->issue['iid'], $estimateInSeconds . 's');
         return $this->load();
     }
 }
