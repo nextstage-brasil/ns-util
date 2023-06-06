@@ -4,14 +4,17 @@ namespace NsUtil;
 
 use Exception;
 
-class Validate {
+class Validate
+{
 
     private $obrigatorios = [];
 
-    public function __construct() {
+    public function __construct()
+    {
     }
 
-    public static function validaCpfCnpj($val) {
+    public static function validaCpfCnpj($val)
+    {
         $val = (string) (new Format($val))->parseInt();
         if (strlen((string) $val) === 11) {
             return self::validaCPF($val);
@@ -22,7 +25,8 @@ class Validate {
         return 'Preencha corretamente CPF/CNPJ';
     }
 
-    private static function validaCPF($cpf = null) {
+    private static function validaCPF($cpf = null)
+    {
         // Verifica se um número foi informado
         if (empty($cpf) || $cpf === '') {
             return 'CPF Inválido: Vazio';
@@ -66,7 +70,8 @@ class Validate {
         }
     }
 
-    private static function validaCnpj($cnpj = null) {
+    private static function validaCnpj($cnpj = null)
+    {
         $cnpj = (new Format($cnpj))->parseInt();
         if (empty($cnpj) || $cnpj === '') {
             return 'CNPJ Inválido: Vazio';
@@ -82,7 +87,8 @@ class Validate {
         $primeiros_numeros_cnpj = substr((string) $cnpj, 0, 12);
         if (!function_exists('multiplica_cnpj')) {
 
-            function multiplica_cnpj($cnpj, $posicao = 5) {
+            function multiplica_cnpj($cnpj, $posicao = 5)
+            {
                 // Variável para o cálculo
                 $calculo = 0;
                 // Laço para percorrer os item do cnpj
@@ -128,7 +134,8 @@ class Validate {
     }
 
     // Define uma função que poderá ser usada para validar e-mails usando regexp
-    public static function validaEmail($email) {
+    public static function validaEmail($email)
+    {
         return
             $er = "/^(([0-9a-zA-Z]+[-._+&])*[0-9a-zA-Z]+@([-0-9a-zA-Z]+[.])+[a-zA-Z]{2,6}){0,1}$/";
         if (preg_match($er, $email)) {
@@ -145,7 +152,8 @@ class Validate {
      * @param array $valuesToValidate
      * @return array
      */
-    public static function validate(array $keysToValidate, array $valuesToValidate, $throwException = false): array {
+    public static function validate(array $keysToValidate, array $valuesToValidate, $throwException = false): array
+    {
         $v = new Validate();
         foreach ($keysToValidate as $item) {
             $v->addCampoObrigatorio($item);
@@ -159,7 +167,8 @@ class Validate {
         return $errors;
     }
 
-    public function addCampoObrigatorio(string $key, ?string $msg = null, string $type = 'string'): Validate {
+    public function addCampoObrigatorio(string $key, ?string $msg = null, string $type = 'string'): Validate
+    {
         $this->obrigatorios['list'][] = ['key' => $key, 'msg' => (null === $msg ? 'Param ' . $key . ' not found or invalid' : $msg), 'type' => $type];
         return $this;
     }
@@ -168,10 +177,11 @@ class Validate {
      * Valida os dados informados em $data. Caso não seja satisfeito, retorna o codigo definido
      * @param array $data
      * @param \NsUtil\Api $api
-     * @param type $errorCode
-     * @return type
+     * @param int $errorCode
+     * @return void
      */
-    public function runValidateData(array $data, Api $api, $errorCode = 200) {
+    public function runValidateData(array $data, Api $api, $errorCode = 200)
+    {
         $campos = [];
         foreach ($this->obrigatorios['list'] as $item) {
             $campos[] = ['key' => $item['key'], 'value' => $data[$item['key']], 'msg' => $item['msg'], 'type' => $item['type']];
@@ -182,7 +192,8 @@ class Validate {
         }
     }
 
-    public function getValidadeAsArray(array $data): array {
+    public function getValidadeAsArray(array $data): array
+    {
         $campos = [];
         foreach ($this->obrigatorios['list'] as $item) {
             $campos[] = ['key' => $item['key'], 'value' => $data[$item['key']], 'msg' => $item['msg'], 'type' => $item['type']];
@@ -190,7 +201,8 @@ class Validate {
         return \NsUtil\Helper::validarCamposObrigatorios($campos);
     }
 
-    public static function isLuhn(string $n) {
+    public static function isLuhn(string $n)
+    {
         $str = '';
         foreach (str_split(strrev((string) $n)) as $i => $d) {
             $str .= $i % 2 !== 0 ? $d * 2 : $d;
@@ -198,7 +210,29 @@ class Validate {
         return array_sum(str_split($str)) % 10 === 0;
     }
 
-    public static function isImei(string $n): bool {
+    public static function isImei(string $n): bool
+    {
         return self::isLuhn($n) && strlen($n) == 15;
+    }
+
+    /**
+     * Valida os dados e retorna API em caso de erro
+     *
+     * @param Api $api
+     * @param array $keysToValidate example: ['field|type|message']
+     * @return void
+     */
+    public static function validateOrFail(Api $api, $keysToValidate = [], $errorCode = 400)
+    {
+        $val = new Validate();
+        foreach ($keysToValidate as $item) {
+            $parts = explode('|', $item);
+            $val->addCampoObrigatorio(
+                $parts[0],
+                $parts[2] ?? null,
+                $parts[1] ?? 'string'
+            );
+        }
+        $val->runValidateData($api->getBody(), $api, $errorCode);
     }
 }
