@@ -27,8 +27,13 @@ class MakeCommand extends Command
         if (null === $args[0]) {
             throw new \Exception('Name of new command was not informed. Use: php nsutil make:command CommandName');
         }
+
+        // create dir
+        $pathToCommands = Helper::getPathApp() . '/src/Console/Commands';
+        Helper::mkdir($pathToCommands);
+
         $className = ucwords(Helper::name2CamelCase($args[0]));
-        $filename = Helper::getPathApp() . '/src/Console/Commands/' . $className . '.php';
+        $filename = $pathToCommands . "/$className.php";
         $commandName = str_ireplace(['_command', 'command'], '', Helper::sanitize(Helper::reverteName2CamelCase($className)));
         $namespace = Helper::getPsr4Name() . '\Console\Commands';
         $signature = str_ireplace(['_', 'command'], [':', ''], $commandName);
