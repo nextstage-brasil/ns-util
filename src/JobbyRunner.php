@@ -11,17 +11,16 @@ use NsUtil\Log;
 use NsUtil\UniqueExecution;
 use Spatie\Async\Pool;
 
-class JobbyRunner {
+class JobbyRunner
+{
 
     private $logError;
     private $jobs = [];
     private $pool;
     private $printSuccessLog = false;
 
-    public function __construct(?string $logfile = null) {
-        // logError
-        // $this->logError = $pathToLog . DIRECTORY_SEPARATOR . 'NS_JobbyRunner.log';
-        // Log::rotate($this->logError, 5);
+    public function __construct(?string $logfile = null)
+    {
         $this->pool = new Assync();
         if (null !== $logfile) {
             $this->pool->setLogfile($logfile);
@@ -32,28 +31,33 @@ class JobbyRunner {
         }
     }
 
-    public function setAutoload(string $path): JobbyRunner {
+    public function setAutoload(string $path): JobbyRunner
+    {
         $this->pool->setAutoloader($path);
         return $this;
     }
 
-    public function setConcurrency(int $concurrency): JobbyRunner {
+    public function setConcurrency(?int $concurrency = null): JobbyRunner
+    {
         $this->pool->setParallelProccess($concurrency);
         return $this;
     }
 
-    public function setPrintSuccessLog(bool $printSuccessLog): JobbyRunner {
+    public function setPrintSuccessLog(bool $printSuccessLog): JobbyRunner
+    {
         $this->printSuccessLog = $printSuccessLog;
         return $this;
     }
 
-    public function setLogfile(string $logfile): JobbyRunner {
+    public function setLogfile(string $logfile): JobbyRunner
+    {
         $this->pool->setLogfile($logfile);
         return $this;
     }
 
 
-    public function run(string $verboseTitle = null): array {
+    public function run(string $verboseTitle = null): array
+    {
         if (null !== $verboseTitle) {
             $this->pool->setShowLoader($verboseTitle);
         }
@@ -104,7 +108,8 @@ class JobbyRunner {
     }
 
 
-    public function runClosure(string $verboseTitle = null): array {
+    public function runClosure(string $verboseTitle = null): array
+    {
         if (null !== $verboseTitle) {
             $this->pool->setShowLoader($verboseTitle);
         }
