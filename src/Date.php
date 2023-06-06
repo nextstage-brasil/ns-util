@@ -58,6 +58,11 @@ class Date
         return $this;
     }
 
+    public function timestamp(): int
+    {
+        return $this->format('timestamp');
+    }
+
     /**
      * Format the current date and time as a string.
      *
