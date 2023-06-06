@@ -26,12 +26,13 @@ try {
     $className = $params['__CLASS__'];
     $function = $params['__FUNCTION__'];
     $class = new $className();
-    
+
     if (method_exists($class, $function)) {
         $output = $class->$function($params);
         $output = (string) is_string($output) ? $output : json_encode($output);
+
         // Log
-        Log::logTxt($logfile . '_success.log', "[$ref] " . $output);
+        Log::logTxt($logfile . '_success.log', "[$ref] " . $output, true);
     } else {
         throw new Exception("Function  $function not found on class $className");
     }

@@ -186,7 +186,7 @@ class Assync
     }
 
     /**
-     * Undocumented function
+     * Adiciona uma execução chamando uma classe da aplicação
      *
      * @param string $name
      * @param ReflectionClass $class
