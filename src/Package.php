@@ -105,7 +105,6 @@ class Package
         array_pop($itens);
         $path_versionNew = implode(DIRECTORY_SEPARATOR, $itens);
 
-        $init = null;
         if (Helper::getSO() === 'windows') {
             $init = substr((string) $path_versionNew, 0, 2);
         }
@@ -115,16 +114,16 @@ class Package
             'version' => "$X.$Y.$Z",
             'version_full' => $versao,
             'path' => $path_versionNew,
-            'init' => $init ? $init . " &&" : "",
+            'init' => (isset(($init)) ? $init . " &&" : ""),
             'bat' => ""
-                . $init ? $init . " &&" : ""
+                . (isset(($init)) ? $init . " &&" : "")
                 . " cd $path_versionNew &&"
                 . " git add .  &&"
                 . " git commit -m \"$message\" &&"
                 . (($createTag) ? " git tag $X.$Y.$Z HEAD &&" : "")
                 . "timeout /t 10",
             'git' => [
-                'local' => $init !== null,
+                'local' => (isset(($init)) ? true : false),
                 'cd' => "cd $path_versionNew",
                 'add' => "git add . ",
                 'commit' => "git commit -m \"$message\" ",
@@ -215,7 +214,8 @@ class Package
                 $build = 'build';
                 break;
             default:
-                throw new  \Exception('Building directory not found1');
+                die('Build directory not found!');
+                break;
         }
         $buildDir = realpath($fontes . DIRECTORY_SEPARATOR . $build);
 

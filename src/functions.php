@@ -81,9 +81,11 @@ if (!function_exists('dd')) {
      * @return void
      */
 
-    function dd($var, ?bool $isHtml = null, bool $showBacktrace = true): void
+    function dd(...$params): void
     {
-        echo Log::see($var, $isHtml, $showBacktrace);
+        foreach ($params as $var) {
+            echo Log::see($var);
+        }
         die();
     }
 }

@@ -28,11 +28,14 @@ class MakeMigration extends Command
         if (null === $args[0]) {
             throw new \Exception('Name of new command was not informed. Use: php nsutil make:migration MigrationName');
         }
+
         $className = $args[0];
+
         $path = (getenv('COMMANDS_MIGRATIONS_PATH')
             ? getenv('COMMANDS_MIGRATIONS_PATH')
             : Helper::getPathApp() . '/_build/install/migrations');
         $lastfiletime = DirectoryManipulation::getLastFileCreated($path) ?? time();
+
         $filename = $path
             . DIRECTORY_SEPARATOR
             . date('Ymd_His', $lastfiletime) . '_'

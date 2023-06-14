@@ -61,6 +61,7 @@ class Runner
             unset($argv[0]); //nsutil
             unset($argv[1]); //command
 
+
             $targetClass = null;
 
             foreach ($classNames as $className) {

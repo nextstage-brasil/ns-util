@@ -4,7 +4,6 @@ return '<?php
 
 namespace {namespace};
 
-use NsUtil\Api;
 use NsLibrary\Controller\ApiRest\AbstractApiRestController;
 
 class {classname} extends AbstractApiRestController
@@ -28,8 +27,9 @@ class {classname} extends AbstractApiRestController
     //        $this->create();
     //    }
 
-    //    public function delete(): void {
-    //        $this->response([]);
+    //    public function delete(int $id): void {
+    //        $item = (new OBJECT())->firstOrFail($id)->delete();
+    //        $this->response([], 201);
     //    }
 }
     ';

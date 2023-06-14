@@ -13,11 +13,13 @@ use NsUtil\DirectoryManipulation;
 use NsUtil\Helper;
 use NsUtil\StatusLoader;
 
-class Migrations {
+class Migrations
+{
 
     private $con, $sqlFilePath;
 
-    public function __construct(string $path, ConnectionPostgreSQL $con) {
+    public function __construct(string $path, ConnectionPostgreSQL $con)
+    {
         $this->sqlFilePath = $path;
         $this->con = $con;
         $this->con instanceof ConnectionPostgreSQL;
@@ -45,11 +47,13 @@ class Migrations {
                                             \$procedure\$;");
     }
 
-    private function getHash(string $string): string {
+    private function getHash(string $string): string
+    {
         return \hash('sha256', $string);
     }
 
-    public function create(string $name, string $sql, bool $includeDate = true): Migrations {
+    public function create(string $name, string $sql, bool $includeDate = true): Migrations
+    {
         // Verificar se já existe
         $files = DirectoryManipulation::openDir($this->sqlFilePath);
         asort($files);
@@ -69,7 +73,8 @@ class Migrations {
         return $this;
     }
 
-    public function createByArray(array $list): Migrations {
+    public function createByArray(array $list): Migrations
+    {
         $counter = 1;
         foreach ($list as $title => $sql) {
             $prefix = str_pad((string) $counter, 4, '0', STR_PAD_LEFT);
@@ -82,7 +87,8 @@ class Migrations {
         return $this;
     }
 
-    public function getContentBySQLFileToNsDDLExecute($filepath): string {
+    public function getContentBySQLFileToNsDDLExecute($filepath): string
+    {
         if (!file_exists($filepath)) {
             die("File not exists: $filepath");
         }
@@ -90,7 +96,8 @@ class Migrations {
         return "call ns_ddl_execute('" . str_replace("'", "''", $content) . "')";
     }
 
-    public function update(): array {
+    public function update(): array
+    {
         $files = DirectoryManipulation::openDir($this->sqlFilePath);
         asort($files);
         $this->con->begin_transaction();
@@ -128,21 +135,29 @@ class Migrations {
         return ['error' => false];
     }
 
-    public static function builder(string $pathAplicacao, array $arrayMigrations, array $conPreQuerys = []) {
+    public static function builder(string $pathAplicacao, array $arrayMigrations, array $conPreQuerys = [])
+    {
         $config = new Config(getenv());
-        $config->loadEnvFile(Helper::fileSearchRecursive('.env', $pathAplicacao));
+
+        $env = (Helper::fileSearchRecursive('.env', $pathAplicacao));
+        if ($env) {
+            $config->loadEnvFile($env);
+        }
+
         $con = new ConnectionPostgreSQL($config->get('DBHOST'), $config->get('DBUSER'), $config->get('DBPASS'), $config->get('DBPORT'), $config->get('DBNAME'));
         foreach ($conPreQuerys as $q) {
             $con->executeQuery($q);
         }
+
         $migrations = (new Migrations($pathAplicacao . '/_migrations', $con))
-                ->createByArray($arrayMigrations)
-                ->update()
-        ;
+            ->createByArray($arrayMigrations)
+            ->update();
+
         return $migrations;
     }
 
-    public static function run(string $pathAplicacao, array $conPreQuerys = [], bool $removeDirAfterSuccess = false): array {
+    public static function run(string $pathAplicacao, array $conPreQuerys = [], bool $removeDirAfterSuccess = false): array
+    {
         try {
             $dirMigrations = \realpath($pathAplicacao) . '/_migrations';
             $migrations = ['error' => "Path is not found $dirMigrations"];
@@ -155,8 +170,7 @@ class Migrations {
                 }
                 $con = new ConnectionPostgreSQL($config->get('DBHOST'), $config->get('DBUSER'), $config->get('DBPASS'), $config->get('DBPORT'), $config->get('DBNAME'));
                 $migrations = (new Migrations($pathAplicacao . '/_migrations', $con))
-                        ->update()
-                ;
+                    ->update();
                 if ($migrations['error'] === false && $removeDirAfterSuccess) {
                     Helper::deleteDir($dirMigrations);
                     if (is_dir($dirMigrations)) {
@@ -172,7 +186,8 @@ class Migrations {
         return $migrations;
     }
 
-    public static function loadFromPath(string $path): array {
+    public static function loadFromPath(string $path): array
+    {
         if (!is_dir($path)) {
             throw new Exception("Path '$path' is not a directory");
         }
@@ -186,5 +201,4 @@ class Migrations {
         }
         return $migrations;
     }
-
 }

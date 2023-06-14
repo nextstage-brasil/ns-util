@@ -10,6 +10,12 @@ use NsUtil\Log;
 
 abstract class Command implements CommandInterface
 {
+
+    public function __construct()
+    {
+    }
+
+
     private function logger($message)
     {
         if (getenv('COMMANDS_LOGFILE')) {

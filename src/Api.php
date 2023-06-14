@@ -3,6 +3,7 @@
 namespace NsUtil;
 
 use Closure;
+use NsUtil\Exceptions\ModelNotFoundException;
 
 class Api
 {
@@ -408,7 +409,7 @@ class Api
         }
         $this->responseMerge([
             'status' => $this->responseCode,
-            'elapsedTime' => $this->eficiencia->end()->time,
+            // 'elapsedTime' => $this->eficiencia->end()->time,
         ]);
 
         // Sanitização
@@ -615,7 +616,13 @@ class Api
      */
     public function rest(string $namespace): void
     {
-        self::restFull($namespace, $this);
+        try {
+            self::restFull($namespace, $this);
+        } catch (ModelNotFoundException) {
+            $this->error('Not found', self::HTTP_NOT_FOUND);
+        } catch (\Exception $exc) {
+            $this->error($exc->getMessage(), $exc->getCode() ?? self::HTTP_BAD_REQUEST);
+        }
     }
 
     /**

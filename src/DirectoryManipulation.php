@@ -147,6 +147,9 @@ class DirectoryManipulation
     {
         // Obtém a lista de arquivos no diretório
         $arquivos = scandir($path);
+        if ($arquivos === false) {
+            return -1;
+        }
 
         // Remove os diretórios "." e ".." da lista
         $arquivos = array_diff($arquivos, array('.', '..'));
