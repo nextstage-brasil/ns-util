@@ -192,4 +192,18 @@ class Format
 
         return (string) $out;
     }
+
+    public function cpfCnpj(): string
+    {
+        $var = self::parseInt((string)$this->string);
+
+        if (strlen((string) $var) === 11) { // cpf
+            $out = substr((string) $var, 0, 3) . '.' . substr((string) $var, 3, 3) . '.' . substr((string) $var, 6, 3) . '-' . substr((string) $var, 9, 2);
+        } else if (strlen((string) $var) === 14) { // cnpj
+            $out = substr((string) $var, 0, 2) . '.' . substr((string) $var, 2, 3) . '.' . substr((string) $var, 5, 3) . '/' . substr((string) $var, 8, 4) . '-' . substr((string) $var, 12, 2);
+        } else {
+            $out = $var;
+        }
+        return (string) $out;
+    }
 }
