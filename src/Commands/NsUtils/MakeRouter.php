@@ -7,14 +7,14 @@ use NsUtil\Helper;
 use NsUtil\Template;
 use NsUtil\Commands\Abstracts\Command;
 
-class MakeCommand extends Command
+class MakeRouter extends Command
 {
     /**
      * The signature of the command.
      *
      * @var string
      */
-    protected $signature = 'make:command';
+    protected $signature = 'make:router';
 
     /**
      * Handles the execution of the command.
@@ -25,11 +25,11 @@ class MakeCommand extends Command
     public function handle(array $args): void
     {
         if (null === $args[0]) {
-            throw new \Exception('Name of new command was not informed. Use: php nsutil make:command CommandName');
+            throw new \Exception('Name of new router was not informed. Use: php nsutil make:router RouterName');
         }
 
         // create dir
-        $pathToCommands = Helper::getPathApp() . '/src/Console/Commands';
+        $pathToCommands = Helper::getPathApp() . '/src/Routers';
         Helper::mkdir($pathToCommands);
 
         $className = ucwords(Helper::name2CamelCase($args[0]));
@@ -37,7 +37,7 @@ class MakeCommand extends Command
         $commandName = str_ireplace(['_command', 'command'], '', Helper::sanitize(Helper::reverteName2CamelCase($className)));
         $namespace = Helper::getPsr4Name() . '\Console\Commands';
         $signature = str_ireplace(['_', 'command'], [':', ''], $commandName);
-        $template = include __DIR__ . '/../Templates/command.php';
+        $template = include __DIR__ . '/../Templates/router.php';
         $content = (new Template($template, [
             'namespace' => $namespace,
             'classname' => $className,
