@@ -618,7 +618,7 @@ class Api
     {
         try {
             self::restFull($namespace, $this);
-        } catch (ModelNotFoundException) {
+        } catch (ModelNotFoundException $exc) {
             $this->error('Not found', self::HTTP_NOT_FOUND);
         } catch (\Exception $exc) {
             $this->error($exc->getMessage(), $exc->getCode() ?? self::HTTP_BAD_REQUEST);
