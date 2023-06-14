@@ -146,12 +146,14 @@ class IRRF
      */
     private function getDeducaoByAliquota(float $aliquota): float
     {
-        $item = array_filter($this->config, fn ($item) => $item['aliquota'] === $aliquota);
-        if (!isset($item[0]['deducao'])) {
+        $filtered = array_values(
+            array_filter($this->config, fn ($item) => $item['aliquota'] === $aliquota)
+        );
+        if (!isset($filtered[0]['deducao']) || $filtered[0]['deducao'] === null) {
             throw new ConfigNotFoundException("Tax table for aliquota $aliquota not found");
         }
 
-        return array_values($item[0])['deducao'];
+        return $filtered[0]['deducao'];
     }
 
     /**
