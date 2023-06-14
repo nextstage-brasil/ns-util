@@ -3,8 +3,12 @@
 namespace NsUtil\IRPF;
 
 use DateTime;
+use NsUtil\Financial\Round;
+use NsUtil\Financial\Rounders\ABNT_NBR_5891;
 use NsUtil\IRPF\Exception\ConfigNotFoundException;
 use NsUtil\IRPF\Exception\LiquidValueNotSetted;
+
+use function NsUtil\dd;
 
 /**
  * Class IRRF
@@ -18,24 +22,25 @@ class IRRF
      */
     private const TABELA = [
         202305 => [
-            4664.68 => ['aliquota' => 0.275, 'deducao' => 884.96],
-            3751.06 => ['aliquota' => 0.225, 'deducao' => 651.73],
-            2826.66 => ['aliquota' => 0.15, 'deducao' => 370.40],
-            2112.01 => ['aliquota' => 0.075, 'deducao' => 158.4],
-            0.0 => ['aliquota' => 0.0, 'deducao' => 0.0],
+            '4664.68' => ['aliquota' => 0.275, 'deducao' => 884.96],
+            '3751.06' => ['aliquota' => 0.225, 'deducao' => 651.73],
+            '2826.66' => ['aliquota' => 0.15, 'deducao' => 370.40],
+            '2112.01' => ['aliquota' => 0.075, 'deducao' => 158.4],
+            '0.0' => ['aliquota' => 0.0, 'deducao' => 0.0],
         ],
         201504 => [
-            4664.69 => ['aliquota' => 0.275, 'deducao' => 869.36],
-            3751.06 => ['aliquota' => 0.225, 'deducao' => 636.13],
-            2826.66 => ['aliquota' => 0.15, 'deducao' => 354.8],
-            1903.99 => ['aliquota' => 0.075, 'deducao' => 142.8],
-            0.0 => ['aliquota' => 0.0, 'deducao' => 0.0],
+            '4664.69' => ['aliquota' => 0.275, 'deducao' => 869.36],
+            '3751.06' => ['aliquota' => 0.225, 'deducao' => 636.13],
+            '2826.66' => ['aliquota' => 0.15, 'deducao' => 354.8],
+            '1903.99' => ['aliquota' => 0.075, 'deducao' => 142.8],
+            '0.0' => ['aliquota' => 0.0, 'deducao' => 0.0],
         ],
     ];
 
     private array $config;
     private float $valorLiquido;
     private float $valorBruto;
+    private int $tabela;
 
     /**
      * IRRF constructor.
@@ -46,9 +51,9 @@ class IRRF
      */
     public function __construct(DateTime $dataPagamento)
     {
-        $tabela = (int) date('Ym', $dataPagamento->getTimestamp());
+        $this->tabela = (int) date('Ym', $dataPagamento->getTimestamp());
         $config = array_values(
-            array_filter(self::TABELA, fn ($item) => $tabela > $item, ARRAY_FILTER_USE_KEY)
+            array_filter(self::TABELA, fn ($item) => $this->tabela >= $item, ARRAY_FILTER_USE_KEY)
         );
 
         if (!isset($config[0])) {
@@ -75,7 +80,11 @@ class IRRF
             return 0.0;
         }
 
-        return $this->calculo($this->valorLiquido);
+        $irpf = $this->calculo();
+
+        // return $irpf;
+
+        return Round::handle(new ABNT_NBR_5891($irpf));
     }
 
     /**
@@ -118,9 +127,9 @@ class IRRF
      */
     private function irrfEscolheTaxa(): array
     {
-        $configs = array_values(array_filter($this->config, fn ($valorLimite) => $this->valorLiquido >= $valorLimite, ARRAY_FILTER_USE_KEY));
+        $configs = array_values(array_filter($this->config, fn ($valorLimite) => $this->valorLiquido >= (float) $valorLimite, ARRAY_FILTER_USE_KEY));
         if (!isset($configs[0])) {
-            throw new ConfigNotFoundException();
+            throw new ConfigNotFoundException('Tax not found');
         }
 
         return $configs[0];
