@@ -2,13 +2,15 @@
 
 namespace NsUtil;
 
-class Html {
+class Html
+{
 
-    public function __construct() {
-        
+    public function __construct()
+    {
     }
 
-    public static function hint($text, $position = "top") {
+    public static function hint($text, $position = "top")
+    {
         return ' data-toggle="tooltip" data-placement="' . $position . '" data-html="true" title="' . $text . '" ';
     }
 
@@ -23,8 +25,9 @@ class Html {
      * @param type $onChange
      * @return \stdClass
      */
-    public static function inputDatePickersGetLeftAndRight($labelA, $labelB, $modelA, $modelB, $minDate, $maxDate, $onChange = '') {
-        $out = new stdClass();
+    public static function inputDatePickersGetLeftAndRight($labelA, $labelB, $modelA, $modelB, $minDate, $maxDate, $onChange = '')
+    {
+        $out = new \stdClass();
         $out->left = Html::inputDatePickerDependente($labelA, $modelA, $minDate, $modelB, $onChange);
         $out->right = Html::inputDatePickerDependente($labelB, $modelB, $modelA, $maxDate, $onChange);
         return $out;
@@ -40,20 +43,20 @@ class Html {
      * @param type $readonly
      * @return type
      */
-    public static function inputDatePickerDependente($label, $model, $minDate = false, $maxDate = false, $ngChange = false, $readonly = true) {
+    public static function inputDatePickerDependente($label, $model, $minDate = false, $maxDate = false, $ngChange = false, $readonly = true)
+    {
         $readonly = (($readonly) ? ' readonly="true"' : '');
         return self::input([
-                    'id' => md5((string)$model),
-                    'ng-if' => '!' . $model . '_ro',
-                    'readonly' => $model . '_ro',
-                    'name' => $model,
-                    'datepickernew' => '',
-                    'ng-model' => $model,
-                    'max-date' => '{{' . $maxDate . '}}',
-                    'min-date' => '{{' . $minDate . '}}',
-                    'ng-change' => $ngChange,
-                    'autocomplete' => 'off',
-                        ], $label);
+            'id' => md5((string)$model),
+            'ng-if' => '!' . $model . '_ro',
+            'readonly' => $model . '_ro',
+            'name' => $model,
+            'datepickernew' => '',
+            'ng-model' => $model,
+            'max-date' => '{{' . $maxDate . '}}',
+            'min-date' => '{{' . $minDate . '}}',
+            'ng-change' => $ngChange,
+            'autocomplete' => 'off',
+        ], $label);
     }
-
 }
