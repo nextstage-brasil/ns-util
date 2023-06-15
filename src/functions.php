@@ -146,6 +146,25 @@ if (!function_exists('nsCommand')) {
     }
 }
 
+// wrapper pra nsCommand 
+if (!function_exists('nsUtil')) {
+    /**
+     * Execute the functions on commands
+     *
+     * @param string $command
+     * @param string $logfile
+     * @param boolean $withNohup
+     * @return void
+     */
+    function nsUtil(
+        $command,
+        $logfile = null,
+        $withNohup = false
+    ) {
+        return nsCommand($command, $logfile, $withNohup);
+    }
+}
+
 if (!function_exists('roundMoneyABNT5891')) {
 
     /**

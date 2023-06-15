@@ -2,9 +2,9 @@
 
 namespace NsUtil\Commands\NsUtils;
 
-use NsUtil\ConsoleTable;
 use NsUtil\Helper;
 use NsUtil\Template;
+use NsUtil\ConsoleTable;
 use NsUtil\Commands\Abstracts\Command;
 
 class MakeRouter extends Command
