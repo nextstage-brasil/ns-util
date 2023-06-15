@@ -6,3 +6,5 @@
 /local.php
 my-local.bat
 *.env
+nsutil
+/Console
