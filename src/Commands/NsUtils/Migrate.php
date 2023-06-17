@@ -21,6 +21,11 @@ class Migrate extends Command
      */
     protected $signature = 'migrate';
 
+    public static array $conPreQuerys = [];
+
+    public static string $pathOutput = '/tmp';
+
+
     /**
      * Handles the execution of the command.
      *
@@ -30,19 +35,24 @@ class Migrate extends Command
     public function handle(array $args): void
     {
 
-        $path = Helper::getPathApp() . '/_build/migrations';
+        $path = (getenv('COMMANDS_MIGRATIONS_PATH')
+            ? getenv('COMMANDS_MIGRATIONS_PATH')
+            : Helper::getPathApp() . '/_build/migrations');
 
-        Migrations::builder(
-            '/tmp',
-            Migrations::loadFromPath($path)
+        echo "\n";
+
+        $ret = Migrations::builder(
+            self::$pathOutput,
+            Migrations::loadFromPath($path),
+            self::$conPreQuerys
         );
 
-        Migrations::run(
-            '/tmp',
-            [],
-            true
-        );
+        Helper::deleteDir(self::$pathOutput . '/_migrations');
 
+        if ($ret['error'] !== false) {
+            echo "\n" . ConsoleTable::setColor("Migrate ERROR!", 'red');
+            dd($ret);
+        }
 
         echo "\n"
             . ConsoleTable::setColor('Success!', 'green')

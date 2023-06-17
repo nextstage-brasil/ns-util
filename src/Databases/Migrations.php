@@ -68,7 +68,7 @@ class Migrations
             $filename = $this->sqlFilePath . DIRECTORY_SEPARATOR . (($includeDate) ? date('ymdHi') . '_' : '') . $name . '.nsUtilDB';
             file_put_contents($filename, $sql);
             chmod($filename, 0777);
-            echo "\n$name was successfully created!";
+            // echo "\n$name was successfully created!";
         }
         return $this;
     }

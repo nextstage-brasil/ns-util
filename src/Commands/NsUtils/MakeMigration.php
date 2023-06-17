@@ -33,7 +33,7 @@ class MakeMigration extends Command
 
         $path = (getenv('COMMANDS_MIGRATIONS_PATH')
             ? getenv('COMMANDS_MIGRATIONS_PATH')
-            : Helper::getPathApp() . '/_build/install/migrations');
+            : Helper::getPathApp() . '/_build/migrations');
         $lastfiletime = DirectoryManipulation::getLastFileCreated($path) ?? time();
 
         $filename = $path
