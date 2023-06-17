@@ -160,7 +160,6 @@ class DirectoryManipulation
         // Percorre a lista de arquivos
         foreach ($arquivos as $arquivo) {
             $caminhoCompleto = $path . DIRECTORY_SEPARATOR .  $arquivo;
-            echo $caminhoCompleto . PHP_EOL;
 
             // Verifica se é um arquivo
             if (is_file($caminhoCompleto)) {
