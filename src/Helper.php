@@ -154,9 +154,8 @@ class Helper
      * @param array $prefixo
      * @return string|array
      */
-    public static function name2CamelCase($string, $prefixo = false)
+    public static function name2CamelCase($string, array $prefixo = ['mem_', 'sis_', 'anz_', 'aux_', 'app_'])
     {
-        $prefixo = array('mem_', 'sis_', 'anz_', 'aux_', 'app_');
         if (is_array($string)) {
             foreach ($string as $key => $value) {
                 $out[self::name2CamelCase($key)] = $value;
