@@ -127,6 +127,28 @@ class Config
     }
 
 
+    /**
+     * Faz a leitura de arquivos com padrão return [] dentro do diretorio informado
+     *
+     * @param string $path
+     * @return Config
+     */
+    public function loadFromPathConfig($path)
+    {
+        try {
+            $files = DirectoryManipulation::openDir($path);
+            foreach ($files as $config) {
+                $key = explode('.', $config)[0];
+                $this->settings[$key] = include($path . '/' . $config);
+            }
+        } catch (\Exception $exc) {
+            // dir config is not found
+        }
+
+        return $this;
+    }
+
+
 
     /**
      * Set the fallback.
