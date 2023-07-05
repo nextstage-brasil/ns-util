@@ -136,6 +136,7 @@ class Config
     public function loadFromPathConfig($path)
     {
         try {
+
             $files = DirectoryManipulation::openDir($path);
             foreach ($files as $config) {
                 $key = explode('.', $config)[0];
