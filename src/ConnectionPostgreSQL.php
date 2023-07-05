@@ -179,7 +179,29 @@ class ConnectionPostgreSQL
     {
         $this->open();
         $out = [];
-        $this->executeQuery($query, $log);
+        $this->executeQuery($query);
+        while ($dd = $this->next()) {
+            if ($keyCamelCaseFormat) {
+                $dd = Helper::name2CamelCase($dd);
+            }
+            $out[] = $dd;
+        }
+        return $out;
+    }
+
+    /**
+     * Executa e retonar a query formatada com nameCase
+     *
+     * @param string $query
+     * @param boolean $log
+     * @param boolean $keyCamelCaseFormat
+     * @return array
+     */
+    public function execQueryAndReturnPrepared(string $query, ?array $params, bool $keyCamelCaseFormat = true): array
+    {
+        $this->open();
+        $out = [];
+        $this->executeQuery($query, $params);
         while ($dd = $this->next()) {
             if ($keyCamelCaseFormat) {
                 $dd = Helper::name2CamelCase($dd);

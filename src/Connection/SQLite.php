@@ -7,7 +7,8 @@ use NsUtil\Helper;
 use PDO;
 use stdClass;
 
-class SQLite {
+class SQLite implements ConnectionInterface
+{
 
     private $con; // garantir o singleton
     private $config;
@@ -20,13 +21,15 @@ class SQLite {
     private static $transaction_in_progress;
     private $nullas = '';
 
-    public function __construct($filename) {
+    public function __construct($filename)
+    {
         $this->config = new stdClass();
         $this->config->filename = $filename;
         $this->open();
     }
 
-    public function open() {
+    public function open()
+    {
         if (!$this->con) {
             try {
                 $stringConnection = 'sqlite:' . $this->config->filename;
@@ -39,15 +42,18 @@ class SQLite {
         }
     }
 
-    public function getConn() {
+    public function getConn()
+    {
         return $this->con;
     }
 
-    public function close() {
+    public function close()
+    {
         $this->con = null;
     }
 
-    public function begin_transaction() {
+    public function begin_transaction()
+    {
         if (!self::$transaction_in_progress) {
             $this->executeQuery('BEGIN');
             self::$transaction_in_progress = true;
@@ -55,28 +61,33 @@ class SQLite {
         }
     }
 
-    public function __shutdown_check() {
+    public function __shutdown_check()
+    {
         $this->con = null;
         if (self::$transaction_in_progress) {
             $this->rollback();
         }
     }
 
-    public function commit() {
+    public function commit()
+    {
         $this->executeQuery("COMMIT");
         self::$transaction_in_progress = false;
     }
 
-    public function rollback() {
+    public function rollback()
+    {
         $this->executeQuery("ROLLBACK");
         self::$transaction_in_progress = false;
     }
 
-    public function autocommit($boolean) {
+    public function autocommit($boolean)
+    {
         $this->con->autocommit($boolean);
     }
 
-    public function executeQuery($query) {
+    public function executeQuery($query, $params = null)
+    {
         $this->open();
         $res = false;
         $this->numRows = 0;
@@ -86,7 +97,13 @@ class SQLite {
 
         try {
             $this->result = $this->con->prepare($query);
-            if (!$this->result->execute()) {
+            if (null !== $params && is_array($params)) {
+                $res = $this->result->execute($params);
+            } else {
+                $res = $this->result->execute();
+            }
+
+            if (!$res) {
                 $this->error = $this->result->errorInfo()[2];
                 throw new Exception($this->result->errorInfo()[0] . $this->result->errorInfo()[2], 0);
             }
@@ -102,7 +119,8 @@ class SQLite {
         return $res;
     }
 
-    public function next() {
+    public function next()
+    {
         try {
             if ($this->result) {
                 $dados = $this->result->fetch(PDO::FETCH_ASSOC);
@@ -126,7 +144,8 @@ class SQLite {
      * @param boolean $keyCamelCaseFormat
      * @return array
      */
-    public function execQueryAndReturn(string $query, bool $log = true, bool $keyCamelCaseFormat = true): array {
+    public function execQueryAndReturn(string $query, bool $log = true, bool $keyCamelCaseFormat = true): array
+    {
         $this->open();
         $out = [];
         $this->executeQuery($query, $log);
@@ -139,11 +158,13 @@ class SQLite {
         return $out;
     }
 
-    public function setNullAs($nullAs = '') {
+    public function setNullAs($nullAs = '')
+    {
         $this->nullas = $nullAs;
     }
 
-    public function insert($table, $array, $nomeCpoId, $onConflict = null) {
+    public function insert($table, $array, $nomeCpoId, $onConflict = null)
+    {
         $preValues = $update = $valores = [];
         foreach ($array as $key => $value) {
             $keys[] = $key;
@@ -175,7 +196,8 @@ class SQLite {
         }
     }
 
-    public function update($table, $array, $cpoWhere) {
+    public function update($table, $array, $cpoWhere)
+    {
         $update = $valores = [];
         $idWhere = $array[$cpoWhere];
         unset($array[$cpoWhere]);
@@ -202,5 +224,27 @@ class SQLite {
             $this->result = false;
             throw new Exception($exc->getMessage() . $query);
         }
+    }
+
+    /**
+     * Executa e retonar a query formatada com nameCase
+     *
+     * @param string $query
+     * @param boolean $log
+     * @param boolean $keyCamelCaseFormat
+     * @return array
+     */
+    public function execQueryAndReturnPrepared(string $query, ?array $params, bool $keyCamelCaseFormat = true): array
+    {
+        $this->open();
+        $out = [];
+        $this->executeQuery($query, $params);
+        while ($dd = $this->next()) {
+            if ($keyCamelCaseFormat) {
+                $dd = Helper::name2CamelCase($dd);
+            }
+            $out[] = $dd;
+        }
+        return $out;
     }
 }

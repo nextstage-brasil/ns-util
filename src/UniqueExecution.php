@@ -12,25 +12,31 @@ class UniqueExecution
 
     public function __construct(string $dbName = 'defaultApplication', string $pathToDB = '/tmp')
     {
-        $user = posix_getpwuid(posix_geteuid())['name'];
-        $pathToDB = (($pathToDB === '/tmp') ? Helper::getTmpDir() : $pathToDB);
-        $db = $pathToDB . '/' . 'NSUniqueExecution';
-        $this->con = new SQLite($db);
-        $this->ref = $dbName;
-        $this->createDB();
-        // date_default_timezone_set('UTC');
+        $defaultConnection = getenv('UNIQUE_EXECUTION_DRIVER') ? getenv('UNIQUE_EXECUTION_DRIVER') : 'sqlite';
 
-        if ($user !== 'root') {
-            @chmod($db, 0777);
-            // @chown($db, 'root');
-            // @chgrp($db, 'root');
+        switch ($defaultConnection) {
+            case 'psql':
+                $this->con = ConnectionPostgreSQL::getConnectionByEnv();
+                break;
+                //sqlite
+            default:
+                $user = posix_getpwuid(posix_geteuid())['name'];
+                $pathToDB = (($pathToDB === '/tmp') ? Helper::getTmpDir() : $pathToDB);
+                $db = $pathToDB . '/' . 'NSUniqueExecution';
+                $this->con = new SQLite($db);
+                if ($user !== 'root') {
+                    @chmod($db, 0777);
+                }
+                break;
         }
+
+        $this->ref = $dbName;
+
+        $this->createDB();
     }
 
-    public static function create(
-        string $dbName = 'defaultApplication',
-        int $secondsLimit = 3600
-    ): UniqueExecution {
+    public static function create(string $dbName = 'defaultApplication', int $secondsLimit = 3600): UniqueExecution
+    {
         $ret = new UniqueExecution($dbName);
         $ret->start($secondsLimit, true);
         return $ret;
@@ -39,15 +45,14 @@ class UniqueExecution
     // Cria a tabela necessária para execução
     private function createDB(): void
     {
-        $query = 'CREATE TABLE IF NOT EXISTS "execution" (
+        $query = 'CREATE TABLE IF NOT EXISTS "_execution_lock" (
             "ref" TEXT PRIMARY KEY,
             "inited_at" INTEGER
         )';
         try {
             $this->con->executeQuery($query);
         } catch (Exception $exc) {
-            echo $exc->getMessage();
-            die();
+            throw new \Exception('UNIQUE EXECUTION ERROR - CONNECT DB: ' . $exc->getMessage());
         }
     }
 
@@ -60,8 +65,12 @@ class UniqueExecution
      */
     public function isRunning(int $timeLimit = 3600, bool $throwException = false): bool
     {
-        $query = 'SELECT COUNT(*) AS counter FROM "execution" WHERE ref="' . $this->ref . '" AND inited_at > ' . (time() - $timeLimit);
-        $counter = $this->con->execQueryAndReturn($query)[0]['counter'];
+        $query = 'SELECT COUNT(*) AS counter FROM "_execution_lock" WHERE ref = :ref AND inited_at > :timeLimit';
+        $counter = $this->con->execQueryAndReturnPrepared($query, [
+            'ref' => $this->ref,
+            'timeLimit' => time() - $timeLimit
+        ])[0]['counter'];
+
         $isRunning =  $counter > 0;
         if ($isRunning && $throwException) {
             throw new Exception($this->getDefaultMessageIsRunning());
@@ -79,9 +88,13 @@ class UniqueExecution
     public function start(int $timeTocheckAnotherExecution = 3600, bool $throwExceptionIfIsRunning = false)
     {
         $this->isRunning($timeTocheckAnotherExecution, $throwExceptionIfIsRunning);
-        $query = "INSERT INTO execution(ref, inited_at) VALUES('" . $this->ref . "', " . time() . ")
-                  ON CONFLICT(ref) DO UPDATE SET inited_at=" . time();
-        $this->con->executeQuery($query);
+
+        $query = "INSERT INTO \"_execution_lock\" (ref, inited_at) VALUES(?, ?) ON CONFLICT(ref) DO UPDATE SET inited_at = ?";
+
+        $initedAt = time();
+
+        $this->con->executeQuery($query, [$this->ref, $initedAt, $initedAt]);
+
         return $this;
     }
 
@@ -91,8 +104,8 @@ class UniqueExecution
      */
     public function end(): void
     {
-        $query = "DELETE FROM \"execution\" WHERE ref='" . $this->ref . "'";
-        $this->con->executeQuery($query);
+        $query = 'DELETE FROM "_execution_lock" WHERE ref=?';
+        $this->con->executeQuery($query, [$this->ref]);
     }
 
     /**
@@ -102,8 +115,8 @@ class UniqueExecution
     public function getStartedAt(): int
     {
         $out = 0;
-        $query = 'SELECT * FROM "execution" WHERE ref="' . $this->ref . '"';
-        $list = $this->con->execQueryAndReturn($query);
+        $query = 'SELECT * FROM "_execution_lock" WHERE ref=?';
+        $list = $this->con->execQueryAndReturnPrepared($query, [$this->ref]);
         if (count($list) > 0) {
             $out = (int) $list[0]['initedAt'];
         }
