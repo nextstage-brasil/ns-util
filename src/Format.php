@@ -26,11 +26,10 @@ class Format
 
     /**
      * 
-     * @param type $data
-     * @param type $escolha
-     * @param type $datahora
-     * @param type $alterarTimeZone
-     * @return boolean
+     * @param string $escolha
+     * @param bool $datahora
+     * @param bool $alterarTimeZone
+     * @return mixed
      */
     public function date($escolha = 'arrumar', $datahora = false, $alterarTimeZone = false)
     {
@@ -88,6 +87,11 @@ class Format
                 break;
             case 'timestamp':
                 $out = $date->getTimestamp();
+                break;
+            case 'age':
+                $dataAtual = new DateTime();
+                $diferenca = $dataAtual->diff($date);
+                $out = [$diferenca->y, $diferenca->m, $diferenca->d];
                 break;
             default:
                 $out = $date->format('Y-m-d');
