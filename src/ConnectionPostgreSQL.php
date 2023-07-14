@@ -107,7 +107,10 @@ class ConnectionPostgreSQL
 
     public function rollback()
     {
-        $this->executeQuery("ROLLBACK");
+        try {
+            $this->executeQuery('ROLLBACK');
+        } catch (\Exception $exc) {
+        }
         self::$transaction_in_progress = false;
     }
 
