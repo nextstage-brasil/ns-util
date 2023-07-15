@@ -48,8 +48,8 @@ class TMetric extends \NsUtil\Controller\AbstractController
             'accountId' => $this->config->get('accountId'),
             'timeEntryFilter' => $timeEntryFilter,
             'useUtcTime' => 'false',
-            'startDate' => $startDate->format('Y-m-d'),
-            'endDate' => $endDate->format('Y-m-d'),
+            'startDate' => $startDate->sub('1 day')->format('Y-m-d'),
+            'endDate' => $endDate->add('1 day')->format('Y-m-d'),
         ];
         $url = 'reports/summary/tasks';
         $headers = ['Authorization: Bearer ' . $this->config->get('token')];
