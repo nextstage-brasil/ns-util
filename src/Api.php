@@ -418,6 +418,9 @@ class Api
         if ($this->responseCode > 401 && stripos(json_encode($this->responseData), 'SQLSTATE') === false) {
             $this->responseData = ['error' => $this->responseData['error'], 'content' => []];
         }
+
+
+
         return $this->responseData;
     }
 
