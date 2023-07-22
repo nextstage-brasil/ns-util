@@ -415,7 +415,7 @@ class Api
         // Sanitização
         $this->responseData['error'] = (($this->responseData['error'] !== false) ? $this->responseData['error'] : false);
         // if ($this->responseData['error'] !== false || ($this->responseCode > 401 && stripos((string) $this->responseData, 'SQLSTATE') === false)) {
-        if ($this->responseCode > 401 && stripos((string) $this->responseData, 'SQLSTATE') === false) {
+        if ($this->responseCode > 401 && stripos(json_encode($this->responseData), 'SQLSTATE') === false) {
             $this->responseData = ['error' => $this->responseData['error'], 'content' => []];
         }
         return $this->responseData;
