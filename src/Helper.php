@@ -339,6 +339,20 @@ class Helper
             CURLOPT_HEADER => true,
             CURLOPT_VERBOSE => false,
         ];
+
+        if ($ssl) {
+            if (file_exists('/nsutil/cacert.pem')) {
+                $options[CURLOPT_CAINFO] = '/nsutil/cacert.pem';
+            } else {
+                if (!file_exists('/tmp/cacert.pem')) {
+                    $content = Helper::myFileGetContents('https://curl.se/ca/cacert.pem');
+                    Helper::saveFile('/tmp/cacert.pem', false, $content, 'SOBREPOR');
+                }
+                $options[CURLOPT_CAINFO] = '/tmp/cacert.pem';
+            }
+        }
+
+
         $options[CURLOPT_HTTPHEADER] = $header;
 
         if (count($params) > 0) {
