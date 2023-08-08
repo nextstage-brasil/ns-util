@@ -680,8 +680,15 @@ class Helper
      */
     public static function getIP(): string
     {
-        $var = (($_SERVER['HTTP_X_FORWARDED_FOR']) ? 'HTTP_X_FORWARDED_FOR' : 'REMOTE_ADDR');
-        $ip = filter_input(INPUT_SERVER, $var, FILTER_DEFAULT);
+
+        if (strlen($_SERVER['HTTP_X_FORWARDED_FOR']) > 0) {
+            $parts = explode(',', $_SERVER['HTTP_X_FORWARDED_FOR']);
+            $ip = trim(end($parts));
+        } else {
+            $ip = $_SERVER['REMOTE_ADDR'];
+        }
+        // $var = (($_SERVER['HTTP_X_FORWARDED_FOR']) ? 'HTTP_X_FORWARDED_FOR' : 'REMOTE_ADDR');
+        // $ip = filter_input(INPUT_SERVER, $var, FILTER_DEFAULT);
         return Filter::string($ip);
     }
 
