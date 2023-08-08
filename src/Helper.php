@@ -687,8 +687,6 @@ class Helper
         } else {
             $ip = $_SERVER['REMOTE_ADDR'];
         }
-        // $var = (($_SERVER['HTTP_X_FORWARDED_FOR']) ? 'HTTP_X_FORWARDED_FOR' : 'REMOTE_ADDR');
-        // $ip = filter_input(INPUT_SERVER, $var, FILTER_DEFAULT);
         return Filter::string($ip);
     }
 
