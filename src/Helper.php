@@ -681,7 +681,7 @@ class Helper
     public static function getIP(): string
     {
 
-        if (strlen($_SERVER['HTTP_X_FORWARDED_FOR']) > 0) {
+        if (isset($_SERVER['HTTP_X_FORWARDED_FOR']) && strlen($_SERVER['HTTP_X_FORWARDED_FOR']) > 0) {
             $parts = explode(',', $_SERVER['HTTP_X_FORWARDED_FOR']);
             $ip = trim(end($parts));
         } else {
