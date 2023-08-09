@@ -108,8 +108,8 @@ class Log
                 break;
         }
 
-        // se não foi setado, e esta rodando em um servidor, aplique HTML
-        $html ??= isset($_SERVER['HTTP_HOST'])  ? strlen($_SERVER['HTTP_HOST']) > 0 : false;
+        // avalia se esta rodando em cli ou web
+        $html ??= php_sapi_name() !== 'cli';
 
         if ($html) {
             $out = "<hr/>
