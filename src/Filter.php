@@ -2,10 +2,11 @@
 
 namespace NsUtil;
 
-class Filter {
+class Filter
+{
 
-    public function __construct() {
-        
+    public function __construct()
+    {
     }
 
     /**
@@ -13,14 +14,15 @@ class Filter {
      * @param string $string
      * @return string
      */
-    public static function string($string): string {
+    public static function string($string): string
+    {
         $string = (string) $string;
         $str = preg_replace('/\x00|<[^>]*>?/', '', $string);
         return str_replace(["'", '"'], ['&#39;', '&#34;'], $str);
     }
 
-    public static function integer($string): int {
+    public static function integer($string): int
+    {
         return (int) filter_var((string) $string, FILTER_VALIDATE_INT);
     }
-
 }

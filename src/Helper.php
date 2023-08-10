@@ -673,6 +673,23 @@ class Helper
         return preg_match("/(android|avantgo|blackberry|bolt|boost|cricket|docomo|fone|hiptop|mini|mobi|palm|phone|pie|tablet|up\.browser|up\.link|webos|wos)/i", (string) $_SERVER["HTTP_USER_AGENT"]);
     }
 
+    public static function isJson($jsonString): bool
+    {
+        $isJson = false;
+        $jsonString = Filter::string($jsonString);
+
+        // Verifica se o conteúdo começa e termina com colchetes ou chaves
+        if ((strpos($jsonString, '[') === 0 && strrpos($jsonString, ']') === strlen($jsonString) - 1) ||
+            (strpos($jsonString, '{') === 0 && strrpos($jsonString, '}') === strlen($jsonString) - 1)
+        ) {
+            // Verifica se o conteúdo é um JSON válido usando json_decode()
+            json_decode($jsonString);
+            $isJson = json_last_error() === JSON_ERROR_NONE;
+        }
+
+        return $isJson;
+    }
+
     /**
      * Retorna o IP em uso pelo cliente
      *
