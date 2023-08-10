@@ -692,7 +692,7 @@ class Helper
 
     /**
      * Ira filtrar um array de entrada de dados conforme os tipos identificados
-     * @param type $var
+     * @param mixed $var
      * @return string
      */
     public static function filterSanitize($var)
