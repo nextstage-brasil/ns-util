@@ -18,7 +18,8 @@ class Filter
     {
         $string = (string) $string;
         $str = preg_replace('/\x00|<[^>]*>?/', '', $string);
-        return str_replace(["'", '"'], ['&#39;', '&#34;'], $str);
+        return (string) $str;
+        // return str_replace(["'", '"'], ['&#39;', '&#34;'], $str);
     }
 
     public static function integer($string): int
