@@ -151,12 +151,13 @@ $out
             ) {
                 return '';
             }
-            return $item['file'] ?? 'file'
+            return ($item['file'] ?? 'file')
                 . ':'
-                . $item['line'] ?? -1
+                . ($item['line'] ?? -1)
                 . ' > '
-                . $item['class'] ?? 'class'
-                . '::' . $item['function'] ?? 'function'
+                . ($item['class'] ?? 'class')
+                . '::'
+                . ($item['function'] ?? 'function')
                 . '()';
         }, debug_backtrace());
 
