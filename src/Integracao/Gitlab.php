@@ -71,14 +71,15 @@ class Gitlab
         $ret = Helper::curlCall($url, $params, $method, $header, $ssl, $timeout);
 
         if ($ret->status >= 203) {
-            throw new \Exception(PHP_EOL .
-                'ERROR: Chamada ao recurso ' . $resource . ' com status ' . $ret->status
-                . PHP_EOL
-                . 'URL: ' . $url
-                . PHP_EOL
-                . PHP_EOL
-                . var_export($ret, true)
-                . PHP_EOL);
+            throw new \Exception("Resource '$resource' from " . $this->config->get('url') . " return status " . $ret->status);
+            // throw new \Exception(PHP_EOL .
+            //     'ERROR: Chamada ao recurso ' . $resource . ' com status ' . $ret->status
+            //     . PHP_EOL
+            //     . 'URL: ' . $url
+            //     . PHP_EOL
+            //     . PHP_EOL
+            //     . var_export($ret, true)
+            //     . PHP_EOL);
         } else {
             $ret->content = json_decode($ret->content, true);
         }
