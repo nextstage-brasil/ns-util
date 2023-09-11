@@ -184,7 +184,7 @@ class Validate
     {
         $campos = [];
         foreach ($this->obrigatorios['list'] as $item) {
-            $campos[] = ['key' => $item['key'], 'value' => $data[$item['key']], 'msg' => $item['msg'], 'type' => $item['type']];
+            $campos[] = ['key' => $item['key'], 'value' => $data[$item['key']] ?? null, 'msg' => $item['msg'], 'type' => $item['type']];
         }
         $error = $this->getValidadeAsArray($data);
         if (count($error) > 0) {
@@ -196,7 +196,7 @@ class Validate
     {
         $campos = [];
         foreach ($this->obrigatorios['list'] as $item) {
-            $campos[] = ['key' => $item['key'], 'value' => $data[$item['key']], 'msg' => $item['msg'], 'type' => $item['type']];
+            $campos[] = ['key' => $item['key'], 'value' => $data[$item['key']] ?? null, 'msg' => $item['msg'], 'type' => $item['type']];
         }
         return \NsUtil\Helper::validarCamposObrigatorios($campos);
     }
