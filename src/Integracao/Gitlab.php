@@ -56,7 +56,7 @@ class Gitlab
      * @param string $method
      * @return object
      */
-    private function fetch(string $resource, array $data = [], string $method = 'GET'): object
+    public function fetch(string $resource, array $data = [], string $method = 'GET'): object
     {
         $header = ['PRIVATE-TOKEN:' . $this->config->get('token')];
 
@@ -72,14 +72,6 @@ class Gitlab
 
         if ($ret->status >= 203) {
             throw new \Exception("Resource '$resource' from " . $this->config->get('url') . " return status " . $ret->status);
-            // throw new \Exception(PHP_EOL .
-            //     'ERROR: Chamada ao recurso ' . $resource . ' com status ' . $ret->status
-            //     . PHP_EOL
-            //     . 'URL: ' . $url
-            //     . PHP_EOL
-            //     . PHP_EOL
-            //     . var_export($ret, true)
-            //     . PHP_EOL);
         } else {
             $ret->content = json_decode($ret->content, true);
         }
