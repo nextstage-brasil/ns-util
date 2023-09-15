@@ -185,13 +185,13 @@ class Config
 
     /**
      * Define um  valor para chave
-     * @param type $key1
-     * @param type $value
-     * @param type $merge
+     * @param string $key1
+     * @param mixed $value
+     * @param bool $merge
      */
     public static function setData($key1, $value, $merge = true)
     {
-        if ($merge && is_array($value) &&  isset(self::$data[$key1])) {
+        if ($merge && is_array($value) && isset(self::$data[$key1])) {
             self::$data[$key1] = array_merge(self::$data[$key1], $value);
         } else {
             self::$data[$key1] = $value;
@@ -200,9 +200,9 @@ class Config
 
     /**
      * Get data
-     * @param type $key
-     * @param type $key2
-     * @return type
+     * @param string $key
+     * @param mixed $key2
+     * @return mixed
      */
     public static function getData($key, $key2 = false)
     {
@@ -224,8 +224,10 @@ class Config
         return [
             'Undefined column' => 'Erro no sistema. (Cód Erro: ABS1001)',
             'app_usuario_un' => 'E-mail informado não disponível para uso',
-            '42703' => 'Erro no sistema (DB-42703)', // undefined column
-            '23505' => 'Já existe registro com esses dados', // unicidade
+            '42703' => 'Erro no sistema (DB-42703)',
+            // undefined column
+            '23505' => 'Já existe registro com esses dados',
+            // unicidade
             '23502' => 'Campo obrigatório não informado (DB205)',
             'not-null constraint' => 'Verifique campos obrigatórios (DB206)',
             'unique constraint' => 'Já existe registro com esses dados (DB207)',
@@ -280,16 +282,9 @@ class Config
             'HYT00' => 'Timeout expired',
             'IM001' => 'Driver does not support this function',
             'IM017' => 'Polling is disabled',
-            '23502' => 'Null value not allowed - check constraint violation',
             '23503' => 'Foreign key violation',
-            '23505' => 'Unique constraint violation',
             '23514' => 'Check constraint violation',
-            '24000' => 'Invalid cursor state',
             '40002' => 'Transaction rollback',
-            '42000' => 'Syntax error or access violation',
-            '42S02' => 'Table not found',
-            '42S22' => 'Column not found',
-            'HY000' => 'General error',
             '25P02' => 'Transaction aborted',
         ];
     }
