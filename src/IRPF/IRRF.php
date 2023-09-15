@@ -8,8 +8,6 @@ use NsUtil\Financial\Rounders\ABNT_NBR_5891;
 use NsUtil\IRPF\Exception\ConfigNotFoundException;
 use NsUtil\IRPF\Exception\LiquidValueNotSetted;
 
-use function NsUtil\dd;
-
 /**
  * Class IRRF
  *
@@ -17,6 +15,13 @@ use function NsUtil\dd;
  */
 class IRRF
 {
+
+    /**
+     * Deduction 
+     */
+    private const CALCULATION_BASE_DEDUCTION = [
+        202305 => 528 // implementado pelo governo lula a fim de equilibrar a tabela de IR
+    ];
     /**
      * Tax tables for different years
      */
@@ -53,7 +58,7 @@ class IRRF
     {
         $this->tabela = (int) date('Ym', $dataPagamento->getTimestamp());
         $config = array_values(
-            array_filter(self::TABELA, fn ($item) => $this->tabela >= $item, ARRAY_FILTER_USE_KEY)
+            array_filter(self::TABELA, fn($item) => $this->tabela >= $item, ARRAY_FILTER_USE_KEY)
         );
 
         if (!isset($config[0])) {
@@ -61,6 +66,11 @@ class IRRF
         }
 
         $this->config = $config[0];
+
+        // deduction on calculation base: https://www.infomoney.com.br/minhas-financas/isencao-imposto-de-renda-governo-sanciona-nova-faixa-de-isencao-tabela-progressiva-que-muda-para-voce/
+        $this->config['calculationBaseDeduction'] = array_values(
+            array_filter(self::CALCULATION_BASE_DEDUCTION, fn($item) => $this->tabela >= $item, ARRAY_FILTER_USE_KEY)
+        )[0] ?? 0;
     }
 
     /**
@@ -76,13 +86,11 @@ class IRRF
             throw new LiquidValueNotSetted('Liquid value not defined');
         }
 
-        if ($this->valorLiquido === 0.0) {
+        if ($this->valorLiquido <= 0.0) {
             return 0.0;
         }
 
         $irpf = $this->calculo();
-
-        // return $irpf;
 
         return Round::handle(new ABNT_NBR_5891($irpf));
     }
@@ -103,12 +111,13 @@ class IRRF
         }
 
         $irrf = ($this->valorLiquido * $aliquota - $deducao) / (1 - $aliquota);
+        $baseCalculo = $this->valorLiquido + $irrf;
 
         if ($irrf < 10) {
             return 0.0;
         } else {
             // Verify if the applied rate is correct
-            $novaaliquota = self::irrfEscolheTaxa($this->valorLiquido + $irrf)['aliquota'];
+            $novaaliquota = self::irrfEscolheTaxa($baseCalculo)['aliquota'];
             if ($novaaliquota !== $aliquota) {
                 return $this->calculo($novaaliquota);
             } else {
@@ -126,7 +135,8 @@ class IRRF
      */
     private function irrfEscolheTaxa($valorLiquido): array
     {
-        $configs = array_values(array_filter($this->config, fn ($valorLimite) => $valorLiquido >= (float) $valorLimite, ARRAY_FILTER_USE_KEY));
+
+        $configs = array_values(array_filter($this->config, fn($valorLimite) => $valorLiquido >= (float) $valorLimite, ARRAY_FILTER_USE_KEY));
         if (!isset($configs[0])) {
             throw new ConfigNotFoundException('Tax not found');
         }
@@ -146,7 +156,7 @@ class IRRF
     private function getDeducaoByAliquota(float $aliquota): float
     {
         $filtered = array_values(
-            array_filter($this->config, fn ($item) => $item['aliquota'] === $aliquota)
+            array_filter($this->config, fn($item) => $item['aliquota'] === $aliquota)
         );
         if (!isset($filtered[0]['deducao']) || $filtered[0]['deducao'] === null) {
             throw new ConfigNotFoundException("Tax table for aliquota $aliquota not found");
@@ -174,7 +184,7 @@ class IRRF
      */
     public function setValorLiquido(?float $valorLiquido)
     {
-        $this->valorLiquido = $valorLiquido;
+        $this->valorLiquido = $valorLiquido - $this->config['calculationBaseDeduction'];
 
         return $this;
     }
