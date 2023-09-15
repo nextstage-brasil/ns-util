@@ -71,7 +71,7 @@ class Gitlab
         $ret = Helper::curlCall($url, $params, $method, $header, $ssl, $timeout);
 
         if ($ret->status >= 203) {
-            throw new \Exception("Resource '$resource' from " . $this->config->get('url') . " return status " . $ret->status);
+            throw new Exception("Resource '$resource' from " . $this->config->get('url') . " return status " . $ret->status);
         } else {
             $ret->content = json_decode($ret->content, true);
         }
@@ -102,7 +102,7 @@ class Gitlab
      * Faz a a leitura de um item especifico do resource
      *
      * @param string $resource
-     * @param id $id
+     * @param mixed $id
      * @param string $action
      * @return array
      */
@@ -129,12 +129,12 @@ class Gitlab
     {
         $this->issueSetDateFormat($data);
         $resource = $this->config->get('rProject') . '/issues';
-        $data['title'] = substr((string)$title, 0, 255);
+        $data['title'] = substr((string) $title, 0, 255);
         $method = 'POST';
         try {
             $ret = $this->fetch($resource, $data, $method);
             return $ret->content;
-        } catch (\Exception $ex) {
+        } catch (Exception $ex) {
             echo PHP_EOL . $ex->getMessage() . PHP_EOL;
             return [];
         }
@@ -166,7 +166,7 @@ class Gitlab
 
     public function setEstimate($issue_iid, $estimate)
     {
-        if (strlen((string)$estimate) <= 0) {
+        if (strlen((string) $estimate) <= 0) {
             return;
         }
         $resource = $this->config->get('rProject') . '/issues/' . $issue_iid . '/time_estimate';
@@ -187,7 +187,7 @@ class Gitlab
 
     public function setSpend($issue_iid, $spend)
     {
-        if (strlen((string)$spend) <= 0) {
+        if (strlen((string) $spend) <= 0) {
             return;
         }
         $this->clearSpentTime($issue_iid);
@@ -206,7 +206,7 @@ class Gitlab
         $method = 'POST';
         try {
             $ret = $this->fetch($resource, $data, $method);
-        } catch (\Exception $ex) {
+        } catch (Exception $ex) {
             echo $ex->getMessage();
         }
         return $ret->content;
@@ -257,7 +257,7 @@ class Gitlab
         // Ordenar os cards pela posicao no trello
         foreach ($trello as $key => $val) {
             if (isset($val[0]['pos'])) {
-                \NsUtil\Helper::arrayOrderBy($trello[$key], 'pos');
+                Helper::arrayOrderBy($trello[$key], 'pos');
             }
         }
 
@@ -277,11 +277,11 @@ class Gitlab
             // Actions
             $actions = [];
             foreach ($data['actions'] as $val) {
-                if (\NsUtil\Helper::compareString($item['id'], $val['id_card'])) {
+                if (Helper::compareString($item['id'], $val['id_card'])) {
                     $actions[] = $val;
                 }
             }
-            \NsUtil\Helper::arrayOrderBy($actions, 'date', 'ASC');
+            Helper::arrayOrderBy($actions, 'date', 'ASC');
 
             // Obter o createtime. Obterá o mais antigo entre criação e update. POr causa da limitação de 10000 registros do trello
             $created = ['date' => $format->setString(date('Y-m-d H:i:s'))->date('iso8601')];
@@ -320,10 +320,10 @@ class Gitlab
 
             // params
             $params = [
-                'due_date' => (string) trim((string)$item['duedate']),
+                'due_date' => (string) trim((string) $item['duedate']),
                 'labels' => (string) implode(',', $item['labels']),
-                'assignee_ids' => (string) trim((string)$this->getFromDePara('assigned', $item['assigned'])),
-                'created_at' => (string) trim((string)$created['date']),
+                'assignee_ids' => (string) trim((string) $this->getFromDePara('assigned', $item['assigned'])),
+                'created_at' => (string) trim((string) $created['date']),
                 'description' => $item['description'],
             ];
 
@@ -346,7 +346,7 @@ class Gitlab
                         break;
                 }
                 if ($text !== false) {
-                    $nomeUsuario = \NsUtil\Helper::arraySearchByKey($data['members'], 'id', $action['id_member'])['name'];
+                    $nomeUsuario = Helper::arraySearchByKey($data['members'], 'id', $action['id_member'])['name'];
                     $body = "*Importado do Trello. "
                         . "Usuário: " . $nomeUsuario
                         . ", ação: " . $action['action']
@@ -367,7 +367,7 @@ class Gitlab
                     //var_export($v);
                     return $v['idChecklist'] === $checklist['id'];
                 });
-                \NsUtil\Helper::arrayOrderBy($checklist['items'], 'pos');
+                Helper::arrayOrderBy($checklist['items'], 'pos');
                 $text = "";
                 // Criar comentário com o checklist
                 foreach ($checklist['items'] as $check) {
@@ -379,7 +379,7 @@ class Gitlab
                         $tarefasPadrao[] = ['issue_name' => $check['name'], 'project_name' => $trello['name'], 'milestone_name' => $item['title']];
                     }
                 }
-                $nomeUsuario = \NsUtil\Helper::arraySearchByKey($data['members'], 'id', $checklist['items'][0]['id_member'])['name'];
+                $nomeUsuario = Helper::arraySearchByKey($data['members'], 'id', $checklist['items'][0]['id_member'])['name'];
                 $body = "*Importado do Trello. "
                     . "Criador: " . $nomeUsuario
                     . "* \r\n"
@@ -395,7 +395,7 @@ class Gitlab
                 $item['labels'][] = 'Milestone: ' . $titleMilestone;
 
                 // Criar milestone se não existir
-                $msID = md5((string)$titleMilestone);
+                $msID = md5((string) $titleMilestone);
                 if (!$out['milestones'][$msID]) {
                     $ms = $this->milestoneAdd($titleMilestone, '', $depara['milestones']['createOn'], $params['due_date'], $params['due_date']);
                     $out['milestones'][$msID] = $ms['id'];
@@ -459,7 +459,7 @@ class Gitlab
             default:
                 die('Tipo de local não permitido: ' . $local);
         }
-        if (strlen((string)$startDate) > 0 && $startDate === $dueDate) {
+        if (strlen((string) $startDate) > 0 && $startDate === $dueDate) {
             // Acrescentar 1 dia
             $dt = new \NsUtil\Format($dueDate);
             $dueDate = $dt->setString($dt->date('timestamp') + (60 * 60 * 24))->date('arrumar');

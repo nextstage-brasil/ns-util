@@ -254,7 +254,7 @@ class Helper
      * @param string $filepath
      * @param boolean $apagarDiretorio
      * @param boolean $trash
-     * @return void
+     * @return bool
      */
     public static function deleteFile(string $filepath, bool $apagarDiretorio = false, bool $trash = false)
     {
@@ -277,9 +277,8 @@ class Helper
                 unlink($filename);
             }
         }
-        if (!file_exists($filename)) {
-            return false;
-        }
+
+        return file_exists($filename);
     }
 
     /**
@@ -324,16 +323,24 @@ class Helper
             CURLOPT_URL => trim((string) $url),
             CURLOPT_CUSTOMREQUEST => $method,
             CURLOPT_POST => false,
-            CURLOPT_USERAGENT => 'Mozilla/5.0 (Windows NT 6.1; rv:8.0) Gecko/20100101 Firefox/8.0', //set user agent
+            CURLOPT_USERAGENT => 'Mozilla/5.0 (Windows NT 6.1; rv:8.0) Gecko/20100101 Firefox/8.0',
+            //set user agent
             CURLOPT_COOKIEFILE => $cookiefile,
             CURLOPT_COOKIEJAR => $cookiefile,
-            CURLOPT_RETURNTRANSFER => true, // return web page
-            CURLOPT_FOLLOWLOCATION => true, // follow redirects
-            CURLOPT_ENCODING => "", // handle all encodings
-            CURLOPT_AUTOREFERER => true, // set referer on redirect
-            CURLOPT_CONNECTTIMEOUT => 30, // timeout on connect
-            CURLOPT_TIMEOUT => (int) $timeout, // timeout on response
-            CURLOPT_MAXREDIRS => 10, // stop after 10 redirects
+            CURLOPT_RETURNTRANSFER => true,
+            // return web page
+            CURLOPT_FOLLOWLOCATION => true,
+            // follow redirects
+            CURLOPT_ENCODING => "",
+            // handle all encodings
+            CURLOPT_AUTOREFERER => true,
+            // set referer on redirect
+            CURLOPT_CONNECTTIMEOUT => 30,
+            // timeout on connect
+            CURLOPT_TIMEOUT => (int) $timeout,
+            // timeout on response
+            CURLOPT_MAXREDIRS => 10,
+            // stop after 10 redirects
             CURLOPT_SSL_VERIFYPEER => $ssl,
             CURLOPT_SSL_VERIFYSTATUS => $ssl,
             CURLOPT_HEADER => true,
@@ -417,11 +424,10 @@ class Helper
 
     /**
      * Retorna um array associativo de um handle aberto via fopen
-     * @param type $handle
-     * @param type $explode
-     * @param type $blockSize
-     * @param type $enclosure
-     * @return boolean
+     *
+     * @param mixed $handle
+     * @param string $explode
+     * @return mixed
      */
     public static function myFGetsCsv($handle, $explode = ';', $blockSize = 0, $enclosure = '"')
     {
@@ -463,28 +469,27 @@ class Helper
 
     /**
      * Trata de dados de entrada via APIs, removendo caracteres não desejados e nulls
-     * @param type $dados
-     * @return boolean
+     * @param array $dados
+     * @return void
      */
     public static function recebeDadosFromView(&$dados)
     {
-        if (!is_array($dados)) {
-            return false;
-        }
-        foreach ($dados as $key => $value) {
-            if (is_array($value)) {
-                self::recebeDadosFromView($dados[$key]);
-            } else {
-                // tirar "undefined" do javascript
-                if ($value === 'undefined' || $value === 'null' || $value === null) {
-                    unset($dados[$key]);
-                    continue;
+        if (is_array($dados)) {
+            foreach ($dados as $key => $value) {
+                if (is_array($value)) {
+                    self::recebeDadosFromView($dados[$key]);
                 } else {
-                    $dados[$key] = Filter::string($value);
-                    $dados[$key] = str_replace(['NS21', '&#34;'], ['&', '"'], $dados[$key]);
-                }
-                if (substr((string) $key, 0, 2) === 'id') {
-                    $dados[$key] = (int) filter_var($value, FILTER_VALIDATE_INT);
+                    // tirar "undefined" do javascript
+                    if ($value === 'undefined' || $value === 'null' || $value === null) {
+                        unset($dados[$key]);
+                        continue;
+                    } else {
+                        $dados[$key] = Filter::string($value);
+                        $dados[$key] = str_replace(['NS21', '&#34;'], ['&', '"'], $dados[$key]);
+                    }
+                    if (substr((string) $key, 0, 2) === 'id') {
+                        $dados[$key] = (int) filter_var($value, FILTER_VALIDATE_INT);
+                    }
                 }
             }
         }
@@ -506,7 +511,7 @@ class Helper
     public static function compareString($str1, $str2, $case = false)
     {
         if (!$case) {
-            return (mb_strtoupper((string)$str1) === mb_strtoupper((string)$str2));
+            return (mb_strtoupper((string) $str1) === mb_strtoupper((string) $str2));
         } else {
             return ($str1 === $str2);
         }
@@ -520,7 +525,7 @@ class Helper
             $cmd = 'file -bi ' . $filename . ' | sed -e "s/.*[ ]charset=//"';
             $cod = shell_exec($cmd);
         } else {
-            throw new \Exception('getFileEncoding somente funciona em sistemas Linux. O seu é ' . $so);
+            throw new Exception('getFileEncoding somente funciona em sistemas Linux. O seu é ' . $so);
         }
         return trim((string) $cod);
     }
@@ -534,7 +539,7 @@ class Helper
                 $cmd = "iconv -f $enc -t utf-8 -o $output $filepath ";
                 $ret = shell_exec($cmd);
                 if (strlen((string) $ret) > 0) {
-                    throw new \Exception("Erro ao converter arquivo $filepath pata UTF-8: " . $ret);
+                    throw new Exception("Erro ao converter arquivo $filepath pata UTF-8: " . $ret);
                 }
             }
         } else {
@@ -569,7 +574,7 @@ class Helper
 
     /**
      * Verifica se o dados existe, se o conteudo é diferente de '' ou null ou false
-     * @param type $value
+     * @param mixed $value
      */
     public static function hasContent($value, $type = 'string')
     {
@@ -679,7 +684,8 @@ class Helper
         $jsonString = Filter::string($jsonString);
 
         // Verifica se o conteúdo começa e termina com colchetes ou chaves
-        if ((strpos($jsonString, '[') === 0 && strrpos($jsonString, ']') === strlen($jsonString) - 1) ||
+        if (
+            (strpos($jsonString, '[') === 0 && strrpos($jsonString, ']') === strlen($jsonString) - 1) ||
             (strpos($jsonString, '{') === 0 && strrpos($jsonString, '}') === strlen($jsonString) - 1)
         ) {
             // Verifica se o conteúdo é um JSON válido usando json_decode()
@@ -805,7 +811,7 @@ class Helper
      * Remove all characters is not a number
      *
      * @param mixed $var
-     * @return int
+     * @return string
      */
     public static function parseInt($var)
     {
@@ -822,7 +828,7 @@ class Helper
         return json_decode(str_replace('&#34;', '"', (string) $json), true);
     }
 
-    public static function objectPHP2Array(\stdClass $object)
+    public static function objectPHP2Array(stdClass $object)
     {
         return json_decode(json_encode($object), true);
     }
@@ -830,7 +836,7 @@ class Helper
     /**
      * Com base na data informada, retorna um array verificando se é feriado, prox dia util....
      * 
-     * @param type $date formato yyyy-mm-dd
+     * @param string $date formato yyyy-mm-dd
      * @return array {"isDiaUtil":true,"proxDiaUtil":"2021-03-19","ultDiaUtil":"2021-03-17"}
      */
     public static function feriado($date)
@@ -843,8 +849,8 @@ class Helper
 
     /**
      * Com base na data informaada, calcula a proxima data útil no calendario, com prazo N estabelecido
-     * @param type $vencimento Data inicial, no formato yyyy-mm-dd
-     * @param type $prazo Prazo em 
+     * @param string $vencimento Data inicial, no formato yyyy-mm-dd
+     * @param int $prazo Prazo em 
      * @return string String, no formato yyyy-mm-dd
      */
     public static function calculaVencimentoUtil($vencimento, $prazo = 0)
@@ -967,9 +973,13 @@ class Helper
 
     public static function getPhpUser()
     {
-        $uid = posix_getuid();
-        $userinfo = posix_getpwuid($uid);
-        return $userinfo;
+        if (function_exists('posix_getuid')) {
+            $uid = posix_getuid();
+            $userinfo = posix_getpwuid($uid);
+            return $userinfo;
+        } else {
+            return -1;
+        }
     }
 
     // Define uma função que poderá ser usada para validar e-mails usando regexp
@@ -986,7 +996,7 @@ class Helper
 
     /**
      * Verifica se a string é uma base64_encoded valida
-     * @param type $data
+     * @param string $data
      * @return boolean
      */
     public static function isBase64Encoded($string)
@@ -1065,7 +1075,7 @@ class Helper
         $t = explode('.', $filename);
         $extensao = array_pop($t);
         $out = '';
-        switch (mb_strtoupper((string)$extensao)) {
+        switch (mb_strtoupper((string) $extensao)) {
             case 'XLSX':
             case 'XLS':
                 $out = 'file-excel-o';
@@ -1099,9 +1109,9 @@ class Helper
     /**
      * Executa uma busca no viacep e retorna
      * @param string $cep
-     * @return \stdClass
+     * @return stdClass
      */
-    public static function buscacep(string $cep): \stdClass
+    public static function buscacep(string $cep): stdClass
     {
         $cepSearch = self::parseInt($cep);
         if (strlen($cepSearch) < 8) {
@@ -1192,7 +1202,7 @@ class Helper
             preg_match('/' . $termOpen . '(.*?)' . $termClose . '/s', $msg, $match);
             unset($match[0]);
             $out = array_map(function ($item) {
-                return trim(str_replace('\n', '<br/>', strip_tags((string)$item)));
+                return trim(str_replace('\n', '<br/>', strip_tags((string) $item)));
             }, $match);
         }
         return is_array($out) ? $out : [];
@@ -1259,9 +1269,12 @@ class Helper
     {
 
         $descriptorspec = [
-            0 => ['pipe', 'r'], // stdin is a pipe that the child will read from
-            1 => ['pipe', 'w'], // stdout is a pipe that the child will write to
-            2 => ['pipe', 'w'], // stderr is a pipe that the child will write to
+            0 => ['pipe', 'r'],
+            // stdin is a pipe that the child will read from
+            1 => ['pipe', 'w'],
+            // stdout is a pipe that the child will write to
+            2 => ['pipe', 'w'],
+            // stderr is a pipe that the child will write to
         ];
 
         $process = proc_open($command, $descriptorspec, $pipes);
