@@ -120,9 +120,9 @@ class Helper
     {
         usort($array, function ($a, $b) use ($element, $sort) {
             if ($sort === 'ASC') {
-                return $a[$element] > $b[$element];
+                return $a[$element] > $b[$element] ? 1 : -1;
             } else {
-                return $a[$element] < $b[$element];
+                return $a[$element] < $b[$element] ? 1 : -1;
             }
         });
     }
