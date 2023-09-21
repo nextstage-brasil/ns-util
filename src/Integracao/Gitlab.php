@@ -85,17 +85,52 @@ class Gitlab
      * @param string $resource
      * @return array
      */
-    public function list(string $resource): array
+    public function list(string $resource, array $filters = []): array
     {
+
+        // nos projetos de gitlab publico, vou buscar os usuarios envolvidos nos projetos autorizados
+        if ($resource === 'users' && stripos($this->config->get('url'), 'gitlab.com') !== false) {
+            return $this->getUsersByProjects();
+        }
+
         $out = [];
         $page = 1;
+
+        $params = array_merge(
+            ['per_page' => 100],
+            $filters,
+            stripos($this->config->get('url'), 'gitlab.com') !== false
+                ? ['visibility' => 'private']
+                : ['scope' => 'all']
+        );
+
         do {
-            $ret = $this->fetch($resource, ['scope' => 'all', 'per_page' => 100, 'page' => $page]);
+            $params['page'] = $page;
+            $ret = $this->fetch($resource, $params);
             $page = (int) ((isset($ret->headers['X-Next-Page'])) ? $ret->headers['X-Next-Page'] : $ret->headers['x-next-page']);
             $out = array_merge($out, $ret->content);
         } while ($page > 0);
 
         return $out ?? [];
+    }
+
+    /**
+     * Ira buscar os usuarios que pertecem aos grupos envolvidos na apikey
+     *
+     * @return array
+     */
+    private function getUsersByProjects(): array
+    {
+        $out = [];
+        $projects = $this->list('projects');
+        foreach ($projects as $project) {
+            $resource = 'projects/' . $project['id'] . '/members/all';
+            $list = $this->list($resource, ['exclude_internal' => true, 'active' => true]);
+            foreach ($list as $user) {
+                $out[$user['id']] = array_intersect_key($user, array_flip(['id', 'username', 'name', 'state', 'avatar_url', 'web_url']));
+            }
+        }
+        return array_values($out);
     }
 
     /**
