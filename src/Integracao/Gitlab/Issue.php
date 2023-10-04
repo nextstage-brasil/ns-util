@@ -7,6 +7,7 @@ use NsUtil\Exceptions\ModelNotFoundException;
 use NsUtil\Integracao\Gitlab;
 
 use function NsUtil\dd;
+use function NsUtil\json_decode;
 
 class Issue
 {
@@ -81,6 +82,14 @@ class Issue
      */
     public function updateLabels(array $labels, bool $merge = false): self
     {
+        if ($merge) {
+            $this->load();
+            $labels = array_merge(
+                json_decode($this->getData()['labels'], true),
+                $labels
+            );
+        }
+
         $this->client->issueEdit(
             $this->issue['iid'],
             ['labels' => implode(',', $labels)]
