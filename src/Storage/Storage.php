@@ -18,8 +18,8 @@ class Storage
             case 'S3':
                 $st = new S3(
                     env('S3_KEY', 'S3_KEY_NOT_DEFINED'),
-                    env('S3_SECRET', 'SE_SECRET_NOT_DEFINED'),
-                    $bucketName ?? env('S3_BUCKET', 'S3_BUCKET_NOT_DEFINED'),
+                    env('S3_SECRET', 'S3_SECRET_NOT_DEFINED'),
+                    $bucketName ?? env('BUCKET_NAME', 'BUCKET_NAME_NOT_DEFINED'),
                     env('S3_REGION', 'us-east-2'),
                     env('S3_VERSION', '2006-03-01')
                 );
