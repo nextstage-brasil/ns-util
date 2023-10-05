@@ -200,3 +200,30 @@ if (!function_exists('utf8_decode')) {
         mb_convert_encoding($string, 'ISO-8859-1', 'UTF-8');
     }
 }
+
+if (!function_exists('env')) {
+    function env(string $key, $default = null)
+    {
+        $value = getenv($key);
+        if (getenv($key) !== false) {
+            switch (strtolower($value)) {
+                case false:
+                    return $default;
+                case 'true':
+                case '(true)':
+                    return true;
+                case 'false':
+                case '(false)':
+                    return false;
+                case 'empty':
+                case '(empty)':
+                    return '';
+                case 'null':
+                case '(null)':
+                    return;
+            }
+
+            return $value;
+        }
+    }
+}
