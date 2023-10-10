@@ -4,7 +4,8 @@ namespace NsUtil;
 
 use stdClass;
 
-class PgLoadCSV {
+class PgLoadCSV
+{
 
     private $file, $run, $consoleTable;
     private $csv = [];
@@ -12,11 +13,12 @@ class PgLoadCSV {
     /**
      * 
      * @param \NsUtil\ConnectionPostgreSQL $con
-     * @param type $schema
+     * @param string $schema
      * @param bool $schemaDrop
-     * @param type $truncateTables
+     * @param mixed $truncateTables
      */
-    public function __construct(ConnectionPostgreSQL $con, $schema = 'import', bool $schemaDrop = false, $truncateTables = false) {
+    public function __construct(ConnectionPostgreSQL $con, $schema = 'import', bool $schemaDrop = false, $truncateTables = false)
+    {
         //$this->file = realpath($file);
         $this->run = new stdClass();
         $this->run->con = $con;
@@ -37,25 +39,29 @@ class PgLoadCSV {
         $this->csv[] = ['Schema', 'Tabela', 'Linhas', 'Tamanho', 'Resultado'];
     }
 
-    public function getConsoleTable() {
+    public function getConsoleTable()
+    {
         $this->consoleTable instanceof ConsoleTable;
         return $this->consoleTable;
     }
 
-    public function getCsv() {
+    public function getCsv()
+    {
         return $this->csv;
     }
 
-    private function consoleTableAddLine($qtdeLinhas, $filesize, $message) {
+    private function consoleTableAddLine($qtdeLinhas, $filesize, $message)
+    {
         $this->csv[$this->file] = [$this->run->schema, $this->run->table, $qtdeLinhas, $filesize, $message];
         $this->consoleTable->addRow([$this->run->schema, $this->run->table, $qtdeLinhas, $message]);
     }
 
     /**
      * Define o que será utilizado em nullas ao executar o insertByCopy
-     * @param type $nullas
+     * @param string $nullas
      */
-    public function setNullAs($nullas = '') {
+    public function setNullAs($nullas = '')
+    {
         $this->run->con->setNullAs($nullas);
         return $this;
     }
@@ -66,7 +72,8 @@ class PgLoadCSV {
      * @param string $tablename - Caso false, será utilizado o nome do arquivo CSV sanitizado
      * @return boolean
      */
-    public function run(string $file_or_dir, $tablename = false) {
+    public function run(string $file_or_dir, $tablename = false)
+    {
         if (is_dir($file_or_dir)) {
             $types = array('csv', 'xlsx');
             $dir = realpath($file_or_dir);
@@ -84,10 +91,10 @@ class PgLoadCSV {
                             $ret = shell_exec('type xlsx2csv');
                             if (stripos($ret, 'not found') > -1) {
                                 die("### ATENÇÃO ### \nBiblioteca xlsx2csv não esta instalada. "
-                                        . "\nPara continuar, execute: 'sudo apt-get update && sudo apt-get install -y xlsx2csv'"
-                                        . "\n"
-                                        . "###############"
-                                        . "\n\n\n");
+                                    . "\nPara continuar, execute: 'sudo apt-get update && sudo apt-get install -y xlsx2csv'"
+                                    . "\n"
+                                    . "###############"
+                                    . "\n\n\n");
                             }
                             $t = explode(DIRECTORY_SEPARATOR, $file);
                             $csv = '/tmp/' . str_replace('.xlsx', '.csv', array_pop($t));
@@ -111,7 +118,7 @@ class PgLoadCSV {
         }
         $this->file = realpath($file_or_dir);
         if (!file_exists($this->file)) {
-            echo "File '$file' not exists" . PHP_EOL;
+            echo "File '" . $this->file . "' not exists" . PHP_EOL;
         }
         Helper::fileConvertToUtf8($file_or_dir);
         $t = explode(DIRECTORY_SEPARATOR, $this->file);
@@ -122,9 +129,12 @@ class PgLoadCSV {
         $this->run->tableSchema = $this->run->schema . '.' . $this->run->table;
         $this->head();
         $this->execute();
+
+        return true;
     }
 
-    private function head() {
+    private function head()
+    {
         $fh = fopen($this->file, "rb") or die('not open');
         $data = fgetcsv($fh, 1000, '\\');
 
@@ -168,16 +178,17 @@ class PgLoadCSV {
 
         //$this->run->fields = implode(',', $this->run->fields);
         $this->run->con->executeQuery("CREATE TABLE IF NOT EXISTS "
-                . $this->run->tableSchema
-                . " ("
-                . implode(',', $cpos)
-                . ")");
+            . $this->run->tableSchema
+            . " ("
+            . implode(',', $cpos)
+            . ")");
         if ($this->run->truncate) {
             $this->run->con->executeQuery("TRUNCATE TABLE " . $this->run->tableSchema . " CASCADE");
         }
     }
 
-    private function execute() {
+    private function execute()
+    {
         echo 'Tabela: "' . $this->run->tableSchema . '"';
         $this->run->linhas = \NsUtil\Helper::linhasEmArquivo($this->file);
         $this->run->filesize = filesize($this->file);
@@ -207,13 +218,14 @@ class PgLoadCSV {
                     $setLoader = 0;
                     $memoriaAlocada = (int) round(memory_get_usage(true), 0);
                     $loader->done($qtdeLinhas - 5); // - 5 para deixar a ultima chamada para o final da operação
-                    $loader->setLabel('R/Seg:'
+                    $loader->setLabel(
+                        'R/Seg:'
                             . number_format(round($qtdeLinhas / (microtime(true) - $start), 0), 0, ',', '.')
                             . ' Mem: ' . round($memoriaAlocada / 1048576, 0) . 'MB'
                     );
                     // descarga
-                    if (count($records) > 0) {
-                        $this->run->con->insertByCopy($this->run->tableSchema, $this->run->fields, $records);
+                    if (count($records ?? []) > 0) {
+                        $this->run->con->insertByCopy($this->run->tableSchema, $this->run->fields, $records ?? []);
                         $records = [];
                     }
                 }
@@ -233,7 +245,8 @@ class PgLoadCSV {
                 $this->run->con->insertByCopy($this->run->tableSchema, $this->run->fields, $records);
                 $records = [];
             }
-            $loader->setLabel('OK! R/Seg:'
+            $loader->setLabel(
+                'OK! R/Seg:'
                     . number_format(round($qtdeLinhas / (microtime(true) - $start), 0), 0, ',', '.')
             );
 
@@ -245,7 +258,8 @@ class PgLoadCSV {
     }
 
     // le a linha no ponteiro e retorna preparado para ingestao
-    private function getLines($handle) {
+    private function getLines($handle)
+    {
         $data = \NsUtil\Helper::myFGetsCsv($handle, $this->run->explode);
         if ($data === false || $data === null) {
             return false;
@@ -253,7 +267,8 @@ class PgLoadCSV {
         return $data;
     }
 
-    private function sanitizeField($str) {
+    private function sanitizeField($str)
+    {
         //$str = preg_replace("/[^A-Za-z0-9]/", "_", $str);
 
         $str = trim(str_replace('"', '', $str));
@@ -272,5 +287,4 @@ class PgLoadCSV {
         }
         return $str;
     }
-
 }
