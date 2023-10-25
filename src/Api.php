@@ -194,8 +194,8 @@ class Api
 
     /**
      * Adiciona a chave de error para response da Api
-     * @param type $mensagem
-     * @param type $code
+     * @param mixed $mensagem
+     * @param int $code
      * @return $this
      */
     public function setError($mensagem, $code = 200)
@@ -218,9 +218,9 @@ class Api
 
     /**
      * Adiciona ao body de saída uma chave => valor
-     * @param type $chave
-     * @param type $valor
-     * @return $this
+     * @param string $chave
+     * @param mixed $valor
+     * @return self
      */
     public function addResponse($chave, $valor)
     {
@@ -230,11 +230,11 @@ class Api
 
     /**
      * Irá retornar o body em array ao inves de imrprimr e encerrar
-     * @return type
+     * @return void
      */
     public function getResponse()
     {
-        return $this->response([], 0, false, true);
+        return $this->response([], 0);
     }
 
     /**
@@ -292,7 +292,7 @@ class Api
 
     /**
      * responde a aplicação com um erro
-     * @param type $mensagem
+     * @param mixed $mensagem
      * @param int $code
      */
     public function error($mensagem, int $code = 0)
