@@ -182,10 +182,10 @@ class Validate
      */
     public function runValidateData(array $data, Api $api, $errorCode = 200)
     {
-        $campos = [];
-        foreach ($this->obrigatorios['list'] as $item) {
-            $campos[] = ['key' => $item['key'], 'value' => $data[$item['key']] ?? null, 'msg' => $item['msg'], 'type' => $item['type']];
-        }
+        // $campos = [];
+        // foreach ($this->obrigatorios['list'] as $item) {
+        //     $campos[] = ['key' => $item['key'], 'value' => $data[$item['key']] ?? null, 'msg' => $item['msg'], 'type' => $item['type']];
+        // }
         $error = $this->getValidadeAsArray($data);
         if (count($error) > 0) {
             $api->error($error, $errorCode);

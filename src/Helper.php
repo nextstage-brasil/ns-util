@@ -592,8 +592,14 @@ class Helper
                 $t = (int) $value;
                 $out = $t > 0;
                 break;
+            case 'array':
+                $out = is_array($value);
+                break;
+            case 'string':
+                $out = strlen((string) $value) > 0;
+                break;
             default:
-                $out = strlen((string) (string) $value) > 0;
+                $out = strlen((string) $value) > 0;
                 break;
         }
         return $out;
@@ -607,7 +613,7 @@ class Helper
     {
         $error = [];
         foreach ($dadosObrigatorios as $item) {
-            $has = self::hasContent($item['value'], (($item['type']) ? $item['type'] : 'string'));
+            $has = self::hasContent($item['value'], $item['type'] ?? 'string');
             if ($has === false) {
                 if ($item['key']) {
                     //$item['msg'] = '{' . $item['key'] . '}: ' . $item['msg'];

@@ -84,8 +84,9 @@ if (!function_exists('dd')) {
     function dd(...$params): void
     {
         foreach ($params as $var) {
-            echo Log::see($var);
+            echo Log::see($var, null, false);
         }
+        echo Log::see('ONLY_BACKTRACE');
         die();
     }
 }

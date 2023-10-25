@@ -88,7 +88,7 @@ class Log
     /**
      * imprimir na tela o texto
      */
-    public static function see($var, $html = null, $backtraceShow = true): void
+    public static function see($var, ?bool $html = null, bool $backtraceShow = true): void
     {
         switch (true) {
             case is_object($var):
@@ -111,28 +111,22 @@ class Log
         // avalia se esta rodando em cli ou web
         $html ??= php_sapi_name() !== 'cli';
 
-        if ($html) {
-            $out = "<hr/>
-            <h5>Log visualization:</h5>
-            <pre>$out</pre>
-            <h5>Backtrace</h5>
-            <pre>" . implode("\n\t", self::getBacktrace()) . "
-            </pre>
-            <hr/>
-            ";
+        if ($var === 'ONLY_BACKTRACE') {
+            $out = '';
         } else {
-            $out = str_replace('&#34;', '"', $out);
-            $out = "\n
-## Content
-$out
-\n## Backtrace
-" . implode("\n", self::getBacktrace()) . "
-";
+            $out = $html
+                ? "<hr/><h5>Log visualization:</h5><pre>$out</pre>"
+                : str_replace('&#34;', '"', $out) . "\n\r## Content\n\r$out";
         }
 
+        $backtrace = $html
+            ? "<hr/><h5>Backtrace</h5><pre>" . implode("<br>", self::getBacktrace()) . "</pre><hr/>"
+            : "\n\r## Backtrace\n\r" . implode("\n", self::getBacktrace()) . "\n\r";
 
 
-        echo $out;
+
+
+        echo $out . ($backtraceShow ? $backtrace : '');
     }
 
     /**
@@ -142,16 +136,17 @@ $out
      */
     public static function getBacktrace()
     {
-        $origem = array_map(function ($item) {
+        $origem = [];
+        foreach (debug_backtrace() as $item) {
             $item['class'] ??= '';
             if (
                 is_null($item)
                 || !is_array($item)
                 || strlen((string) $item['class']) === 0
             ) {
-                return '';
-            }
-            return ($item['file'] ?? 'file')
+                continue;
+            };
+            $origem[] = ($item['file'] ?? 'file')
                 . ':'
                 . ($item['line'] ?? -1)
                 . ' > '
@@ -159,8 +154,7 @@ $out
                 . '::'
                 . ($item['function'] ?? 'function')
                 . '()';
-        }, debug_backtrace());
-
+        }
         return $origem;
     }
 }
