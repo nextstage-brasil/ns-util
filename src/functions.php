@@ -137,6 +137,10 @@ if (!function_exists('nsCommand')) {
             throw new \Exception("File 'nsutil' not found");
         }
 
+        if ($logfile) {
+            Log::rotate($logfile);
+        }
+
         $cmd = "cd " . Helper::getPathApp() . " && ";
         $cmd .= $withNohup ? '/usr/bin/nohup ' : '';
         $cmd .= '/usr/bin/php nsutil ' . $command;
