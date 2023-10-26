@@ -2,6 +2,7 @@
 
 namespace NsUtil;
 
+use DateTime;
 use Exception;
 use stdClass;
 
@@ -1319,5 +1320,31 @@ class Helper
     public static function uniqueHash($prefix = '')
     {
         return md5($prefix . uniqid(rand(), true));
+    }
+
+    /**
+     * Obtém a data de vecimento do certificado anexado a URL ou null caso não exista
+     *
+     * @param string $url
+     * @return ?int
+     */
+    public static function sslGetEndDate(string $url)
+    {
+        if (Helper::getSO() !== 'linux') {
+            throw new Exception('Only Linux System');
+        }
+        // sanitize
+        $url = str_replace(['https://', 'http://', ':443', '/'], '', $url);
+        // sh
+        $sh = "openssl s_client -connect $url:443 2>/dev/null | openssl x509 -noout -enddate | awk -F= '{print $2}'";
+        $return = null;
+
+        $date = shell_exec($sh);
+        if (strlen($date) > 0) {
+            $date = new DateTime($date);
+            $return = $date->getTimestamp() ?? null;
+        }
+
+        return $return;
     }
 }
