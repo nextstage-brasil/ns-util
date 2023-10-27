@@ -820,9 +820,23 @@ class Helper
      * @param mixed $var
      * @return string
      */
-    public static function parseInt($var)
+    public static function parseInt($var, $isNumber = false)
     {
-        return preg_replace("/[^0-9]/", "", (string) $var);
+        $str = (string) $var;
+
+        // mantém e considera o traço um valor negativo
+        if ($isNumber) {
+            // remover virgulas
+            $str = str_replace([',', '.'], '',  $str);
+
+            if (preg_match('/-?\d+/', $str, $matches)) {
+                return (int) $matches[0];
+            }
+
+            return null;
+        } else {
+            return preg_replace("/[^0-9]/", "", (string) $var);
+        }
     }
 
     /**
@@ -1024,7 +1038,7 @@ class Helper
     public static function decimalFormat($var)
     {
         if (stripos($var, ',') > -1) { // se achar virgula, veio da view, com formato. da base, nao vem virgula
-            $var = self::parseInt($var);
+            $var = self::parseInt($var, true);
             $var = substr((string) $var, 0, strlen((string) $var) - 2) . "." . substr((string) $var, strlen((string) $var) - 2, 2);
         }
         return $var;
