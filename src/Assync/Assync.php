@@ -116,10 +116,10 @@ class Assync
     /**
      * Setter to logfile
      *
-     * @param string $file
+     * @param ?string $file
      * @return self
      */
-    public function setLogfile(string $file): self
+    public function setLogfile(?string $file): self
     {
         $this->logfile = $file;
         return $this;
