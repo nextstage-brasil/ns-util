@@ -116,7 +116,7 @@ class Log
         } else {
             $out = $html
                 ? "<hr/><h5>Log visualization:</h5><pre>$out</pre>"
-                : str_replace('&#34;', '"', $out) . "\n\r## Content\n\r$out";
+                : "\n\r## Content\n\r".str_replace('&#34;', '"', $out)
         }
 
         $backtrace = $html
