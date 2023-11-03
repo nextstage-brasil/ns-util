@@ -1,5 +1,7 @@
 <?php
 
+namespace NsUtil\Middlewares;
+
 use NsUtil\Api;
 use NsUtil\Exceptions\RedisConnectionException;
 use NsUtil\Exceptions\TooManyRequestException;
