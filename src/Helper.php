@@ -710,12 +710,11 @@ class Helper
      */
     public static function getIP(): string
     {
-
         if (isset($_SERVER['HTTP_X_FORWARDED_FOR']) && strlen($_SERVER['HTTP_X_FORWARDED_FOR']) > 0) {
             $parts = explode(',', $_SERVER['HTTP_X_FORWARDED_FOR']);
             $ip = trim(end($parts));
         } else {
-            $ip = $_SERVER['REMOTE_ADDR'];
+            $ip = $_SERVER['HTTP_CLIENT_IP'] ?? $_SERVER['REMOTE_ADDR'] ?? '-';
         }
         return Filter::string($ip);
     }
