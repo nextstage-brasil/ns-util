@@ -36,7 +36,7 @@ class CheckAPIKeyMiddleware implements MiddlewareInterface
             return true;
         }
 
-        $this->check();
+        return $this->check();
     }
     public function setApiKey(): void
     {
@@ -46,13 +46,8 @@ class CheckAPIKeyMiddleware implements MiddlewareInterface
             ?? $this->apikey;
     }
 
-    public function check()
+    public function check(): bool
     {
-        // try {
-        //     (new ApiUsers())->firstOrFail(['apikeyApiUsers' => $apikey]);
-        //     return true;
-        // } catch (ModelNotFoundException $exc) {
-        //     $api->error('Invalid API', Api::HTTP_FORBIDDEN);
-        // }
+        throw new Exception('Check API not implemented in final class');
     }
 }
