@@ -77,12 +77,14 @@ class RateLimitMiddleware implements MiddlewareInterface
 
         $resource = mb_strtolower(Helper::name2CamelCase($api->getConfigData()['rest']['resource']));
 
-        $this->configByRoute = array_map(
-            fn ($item) => mb_strtolower(Helper::name2CamelCase($item)),
-            array_merge($this->configByRoute, [
-                'healthcheck' => [200, RateLimiter::PER_MINUTE]
-            ])
-        );
+        $this->configByRoute = array_merge($this->configByRoute, [
+            'healthcheck' => [200, RateLimiter::PER_MINUTE]
+        ]);
+
+        foreach ($this->configByRoute as $key => $value) {
+            $keyLower = mb_strtolower(Helper::name2CamelCase($key));
+            $this->configByRoute[$keyLower] = $value;
+        }
 
         $this->maxCallsLimit = $this->configByRoute[$resource][0] ?? $this->maxCallsLimit;
         $this->secondsInterval = $this->configByRoute[$resource][1] ?? $this->secondsInterval;
