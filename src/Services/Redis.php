@@ -35,7 +35,7 @@ class Redis
                     'REDIS_PORT' => getenv('REDIS_PORT') ? getenv('REDIS_PORT') : 'default: 6379',
                 ]
             ]);
-            throw new RedisConnectionException('Check your Redis configuration', 400);
+            throw new RedisConnectionException('Check rate limiter server configuration', 400);
         }
     }
 
