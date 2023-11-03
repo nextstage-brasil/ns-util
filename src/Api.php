@@ -637,6 +637,25 @@ class Api
         return self::validator($message, $code, $rule);
     }
 
+    /**
+     * Provides a compatibility method for middleware based on the validator method.
+     *
+     * @param string $message        The error message to display upon validation failure
+     * @param int $code              The error code
+     * @param Closure|MiddlewareInterface $rule The closure or Middleware class instance to perform the validation
+     *
+     * @return self
+     * @throws Exception             Thrown if a closure or Middleware class is not provided
+     */
+    public function middlewares($rules): self
+    {
+        foreach ($rules as $rule) {
+            self::validator('', 0, $rule);
+        }
+
+        return $this;
+    }
+
 
     /**
      * Undocumented function
