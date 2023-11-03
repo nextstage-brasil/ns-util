@@ -80,7 +80,7 @@ class Redis
                 self::set($key, $ret, $timeInSeconds);
             }
         }
-        return strlen($ret) === 0 ? null : $ret;
+        return strlen((string) $ret) === 0 ? null : $ret;
     }
 
     public static function getHashedKey($content)

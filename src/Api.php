@@ -3,7 +3,11 @@
 namespace NsUtil;
 
 use Closure;
+use Exception;
 use NsUtil\Exceptions\ModelNotFoundException;
+use NsUtil\Exceptions\RedisConnectionException;
+use NsUtil\Exceptions\TooManyRequestException;
+use NsUtil\Services\RateLimiter;
 
 class Api
 {
@@ -635,6 +639,25 @@ class Api
     public function onResponse(Closure $onResponse)
     {
         $this->onResponse = $onResponse;
+        return $this;
+    }
+
+    public function rateLimit(int $maxCallsLimit = 120, int $secondsInterval = 60, ?string $apikey = null): self
+    {
+        try {
+            if (null !== $apikey) {
+                RateLimiter::byKey($apikey, $maxCallsLimit, $secondsInterval, $this->getConfigData()['rest']['resource']);
+            } else {
+                RateLimiter::byIP($maxCallsLimit, $secondsInterval, $this->getConfigData()['rest']['resource']);
+            }
+        } catch (RedisConnectionException $exc) {
+            $this->error($exc->getMessage(), $exc->getCode());
+        } catch (TooManyRequestException $exc) {
+            $this->error($exc->getMessage(), $exc->getCode());
+        } catch (Exception $exc) {
+            $this->error($exc->getMessage(), $exc->getCode());
+        }
+
         return $this;
     }
 }

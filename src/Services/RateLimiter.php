@@ -72,7 +72,7 @@ class RateLimiter
 
         $totalUserCalls = ((int) self::$redis->get($rateKey)) + 1;
         if ($totalUserCalls > $maxCallsLimit) {
-            throw new TooManyRequestException();
+            throw new TooManyRequestException('');
         }
 
         self::$redis->incr($rateKey);
