@@ -10,6 +10,8 @@ use NsUtil\Helper;
 use NsUtil\Interface\MiddlewareInterface;
 use NsUtil\Services\RateLimiter;
 
+use function NsUtil\dd;
+
 class CheckAPIKeyMiddleware implements MiddlewareInterface
 {
     public ?string $apikey = null;
@@ -28,9 +30,11 @@ class CheckAPIKeyMiddleware implements MiddlewareInterface
 
         $this->api = $api;
 
-        $this->setApiKey();;
+        $this->setApiKey();
 
-        $resource = Helper::name2CamelCase($api->getConfigData()['rest']['resource']);
+        $resource = mb_strtolower(Helper::name2CamelCase($api->getConfigData()['rest']['resource']));
+        $this->freeRoutes = array_map(fn ($item) => mb_strtolower(Helper::name2CamelCase($item)), $this->freeRoutes);
+
 
         if (in_array($resource, $this->freeRoutes)) {
             return true;

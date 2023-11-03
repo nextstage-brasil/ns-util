@@ -6,6 +6,7 @@ use NsUtil\Api;
 
 interface MiddlewareInterface
 {
-    public function __construct();
     public function handle(Api $api): bool;
+
+    public function check(): bool;
 }

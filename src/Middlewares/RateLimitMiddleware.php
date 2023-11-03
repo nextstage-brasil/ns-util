@@ -32,6 +32,8 @@ class RateLimitMiddleware implements MiddlewareInterface
 
         $this->setApiKey();
 
+        $this->check();
+
         try {
             if ($this->setApiKey && null !== $this->apikey) {
                 RateLimiter::byKey($this->apikey, $this->maxCallsLimit, $this->secondsInterval, $resource);
@@ -59,5 +61,10 @@ class RateLimitMiddleware implements MiddlewareInterface
                 ?? '-1'
             )
             : $this->apikey;
+    }
+
+    public function check(): bool
+    {
+        return true;
     }
 }

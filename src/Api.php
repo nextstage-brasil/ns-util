@@ -185,7 +185,7 @@ class Api
 
     /**
      * ATENÇÃO: Retorna o dado conforme foi enviado, sem nenhum tratamento de segurança. Use com atenção.
-     * @param type $key
+     * @param string $key
      */
     public function getOriginalData($key)
     {
@@ -349,7 +349,7 @@ class Api
     public static function result(int $code, array $response, $type = 'json')
     {
         $api = new Api();
-        $api->response($response, $code, $type);
+        $api->response($response, $code);
     }
 
     /**
@@ -669,7 +669,7 @@ class Api
             self::restFull($namespace, $this);
         } catch (ModelNotFoundException $exc) {
             $this->error('Not found', self::HTTP_NOT_FOUND);
-        } catch (\Exception $exc) {
+        } catch (Exception $exc) {
             $this->error($exc->getMessage(), $exc->getCode() ?? self::HTTP_BAD_REQUEST);
         }
     }
