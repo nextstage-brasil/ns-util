@@ -7,6 +7,7 @@ use Exception;
 use NsUtil\Exceptions\ModelNotFoundException;
 use NsUtil\Exceptions\RedisConnectionException;
 use NsUtil\Exceptions\TooManyRequestException;
+use NsUtil\Interface\MiddlewareInterface;
 use NsUtil\Services\RateLimiter;
 
 class Api
@@ -20,8 +21,8 @@ class Api
     private $config = [];
     private $router;
     private $simpleReturn = false; // Utilizado para deinfir se aapenas retornar o conteudo ou encerrar a aplicação
-    private $successCallback;
-    private $errorCallback;
+    private ?Closure $successCallback = null;
+    private ?Closure $errorCallback = null;
     private $onResponse;
     private $authRequired;
     private $validators = [];
@@ -551,10 +552,10 @@ class Api
     /**
      * Undocumented function
      *
-     * @param \Closure $successCallback
+     * @param Closure $successCallback
      * @return self
      */
-    public function setSuccessCallback(\Closure $successCallback): self
+    public function setSuccessCallback(Closure $successCallback): self
     {
         $this->successCallback = $successCallback;
         return $this;
@@ -563,10 +564,10 @@ class Api
     /**
      * Undocumented function
      *
-     * @param \Closure $successCallback
+     * @param Closure $successCallback
      * @return self
      */
-    public function onSuccess(\Closure $successCallback): self
+    public function onSuccess(Closure $successCallback): self
     {
         $this->successCallback = $successCallback;
         return $this;
@@ -575,24 +576,36 @@ class Api
     /**
      * Undocumented function
      *
-     * @param \Closure $successCallback
+     * @param Closure $successCallback
      * @return self
      */
-    public function onError(\Closure $errorCallback): self
+    public function onError(Closure $errorCallback): self
     {
         $this->errorCallback = $errorCallback;
         return $this;
     }
 
     /**
-     * Undocumented function
+     * Validates the incoming request using a provided closure or middleware class instance.
      *
-     * @param \Closure $successCallback
+     * @param string $message        The error message to display upon validation failure
+     * @param int $code              The error code
+     * @param Closure|MiddlewareInterface $rule The closure or Middleware class instance to perform the validation
+     *
      * @return self
+     * @throws Exception             Thrown if a closure or Middleware class is not provided
      */
-    public function validator(string $message, int $code, \Closure $rule): self
+    public function validator(string $message, int $code, $rule): self
     {
-        $ret = call_user_func($rule);
+        // Check if the parameter is an instance of a class that implements MiddlewareInterface
+        if ($rule instanceof MiddlewareInterface) {
+            $ret = $rule->handle($this);
+        } elseif (is_callable($rule)) {
+            $ret = call_user_func($rule);
+        } else {
+            throw new Exception('Only closure or Middleware class was accepted');
+        }
+
         if ($ret !== true) {
             $this->validators[] = function ($api) use ($code, $message) {
                 $api->error($message, $code);
@@ -601,18 +614,22 @@ class Api
         return $this;
     }
 
+
     /**
-     * Just to compatibility
+     * Provides a compatibility method for middleware based on the validator method.
      *
-     * @param string $message
-     * @param integer $code
-     * @param \Closure $rule
+     * @param string $message        The error message to display upon validation failure
+     * @param int $code              The error code
+     * @param Closure|MiddlewareInterface $rule The closure or Middleware class instance to perform the validation
+     *
      * @return self
+     * @throws Exception             Thrown if a closure or Middleware class is not provided
      */
-    public function middleware(string $message, int $code, \Closure $rule): self
+    public function middleware(string $message, int $code, $rule): self
     {
         return self::validator($message, $code, $rule);
     }
+
 
     /**
      * Undocumented function

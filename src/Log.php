@@ -91,6 +91,9 @@ class Log
     public static function see($var, ?bool $html = null, bool $backtraceShow = true): void
     {
         switch (true) {
+            case is_callable($var):
+                $out = var_export($var, true);
+                break;
             case is_object($var):
                 $out = json_encode(Helper::objectPHP2Array($var), JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
                 break;
