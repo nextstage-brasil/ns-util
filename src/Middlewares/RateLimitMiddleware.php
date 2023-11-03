@@ -16,6 +16,8 @@ class RateLimitMiddleware implements MiddlewareInterface
     public int $secondsInterval = RateLimiter::PER_MINUTE;
     public ?string $apikey = 'not-defined';
 
+    public array $configByRoute = [];
+
     public bool $setApiKey = false;
 
     private Api $api;
@@ -28,7 +30,17 @@ class RateLimitMiddleware implements MiddlewareInterface
     {
         $this->api = $api;
 
-        $resource = Helper::name2CamelCase($this->api->getConfigData()['rest']['resource']);
+        $resource = mb_strtolower(Helper::name2CamelCase($api->getConfigData()['rest']['resource']));
+
+        $this->configByRoute = array_map(
+            fn ($item) => mb_strtolower(Helper::name2CamelCase($item)),
+            array_merge($this->configByRoute, [
+                'healthcheck' => [200, RateLimiter::PER_MINUTE]
+            ])
+        );
+
+        $maxCallsLimit = $this->configByRoute[$resource][0] ?? $this->maxCallsLimit;
+        $secondsInterval = $this->configByRoute[$resource][1] ?? $this->secondsInterval;
 
         $this->setApiKey();
 
@@ -36,9 +48,9 @@ class RateLimitMiddleware implements MiddlewareInterface
 
         try {
             if ($this->setApiKey && null !== $this->apikey) {
-                RateLimiter::byKey($this->apikey, $this->maxCallsLimit, $this->secondsInterval, $resource);
+                RateLimiter::byKey($this->apikey, $maxCallsLimit, $secondsInterval);
             } else {
-                RateLimiter::byIP($this->maxCallsLimit, $this->secondsInterval, $resource);
+                RateLimiter::byIP($maxCallsLimit, $secondsInterval);
             }
         } catch (RedisConnectionException $exc) {
             $this->api->error($exc->getMessage(), $exc->getCode());
