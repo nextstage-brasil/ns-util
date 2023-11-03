@@ -590,7 +590,7 @@ class Api
      *
      * @param string $message        The error message to display upon validation failure
      * @param int $code              The error code
-     * @param Closure|MiddlewareInterface $rule The closure or Middleware class instance to perform the validation
+     * @param Closure|MiddlewareInterface|string $rule The closure or Middleware class instance to perform the validation
      *
      * @return self
      * @throws Exception             Thrown if a closure or Middleware class is not provided
@@ -598,12 +598,19 @@ class Api
     public function validator(string $message, int $code, $rule): self
     {
         // Check if the parameter is an instance of a class that implements MiddlewareInterface
-        if ($rule instanceof MiddlewareInterface) {
-            $ret = $rule->handle($this);
-        } elseif (is_callable($rule)) {
+        if (is_callable($rule)) {
             $ret = call_user_func($rule);
         } else {
-            throw new Exception('Only closure or Middleware class was accepted');
+            if (is_string($rule) && class_exists($rule)) {
+                $class = new $rule();
+                if ($class instanceof MiddlewareInterface) {
+                    $ret = $class->handle($this);
+                } else {
+                    throw new Exception('Only middleware interface was accepted');
+                }
+            } else {
+                throw new Exception('Only closure or middleware interface was accepted');
+            }
         }
 
         if ($ret !== true) {
