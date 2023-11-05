@@ -29,13 +29,13 @@ class MakeRouter extends Command
         }
 
         // create dir
-        $pathToCommands = Helper::getPathApp() . '/src/NsLibrary/Routers';
+        $pathToCommands = Helper::getPathApp() . '/src/Controllers/Api';
         Helper::mkdir($pathToCommands);
 
         $className = ucwords(Helper::name2CamelCase($args[0]));
         $filename = $pathToCommands . "/$className.php";
         $commandName = str_ireplace(['_router', 'router'], '', Helper::sanitize(Helper::reverteName2CamelCase($className)));
-        $namespace = Helper::getPsr4Name() . '\NsLibrary\Routers';
+        $namespace = Helper::getPsr4Name() . '\Controllers\Api';
         $signature = str_ireplace(['_', 'command'], [':', ''], $commandName);
         $template = include __DIR__ . '/../Templates/router.php';
         $content = (new Template($template, [
