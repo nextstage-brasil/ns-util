@@ -7,7 +7,7 @@ use Exception;
 use NsUtil\Exceptions\ModelNotFoundException;
 use NsUtil\Exceptions\RedisConnectionException;
 use NsUtil\Exceptions\TooManyRequestException;
-use NsUtil\Interface\MiddlewareInterface;
+use NsUtil\Interfaces\MiddlewareInterface;
 use NsUtil\Services\RateLimiter;
 
 class Api
@@ -126,7 +126,8 @@ class Api
             'rest' => $rest,
             'bodyOrigin' => $bodyOrigin,
             'headers' => $this->getHeaders(),
-            'rota' => $router->getAllParam(1) . (($router->getAllParam(2)) ? '/' . $router->getAllParam(2) : ''), // '/' . $router->getAllParam(2),
+            'rota' => $router->getAllParam(1) . (($router->getAllParam(2)) ? '/' . $router->getAllParam(2) : ''),
+            // '/' . $router->getAllParam(2),
             'acao' => 'ws_' . $router->getAllParam(2),
             'controller' => ucwords((string) $router->getAllParam(1)),
             'includeFile' => $router->getIncludeFile(),

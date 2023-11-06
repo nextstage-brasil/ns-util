@@ -7,7 +7,7 @@ use NsUtil\Api;
 use NsUtil\Exceptions\RedisConnectionException;
 use NsUtil\Exceptions\TooManyRequestException;
 use NsUtil\Helper;
-use NsUtil\Interface\MiddlewareInterface;
+use NsUtil\Interfaces\MiddlewareInterface;
 use NsUtil\Services\RateLimiter;
 
 /**

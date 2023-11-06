@@ -1,6 +1,6 @@
 <?php
 
-namespace NsUtil\Interface;
+namespace NsUtil\Interfaces;
 
 use NsUtil\Api;
 

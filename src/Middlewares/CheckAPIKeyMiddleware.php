@@ -5,7 +5,7 @@ namespace NsUtil\Middlewares;
 use Exception;
 use NsUtil\Api;
 use NsUtil\Helper;
-use NsUtil\Interface\MiddlewareInterface;
+use NsUtil\Interfaces\MiddlewareInterface;
 
 /**
  * CheckAPIKeyMiddleware validates the presence of API keys for secured routes and implements the MiddlewareInterface.
@@ -53,7 +53,7 @@ class CheckAPIKeyMiddleware implements MiddlewareInterface
         $this->setApiKey();
 
         $resource = mb_strtolower(Helper::name2CamelCase($api->getConfigData()['rest']['resource']));
-        $this->freeRoutes = array_map(fn ($item) => mb_strtolower(Helper::name2CamelCase($item)), $this->freeRoutes);
+        $this->freeRoutes = array_map(fn($item) => mb_strtolower(Helper::name2CamelCase($item)), $this->freeRoutes);
 
         if (in_array($resource, $this->freeRoutes)) {
             return true;
