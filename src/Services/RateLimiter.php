@@ -59,7 +59,7 @@ class RateLimiter
 
         $rateKey = $appkey ?? self::getIpAddress() . '-' . (string) $route;
 
-        if (null === self::$redis->get($rateKey)) {
+        if (null === self::$redis::get($rateKey)) {
 
             // per_day
             if ($secondsInterval === -1) {
@@ -67,21 +67,21 @@ class RateLimiter
                 $secondsInterval = $mezzanotte->timestamp() - now()->timestamp();
             }
 
-            self::$redis->set($rateKey, 0, $secondsInterval);
+            self::$redis::set($rateKey, 0, $secondsInterval);
         }
 
-        $totalUserCalls = ((int) self::$redis->get($rateKey)) + 1;
+        $totalUserCalls = ((int) self::$redis::get($rateKey)) + 1;
         if ($totalUserCalls > $maxCallsLimit) {
             throw new TooManyRequestException('Limite exceed. (' . $rateKey . ')');
         }
 
-        self::$redis->incr($rateKey);
+        self::$redis::incr($rateKey);
     }
 
     public static function clear(?string $appkey = null): void
     {
         self::init();
         $rateKey = $appkey ?? self::getIpAddress();
-        self::$redis->clearKey($rateKey);
+        self::$redis::clearKey($rateKey);
     }
 }

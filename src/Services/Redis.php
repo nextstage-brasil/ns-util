@@ -54,7 +54,7 @@ class Redis
      * @param integer $timeInSeconds Valor em segundos da duração do cache
      * @return void
      */
-    public static function set(string $key, $value, int $timeInSeconds)
+    public static function set(string $key, $value, int $timeInSeconds = self::FOREVER)
     {
         self::init();
         self::prepareKey($key);
@@ -65,20 +65,21 @@ class Redis
         } else {
             self::$client->set($key, $value);
         }
+
         self::$client->expire($key, $timeInSeconds);
     }
 
-    public static function get($key, \Closure $fn = null, $timeInSeconds = null)
+    public static function get($key, $fn = null, int $timeInSeconds = self::FOREVER)
     {
+        $originalKey = $key;
         self::init();
         self::prepareKey($key);
 
         $ret = self::$client->get($key);
-        if (strlen((string) $ret)  === 0) {
-            if (is_callable($fn)) {
-                $ret = call_user_func($fn);
-                self::set($key, $ret, $timeInSeconds);
-            }
+
+        if (strlen((string) $ret) === 0) {
+            self::set($originalKey, $fn, $timeInSeconds);
+            $ret = self::$client->get($key);
         }
         return strlen((string) $ret) === 0 ? null : $ret;
     }
@@ -119,7 +120,7 @@ class Redis
         self::prepareKey($key);
 
         $ret = self::$client->get($key);
-        if (strlen((string) $ret)  === 0) {
+        if (strlen((string) $ret) === 0) {
             throw new Exception("Redis: key '$originalKey' not found");
         }
 
