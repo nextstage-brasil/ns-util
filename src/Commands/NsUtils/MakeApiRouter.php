@@ -7,7 +7,7 @@ use NsUtil\Template;
 use NsUtil\ConsoleTable;
 use NsUtil\Commands\Abstracts\Command;
 
-class MakeRouter extends Command
+class MakeApiRouter extends Command
 {
     /**
      * The signature of the command.
