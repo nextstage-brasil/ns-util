@@ -9,6 +9,8 @@ use NsUtil\Helper;
 use NsUtil\Log;
 use Predis\Client;
 
+use NsUtil\json_decode;
+
 class Redis
 {
     private static ?Client $client = null;
@@ -142,5 +144,28 @@ class Redis
         }
 
         self::$client->incr($key);
+    }
+
+    public static function cacheArray($key, $value = null, int $timeInSeconds = self::FOREVER)
+    {
+        $originalKey = $key;
+        self::init();
+        self::prepareKey($key);
+
+        $ret = self::$client->get($key);
+
+        if (strlen((string) $ret) === 0) {
+            $ret = json_encode(is_callable($value) ? call_user_func($value) : $value);
+            self::set($originalKey, $ret, $timeInSeconds);
+            $ret = self::$client->get($key);
+        }
+        return json_decode($ret, true);
+    }
+
+    public static function cacheJson($key, $value = null, int $timeInSeconds = self::FOREVER)
+    {
+        $ret = self::cacheArray($key, $value, $timeInSeconds);
+
+        return json_decode($ret);
     }
 }
