@@ -41,11 +41,11 @@ class Redis
         }
     }
 
-    private static function prepareKey(&$key)
+    private static function prepareKey($key): string
     {
         $ambiente = (string) getenv('AMBIENTE') ? getenv('AMBIENTE') : 'default';
         $prefix = getenv('REDIS_PREFIX') ? getenv('REDIS_PREFIX') : '';
-        $key = (string) '_' . hash('crc32', "$key - $prefix - $ambiente");
+        return '_' . md5("$key - $prefix - $ambiente");
     }
 
     /**
@@ -59,7 +59,7 @@ class Redis
     public static function set(string $key, $value, int $timeInSeconds = self::FOREVER)
     {
         self::init();
-        self::prepareKey($key);
+        $key = self::prepareKey($key);
 
         if (is_callable($value)) {
             $ret = call_user_func($value);
@@ -71,26 +71,20 @@ class Redis
         self::$client->expire($key, $timeInSeconds);
     }
 
-    public static function get($key, $fn = null, int $timeInSeconds = self::FOREVER)
+    public static function get($key, $value = null, int $timeInSeconds = self::FOREVER)
     {
-        $originalKey = $key;
+
         self::init();
-        self::prepareKey($key);
 
-        $ret = self::$client->get($key);
+        $ret = self::$client->get(self::prepareKey($key));
 
-        if (strlen((string) $ret) === 0) {
-            self::set($originalKey, $fn, $timeInSeconds);
-            $ret = self::$client->get($key);
+        if (strlen((string) $ret) === 0 && $value !== null) {
+            self::set($key, $value, $timeInSeconds);
+            $ret = self::$client->get(self::prepareKey($key));
         }
         return strlen((string) $ret) === 0 ? null : $ret;
     }
 
-    public static function getHashedKey($content)
-    {
-        self::prepareKey($content);
-        return $content;
-    }
 
     public static function clearAll()
     {
@@ -101,7 +95,7 @@ class Redis
     public static function clearKey($key): void
     {
         self::init();
-        self::prepareKey($key);
+        $key = self::prepareKey($key);
         if (self::$client->exists($key)) {
             self::$client->del($key);
         }
@@ -119,7 +113,7 @@ class Redis
     {
         $originalKey = $key;
         self::init();
-        self::prepareKey($key);
+        $key = self::prepareKey($key);
 
         $ret = self::$client->get($key);
         if (strlen((string) $ret) === 0) {
@@ -138,7 +132,7 @@ class Redis
     {
         $originalKey = $key;
         self::init();
-        self::prepareKey($key);
+        $key = self::prepareKey($key);
         if (!self::$client->exists($key)) {
             throw new Exception("Redis: key '$originalKey' not found");
         }
@@ -148,18 +142,11 @@ class Redis
 
     public static function cacheArray($key, $value = null, int $timeInSeconds = self::FOREVER)
     {
-        $originalKey = $key;
-        self::init();
-        self::prepareKey($key);
+        $content = self::get($key, function () use ($value) {
+            return (string) json_encode(is_callable($value) ? call_user_func($value) : $value);
+        }, $timeInSeconds);
 
-        $ret = self::$client->get($key);
-
-        if (strlen((string) $ret) === 0) {
-            $ret = json_encode(is_callable($value) ? call_user_func($value) : $value);
-            self::set($originalKey, $ret, $timeInSeconds);
-            $ret = self::$client->get($key);
-        }
-        return json_decode($ret, true);
+        return json_decode($content, true);
     }
 
     public static function cacheJson($key, $value = null, int $timeInSeconds = self::FOREVER)
@@ -167,5 +154,12 @@ class Redis
         $ret = self::cacheArray($key, $value, $timeInSeconds);
 
         return json_decode($ret);
+    }
+
+    public function cache($key, $value = null, int $timeInSeconds = self::FOREVER)
+    {
+        return self::get($key, function () use ($value) {
+            return is_callable($value) ? call_user_func($value) : $value;
+        }, $timeInSeconds);
     }
 }
