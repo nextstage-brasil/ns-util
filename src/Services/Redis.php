@@ -20,12 +20,16 @@ class Redis
     {
         try {
             if (null === self::$client) {
-                self::$client = new Client([
+                $options = [
                     'scheme' => 'tcp',
                     'host' => getenv('REDIS_HOST') ? getenv('REDIS_HOST') : 'host.docker.internal',
                     'port' => getenv('REDIS_PORT') ? getenv('REDIS_PORT') : 6379,
                     // 'prefix' => getenv('REDIS_PREFIX') ? getenv('REDIS_PREFIX') : ''
-                ]);
+                ];
+                if (getenv('REDIS_PASSWORD')) {
+                    $options['password'] = getenv('REDIS_PASSWORD');
+                }
+                self::$client = new Client($options);
             }
 
             self::$client->connect(); // Tenta conectar ao Redis
