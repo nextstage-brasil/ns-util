@@ -68,7 +68,7 @@ class CheckAPIKeyMiddleware implements MiddlewareInterface
     public function setApiKey(): void
     {
         $headers = $this->api->getHeaders(true);
-        $this->apikey = $headers[$this->apikey]
+        $this->apikey = $headers[mb_strtolower((string) $this->apikey ?? '-nsutil')]
             ?? $headers['apikey']
             ?? $this->apikey;
     }
