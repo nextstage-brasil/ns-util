@@ -2,12 +2,14 @@
 
 namespace NsUtil\Deployer;
 
-class DeployerGenerator {
+class DeployerGenerator
+{
 
     private $configs = [];
     private $gitlabCI = [];
 
-    public function __construct($packageName, $packagePath, $templateShInstallPath = false) {
+    public function __construct($packageName, $packagePath, $templateShInstallPath = false)
+    {
         $this->configs['packageName'] = $packageName;
         $this->configs['packagePath'] = $packagePath;
         $templateFile = __DIR__ . '/lib/deployDefault.sh';
@@ -31,18 +33,19 @@ variables:
 
     /**
      * 
-     * @param type $clientName Prefixo + nome da branch a ser processada no CI
-     * @param type $pathOnServer caminho absoluto noservidor antes da pasta build, ex.: /var/www/nome_app (build esta em /var/www/nome_app/build)
-     * @param type $ownerOnServer Dono dos arquivos no servidor (Ex.: ubuntu, debian, usuario especifico)
-     * @param type $pathToKeySSH Caminho do arquivo para o SSH quando deploy for feito localmente
-     * @param type $userDeployer Ususario que executará o deploy. Não necessáriamente precisa ser o proprietario. Ex.: deployer
-     * @param type $host host para instalação ex.: www.meuapp.com.br, ou 172.0.0.1
+     * @param string $clientName Prefixo + nome da branch a ser processada no CI
+     * @param string $pathOnServer caminho absoluto noservidor antes da pasta build, ex.: /var/www/nome_app (build esta em /var/www/nome_app/build)
+     * @param string $ownerOnServer Dono dos arquivos no servidor (Ex.: ubuntu, debian, usuario especifico)
+     * @param string $pathToKeySSH Caminho do arquivo para o SSH quando deploy for feito localmente
+     * @param string $userDeployer Ususario que executará o deploy. Não necessáriamente precisa ser o proprietario. Ex.: deployer
+     * @param mixed $host host para instalação ex.: www.meuapp.com.br, ou 172.0.0.1
      * @param bool $installCrontab default false, decide se deve instalar o arquivo em /cron/crontab para este deploy. Não deve ser utilizado para homologações. 
      * ATENÇÃO: Será instalado para o usuario dono dos arquivos. ex.: se for ubuntu e tiver varios apps, apagara os demais crontabs.
      * @param bool $sudoRequire Se true (default), sera aplicado sudo antes das instalaçãoes. Pode pedir senha caso usuario não tenha acesso ao sudo sem senha.
      * @return $this
      */
-    public function addConfig($clientName, $pathOnServer, $ownerOnServer, $pathToKeySSH, $userDeployer, $host, bool $installCrontab = false, bool $sudoRequire = true) {
+    public function addConfig($clientName, $pathOnServer, $ownerOnServer, $pathToKeySSH, $userDeployer, $host, bool $installCrontab = false, bool $sudoRequire = true)
+    {
         // version
         $name = str_replace(' ', '_', $clientName);
         $this->configs['deployers'][] = [
@@ -65,7 +68,8 @@ variables:
         return $this;
     }
 
-    private function setDefaultScritps($pathDeployer) {
+    private function setDefaultScritps($pathDeployer)
+    {
         $scripts = \NsUtil\DirectoryManipulation::openDir(__DIR__ . '/lib');
         \NsUtil\Helper::mkdir($pathDeployer . '/deploy/scripts');
         foreach ($scripts as $script) {
@@ -79,7 +83,16 @@ variables:
      * Gera os arquivo sh e runners
      * @param type $pathDeployer: Deve ser o mesmo diretório onde se encontra o "builder.php"
      */
-    public function run($pathDeployer, $phpVersion = '7.2') {
+
+    /**
+     * Gera os arquivo sh e runners
+     *
+     * @param string $pathDeployer
+     * @param string $phpVersion
+     * @return void
+     */
+    public function run($pathDeployer, $phpVersion = '7.2')
+    {
         $this->configs['pathDeployer'] = $pathDeployer;
         $this->setDefaultScritps($pathDeployer);
         foreach ($this->configs['deployers'] as $key => $val) {
@@ -163,7 +176,8 @@ timeout /t 15";
         }
     }
 
-    private function gitLabCI_AddStage($branchName, $sshHost, $sshPath, $sshDeployerFilename, $sshUserDeployer, $item) {
+    private function gitLabCI_AddStage($branchName, $sshHost, $sshPath, $sshDeployerFilename, $sshUserDeployer, $item)
+    {
         // Gerado pelo Package
         $zipCommand = file_get_contents($this->configs['pathDeployer'] . '/deploy/scripts/zipCommandToCI.sh');
 

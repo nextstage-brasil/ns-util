@@ -41,7 +41,7 @@ class ConnectionPostgreSQL
             Log::logTxt(
                 $this->logfile,
                 '[' . $this->con->pgsqlGetPid() . '] ' .
-                    preg_replace('/(\\s)+/', ' ', $message),
+                preg_replace('/(\\s)+/', ' ', $message),
                 true
             );
         }
@@ -109,7 +109,7 @@ class ConnectionPostgreSQL
     {
         try {
             $this->executeQuery('ROLLBACK');
-        } catch (\Exception $exc) {
+        } catch (Exception $exc) {
         }
         self::$transaction_in_progress = false;
     }
@@ -224,14 +224,14 @@ class ConnectionPostgreSQL
     }
 
     /**
+     * Ingest data using copy strategy postgresql
      *
-     * @param Connection $db
-     * @param string $this->tableName
-     * @param string[] $fields List of fields names.
-     * @param array[] $records Two-demension array of cells (array of rows).
-     * @return boolean
+     * @param string $toTable
+     * @param array $fields
+     * @param array $records
+     * @return void
      */
-    public function insertByCopy($toTable, array $fields, array $records)
+    public function insertByCopy($toTable, array $fields, array $records): bool
     {
         $this->open();
         static $delimiter = "\t";
@@ -319,11 +319,11 @@ class ConnectionPostgreSQL
 
     /**
      * Executara um update na tabela com prepared. Os nomes do campos já devem estar no formato da tabela, sem camelcase
-     * @param type $table
-     * @param type $array
-     * @param type $cpoWhere
+     * @param string $table
+     * @param array $array
+     * @param string $cpoWhere
      * @return boolean
-     * @throws SistemaException
+     * @throws Exception
      */
     public function update($table, $array, $cpoWhere)
     {

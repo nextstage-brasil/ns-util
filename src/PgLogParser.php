@@ -2,13 +2,18 @@
 
 namespace NsUtil;
 
-class PgLogParser {
+use Exception;
 
-    public function __construct() {
-        
+class PgLogParser
+{
+
+    public function __construct()
+    {
+
     }
 
-    private function item($data, $tipo, $tipo2, $duracao, $descricao) {
+    private function item($data, $tipo, $tipo2, $duracao, $descricao)
+    {
         return [
             'datahora' => $data,
             'database' => '',
@@ -22,7 +27,8 @@ class PgLogParser {
         ];
     }
 
-    public function parseToArray($filename) {
+    public function parseToArray($filename)
+    {
         //$filename = __DIR__ . '/win-log.log'; // str_replace('\\', DIRECTORY_SEPARATOR, 'D:\.pg-data\log\postgresql-2020-10-19_093005.log');
         //2020-10-19 14:05:35.611 -03 [19895] collaborative@cs_1.11.5 ERROR:  unrecognized configuration parameter "application.name"
 
@@ -34,8 +40,8 @@ class PgLogParser {
         $format = new Format();
 
         foreach ($list as $key => $item) {
-            $item = str_replace(["\t", "\n"], [' ', ' '], trim((string)$item));
-            if (strlen((string)$item) < 2) {
+            $item = str_replace(["\t", "\n"], [' ', ' '], trim((string) $item));
+            if (strlen((string) $item) < 2) {
                 continue;
             }
             //2020-10-19 09:55:59.487 -03 [4880] ERROR: syntax error at or near ")" at character 1224
@@ -46,7 +52,7 @@ class PgLogParser {
             $data = false;
             try {
                 $str = $datahora[0] . ' ' . $datahora[1];
-                if (strlen((string)$str) > 8) {
+                if (strlen((string) $str) > 8) {
                     $data = $format->setString($str)->date('arrumar', true);
                 }
             } catch (Exception $exc) {
@@ -69,11 +75,11 @@ class PgLogParser {
                 if (stripos($item, 'duration: ') > 0) {
                     $dur = explode(':', $descricao);
                     $tipo = $tipo2 = 'LENTIDAO';
-                    $duracao = explode(' ', trim((string)$dur[1]))[0] . 'ms';
-                    $descricao = trim((string)$dur[2]);
+                    $duracao = explode(' ', trim((string) $dur[1]))[0] . 'ms';
+                    $descricao = trim((string) $dur[2]);
                 }
                 // Novo item
-                if ($data !== $lastDate) {
+                if ($data !== ($lastDate ?? '--')) {
                     $lastDate = $data;
                     $i++;
                     $out[$i] = $this->item($data, $tipo, $tipo2, $duracao, $descricao);
@@ -93,10 +99,10 @@ class PgLogParser {
                         default:
                             $chave = 'descricao';
                     }
-                    $out[$i][$chave] .= chr(13) . trim((string)$descricao);
+                    $out[$i][$chave] .= chr(13) . trim((string) $descricao);
                 }
             } else {
-                $out[$i][$chave] .= chr(13) . trim((string)$item);
+                $out[$i][$chave ?? null] .= chr(13) . trim((string) $item);
             }
 
             //echo $item . "<br/>";
@@ -105,7 +111,8 @@ class PgLogParser {
         return $out;
     }
 
-    public function loadToTable($filename, $schema, $tablename, ConnectionPostgreSQL $con, $tempDir = "/tmp") {
+    public function loadToTable($filename, $schema, $tablename, ConnectionPostgreSQL $con, $tempDir = "/tmp")
+    {
         $out = $this->parseToArray($filename);
         $csv = [];
         $header = [];

@@ -178,7 +178,7 @@ if (!function_exists('roundMoneyABNT5891')) {
      * @param string $command
      * @param string $logfile
      * @param boolean $withNohup
-     * @return void
+     * @return float
      */
     function roundMoneyABNT5891(
         $value,
@@ -229,6 +229,8 @@ if (!function_exists('env')) {
             }
 
             return $value;
+        } else {
+            return $default;
         }
     }
 }

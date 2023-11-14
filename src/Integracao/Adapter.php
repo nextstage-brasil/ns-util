@@ -5,16 +5,18 @@ namespace NsUtil\Integracao;
 use Exception;
 use NsUtil\Helper;
 
-abstract class Adapter {
+abstract class Adapter
+{
 
     protected $token, $endpoint, $appkey, $showLogs, $sessionName;
     private $atualLoginTime;
 
-    public function __construct($endpoint, $appkey, $autologin = false) {
+    public function __construct($endpoint, $appkey, $autologin = false)
+    {
         $this->endpoint = $endpoint;
         $this->appkey = $appkey;
         if (!$this->sessionName) {
-            $this->sessionName = md5((string)$endpoint . $appkey);
+            $this->sessionName = md5((string) $endpoint . $appkey);
         }
         $_SESSION[$this->sessionName] = 0;
         if ($autologin) {
@@ -22,7 +24,8 @@ abstract class Adapter {
         }
     }
 
-    private function login() {
+    private function login()
+    {
         // se validade for menor que agora, faz login
         if ((int) $_SESSION[$this->sessionName] < time()) {
             $_SESSION[$this->sessionName] = time() + (1000 * 3); // pra evitar auto loopíng ao usar call
@@ -41,12 +44,14 @@ abstract class Adapter {
     /**
      * Ignora por uma unica vez a verificação de login
      */
-    public function ignoreLogin(int $segundos = 3) {
+    public function ignoreLogin(int $segundos = 3)
+    {
         $this->atualLoginTime = $_SESSION[$this->sessionName];
         $_SESSION[$this->sessionName] = time() + 3 * $segundos;
     }
 
-    public function call($recurso, $params = [], $method = 'POST', $header = []) {
+    public function call($recurso, $params = [], $method = 'POST', $header = [])
+    {
         return $this->_call($recurso, $params, $method, $header);
     }
 
@@ -57,9 +62,10 @@ abstract class Adapter {
      * @param array $params
      * @param string $method
      * @param array $header
-     * @return \stdClass
+     * @return object
      */
-    public function _call($recurso, $params = [], $method = 'POST', $header = []) {
+    public function _call($recurso, $params = [], $method = 'POST', $header = [])
+    {
         $this->login();
         try {
             $url = $this->endpoint . '/' . $recurso;
@@ -132,7 +138,8 @@ abstract class Adapter {
     //     }
     // }
 
-    protected function printLogsOnScreen($text) {
+    protected function printLogsOnScreen($text)
+    {
         if ($this->showLogs) {
             echo "<hr>printLogAdapterIntegracao: <br/><br/>: ";
             echo $text . "<hr>";

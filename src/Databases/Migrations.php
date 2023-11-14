@@ -179,7 +179,7 @@ class Migrations
                 }
                 ob_end_clean();
             }
-        } catch (\Exception $exc) {
+        } catch (Exception $exc) {
             throw new Exception($exc->getMessage());
         }
 

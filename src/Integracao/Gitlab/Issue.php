@@ -42,7 +42,7 @@ class Issue
             }
 
             $this->setIssue($data, false);
-        } catch (\Exception $exc) {
+        } catch (Exception $exc) {
             throw new ModelNotFoundException($exc->getMessage());
         }
 
@@ -115,5 +115,26 @@ class Issue
     {
         $this->client->setEstimate($this->issue['iid'], $estimateInSeconds . 's');
         return $this->load();
+    }
+
+    public function setLinkedIssue(int $targetIssueIid, ?int $targetProjectId): self
+    {
+        $targetProjectId ??= $this->issue['project_id'];
+
+        $resource = 'projects/' . $this->issue['project_id']
+            . '/issues/' . $this->issue['iid']
+            . '/links'
+        ;
+
+        $payload = [
+            "link_type" => "relates_to",
+            "target_project_id" => (string) $targetProjectId,
+            'target_issue_iid' => (string) $targetIssueIid
+        ];
+
+        $ret = $this->client->fetch($resource, $payload, 'POST');
+
+        return $this;
+
     }
 }

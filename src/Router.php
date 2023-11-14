@@ -2,7 +2,8 @@
 
 namespace NsUtil;
 
-class Router {
+class Router
+{
 
     private $valorTotalURl;
     private $serverUri;
@@ -21,7 +22,8 @@ class Router {
      * @return $this->serverUri retorna o valor da REQUEST_URI ( LINK )
      * @return $this->valorTotalURl retorna o valoar da ( path quebrada PHP_URL_PATH ) para validação
      */
-    public function __construct(string $page404Path, array $arrayValues = []) {
+    public function __construct(string $page404Path, array $arrayValues = [])
+    {
         $this->pathView = '/';
         $this->arrayValues = $arrayValues;
 
@@ -42,11 +44,13 @@ class Router {
         $this->routes();
     }
 
-    public function getIncludeFile() {
+    public function getIncludeFile()
+    {
         return $this->includeFile;
     }
 
-    public function getRoute() {
+    public function getRoute()
+    {
         return $this->route;
     }
 
@@ -58,7 +62,14 @@ class Router {
      * @return $search_array = procura na array o valor da base name
      * @return $url -> last = pega o ultimo nome da array
      */
-    public function genereteUrl() {
+
+    /**
+     * Gera a url para route
+     *
+     * @return string
+     */
+    public function genereteUrl()
+    {
         //Explode url vindo do $this->serverUri
         $url = explode('/', $this->serverUri);
         //Pega o nome do diretorio atual a base name do 
@@ -107,22 +118,14 @@ class Router {
         return $url;
     }
 
-    /**
-     * @todo pageError404() Erro se não encontrar pagina 404
-     * @return http_response_code -> Adiciona no header error 404
-     * @return $path -> Valor da Pasta e caminho do erro 404
-     */
-    public function pageError404() {
-        return $this->page404;
-    }
 
     /**
-     * @todo   routes() Faz o caminho de Rotas
-     * @param  $valorArray = valor de uso da rota exemple:
-     * @return http_response_code -> Adiciona no header error 404
-     * @return $path -> Valor da Pasta e caminho do erro 404
+     * Undocumented function
+     *
+     * @return self
      */
-    public function routes() {
+    public function routes()
+    {
         // IDENTIFICAR PARAMETROS
         $temp = explode('/', $this->genereteUrl());
         $rota = '/' . ((isset($temp[1])) ? $temp[1] : '');
@@ -149,7 +152,8 @@ class Router {
         return $this;
     }
 
-    public function validaOd1(array $rotasDev, array $rotasAdmin = []) {
+    public function validaOd1(array $rotasDev, array $rotasAdmin = [])
+    {
         $temp = explode('/', $this->genereteUrl());
         $rota = '/' . $temp[1];
 
@@ -162,7 +166,7 @@ class Router {
             return true;
         }
         //soente develoopes
-        foreach ($this->rotasDev as $item) {
+        foreach ($rotasDev as $item) {
             $item = '/' . $item;
             if ((Helper::compareString($rota, $item) || Helper::compareString($rota, $item . '/')) && !$_SESSION['od1']) {
                 $rota = '/onlyDev';
@@ -170,34 +174,39 @@ class Router {
             }
         }
 
-        //somente adminsitradores
-        foreach ($this->rotasAdmin as $item) {
-            $item = '/' . $item;
-            if ((Helper::compareString($rota, $item) || Helper::compareString($rota, $item . '/')) && !UsuarioController::isUserAdmin()) {
-                $rota = '/onlyAdmin';
-                Log::auditoria('ACESSO-INDEVIDO', $_SERVER['REQUEST_URI']);
-                return true;
-            }
-        }
+        // //somente adminsitradores
+        // foreach ($rotasAdmin as $item) {
+        //     $item = '/' . $item;
+        //     if ((Helper::compareString($rota, $item) || Helper::compareString($rota, $item . '/')) && !UsuarioController::isUserAdmin()) {
+        //         $rota = '/onlyAdmin';
+        //         Log::auditoria('ACESSO-INDEVIDO', $_SERVER['REQUEST_URI']);
+        //         return true;
+        //     }
+        // }
     }
 
-    private function htaccessWriter() {
+    private function htaccessWriter()
+    {
         $file = '';
     }
 
-    function getValorTotalURl() {
+    function getValorTotalURl()
+    {
         return $this->valorTotalURl;
     }
 
-    function getServerUri() {
+    function getServerUri()
+    {
         return $this->serverUri;
     }
 
-    function getPathView() {
+    function getPathView()
+    {
         return $this->pathView;
     }
 
-    function getParam($key = false) {
+    function getParam($key = false)
+    {
         if ($key !== false) {
             return $this->param[$key];
         } else {
@@ -205,7 +214,8 @@ class Router {
         }
     }
 
-    function getAllParam($key = false) {
+    function getAllParam($key = false)
+    {
         if ($key !== false) {
             return ((isset($this->allParam[$key])) ? $this->allParam[$key] : null);
         } else {
@@ -213,8 +223,14 @@ class Router {
         }
     }
 
-    function getEntidade() {
+    function getEntidade()
+    {
         return $this->entidade;
+    }
+
+    function pageError404(): string
+    {
+        return '404.html';
     }
 
 }

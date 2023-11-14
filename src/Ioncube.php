@@ -2,23 +2,30 @@
 
 namespace NsUtil;
 
-class Ioncube {
+class Ioncube
+{
 
     private $licenseProperties;
 
-    public function __construct() {
-        $this->licenseProperties = ioncube_license_properties();
-        if ($this->licenseProperties === false) {
-            throw new \Exception("Ioncube: Unable to read license properties");
+    public function __construct()
+    {
+        if (function_exists("ioncube_license_properties")) {
+            $this->licenseProperties = \ioncube_license_properties();
+            if ($this->licenseProperties === false) {
+                throw new \Exception("Ioncube: Unable to read license properties");
+            }
+            $new = [];
+            foreach ($this->licenseProperties as $key => $val) {
+                $new[$key] = $val['value'];
+            }
+            $this->licenseProperties = (object) $new;
+        } else {
+            throw new \Exception("Ioncube: Not found Ioncube extension");
         }
-        $new = [];
-        foreach ($this->licenseProperties as $key => $val) {
-            $new[$key] = $val['value'];
-        }
-        $this->licenseProperties = (object) $new;
     }
 
-    public function get($key = false) {
+    public function get($key = false)
+    {
         if ($key === false) {
             return $this->licenseProperties;
         }
@@ -29,7 +36,8 @@ class Ioncube {
         }
     }
 
-    public function encode($pathToEncoderBatFile, $pathToPostEncoderBatFile) {
+    public function encode($pathToEncoderBatFile, $pathToPostEncoderBatFile)
+    {
         // Acionar ioncube
         echo "\nCodificando arquivos PHP";
         $cmd = 'call ' . $pathToEncoderBatFile;

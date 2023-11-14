@@ -19,6 +19,13 @@ class Html
         return ' data-toggle="tooltip" data-placement="' . $position . '" data-html="true" title="' . $text . '" ';
     }
 
+    public static function iconFafa(string $name, int $tamanho = 1)
+    {
+        $tamanho = (($tamanho === 1) ? '1g' : $tamanho . 'x');
+        $name = 'fa-' . $name . ' fa-' . $tamanho;
+        return '<i class="fa ' . $name . '" aria-hidden="true"></i>';
+    }
+
     /**
      * Retorna dois elementos interligados de datapicker
      * @param string $labelA
@@ -47,13 +54,13 @@ class Html
      * @param boolean $maxDate
      * @param boolean $ngChange
      * @param boolean $readonly
-     * @return void
+     * @return string
      */
     public static function inputDatePickerDependente($label, $model, $minDate = false, $maxDate = false, $ngChange = false, $readonly = true)
     {
         $readonly = (($readonly) ? ' readonly="true"' : '');
         return self::input([
-            'id' => md5((string)$model),
+            'id' => md5((string) $model),
             'ng-if' => '!' . $model . '_ro',
             'readonly' => $model . '_ro',
             'name' => $model,

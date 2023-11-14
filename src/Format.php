@@ -103,7 +103,7 @@ class Format
 
     public function fone()
     {
-        $fone = self::parseInt($this->string);
+        $fone = self::parseInt();
         $ddd = '(' . substr((string) $fone, 0, 2) . ') ';
         $fone = substr((string) $fone, 2, strlen((string) $fone) - 2);
         $out = $ddd . substr((string) $fone, 0, 4) . substr((string) $fone, 4, 8);
@@ -115,7 +115,7 @@ class Format
 
     public function cep()
     {
-        $cep = self::parseInt($this->string);
+        $cep = self::parseInt();
         return substr((string) $cep, 0, 5) . '-' . substr((string) $cep, 5, 8);
     }
 
@@ -127,7 +127,7 @@ class Format
     {
         $var = $this->string;
         if (stripos($var, ',') > -1) {
-            $var = self::parseInt($var);
+            $var = self::parseInt();
             $var = substr((string) $var, 0, strlen((string) $var) - 2) . "." . substr((string) $var, strlen((string) $var) - 2, 2);
         }
         return $var;
@@ -171,10 +171,10 @@ class Format
 
     /**
      * Formata um numero para exibiição
-     * @param type $number
-     * @param type $sinalNoFim
-     * @param type $prefixo
-     * @param type $color
+     *
+     * @param boolean $sinalNoFim
+     * @param boolean $prefixo
+     * @param boolean $color
      * @return string
      */
     public function formatNumber(bool $sinalNoFim = false, bool $prefixo = true, bool $color = true): string
@@ -199,7 +199,7 @@ class Format
 
     public function cpfCnpj(): string
     {
-        $var = self::parseInt((string)$this->string);
+        $var = self::parseInt();
 
         if (strlen((string) $var) === 11) { // cpf
             $out = substr((string) $var, 0, 3) . '.' . substr((string) $var, 3, 3) . '.' . substr((string) $var, 6, 3) . '-' . substr((string) $var, 9, 2);

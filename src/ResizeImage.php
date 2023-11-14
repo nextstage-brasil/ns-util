@@ -5,30 +5,36 @@ namespace NsUtil;
 use WideImage\WideImage;
 
 
-class ResizeImage {
+class ResizeImage
+{
 
     private $file;
     private $resolucao;
 
-    public function __construct() {
-        
+    public function __construct()
+    {
+
     }
 
-    function setFile($file) {
+    function setFile($file)
+    {
         $this->file = $file;
         return $this;
     }
 
-    function setResolucao($resolucao) {
+    function setResolucao($resolucao)
+    {
         $this->resolucao = (int) $resolucao;
         return $this;
     }
 
     /**
-     * 
-     * @param type $fixed Define que obrigatoriamente deve ser redimensionada. Se false, somente ira redimensionar se o arquivo atual foi maior que a resolução escolhida, ou seja, reduzir.
+     * Executa a função
+     *
+     * @return void
      */
-    public function run() {
+    public function run()
+    {
         $wide = WideImage::load($this->file);
         list($largura_original, $altura_original) = getimagesize($this->file);
         if ($largura_original > $altura_original) {
@@ -38,7 +44,8 @@ class ResizeImage {
         }
     }
 
-    public function reduz() {
+    public function reduz()
+    {
         list($largura_original, $altura_original) = getimagesize($this->file);
         $ladoMaior = (($largura_original > $altura_original) ? $largura_original : $altura_original);
         if ($ladoMaior > $this->resolucao) {

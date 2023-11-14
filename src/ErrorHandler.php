@@ -4,11 +4,13 @@ namespace NsUtil;
 
 use Exception;
 
-class ErrorHandler {
+class ErrorHandler
+{
 
     private $filename, $applicationName, $printError;
 
-    function __construct(string $log_filename, string $applicationName, bool $printError = false) {
+    function __construct(string $log_filename, string $applicationName, bool $printError = false)
+    {
         Helper::directorySeparator($log_filename);
         $this->filename = $log_filename;
         $this->applicationName = $applicationName;
@@ -18,17 +20,18 @@ class ErrorHandler {
             Helper::saveFile($this->filename, false, "appname,time,filename,line_num,error,message,backtrace");
             chmod($this->filename, 0777);
         }
-        
+
         set_error_handler([&$this, 'userErrorHandler']);
     }
 
-    function userErrorHandler($errno, $errmsg, $filename, $linenum) {
+    function userErrorHandler($errno, $errmsg, $filename, $linenum)
+    {
         $log_file_error = $this->filename;
 
         try {
             // Rotate File
             Log::rotate($this->filename);
-        } catch (\Exception $ex) {
+        } catch (Exception $ex) {
             $msg = "ERROR: Could not create file "
                 . $this->filename
                 . '. Mssage: '

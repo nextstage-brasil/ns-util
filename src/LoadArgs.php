@@ -3,7 +3,8 @@
 namespace NsUtil;
 
 // Helper funcionrs
-class LoadArgs {
+class LoadArgs
+{
 
     public $args;
     private $help;
@@ -11,9 +12,10 @@ class LoadArgs {
     /**
      * 
      * @param array $params = ['q' => ['LABEL', 'DEFAULT']]
-     * @param type $usageExample "php geocode_update.php -q 30"
+     * @param string $usageExample "php geocode_update.php -q 30"
      */
-    public function __construct(array $params, $usageExample = 'Não definido') {
+    public function __construct(array $params, $usageExample = 'Não definido')
+    {
         $newparamns = [];
         foreach ($params as $key => $val) {
             $newparamns[$key] = $val[0];
@@ -27,10 +29,10 @@ class LoadArgs {
 
         $options = [];
         foreach ($newparamns as $key => $val) {
-            $help[] = "\t-$key\t" . $val . ". Default: " . ((isset($defaultValues[$key]))?$defaultValues[$key]:'Not defined');
+            $help[] = "\t-$key\t" . $val . ". Default: " . ((isset($defaultValues[$key])) ? $defaultValues[$key] : 'Not defined');
             $options[$key] = "$key:";
         }
-        $help [] = '';
+        $help[] = '';
         //var_export($options);
         $args = getopt(implode('', $options));
         //var_export($args);
@@ -45,7 +47,8 @@ class LoadArgs {
         $this->args = $data;
     }
 
-    public function printHelp($extraMsg = '') {
+    public function printHelp($extraMsg = '')
+    {
         echo $extraMsg ? ">> ERROR:  $extraMsg" . PHP_EOL : '';
         echo $this->help;
         die();

@@ -82,7 +82,7 @@ class Licence
     public static function readFromIoncube($licenceName)
     {
         if (function_exists('ioncube_license_properties')) {
-            $lic = ioncube_license_properties()[$licenceName]['value'] ?? null;
+            $lic = \ioncube_license_properties()[$licenceName]['value'] ?? null;
             if (null !== $lic) {
                 $lic = trim($lic);
             }

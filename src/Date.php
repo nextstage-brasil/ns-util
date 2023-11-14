@@ -30,7 +30,6 @@ class Date
         if (null !== $tz) {
             $this->item->setTimezone(new DateTimeZone($tz));
         }
-        return $this;
     }
 
     /**
@@ -60,7 +59,7 @@ class Date
 
     public function timestamp(): int
     {
-        return $this->format('timestamp');
+        return (int) $this->format('timestamp');
     }
 
     /**

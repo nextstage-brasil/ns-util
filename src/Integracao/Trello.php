@@ -2,32 +2,39 @@
 
 namespace NsUtil\Integracao;
 
-class Trello {
+use Exception;
+use NsUtil\PgLoadCSV;
+
+class Trello
+{
 
     private static $depara;
 
-    public function __construct() {
-        
+    public function __construct()
+    {
+
     }
 
     /**
      * Busca no depara o name para id
-     * @param type $chave
-     * @param type $valor
-     * @return type
+     * @param string $chave
+     * @param string $valor
+     * @return mixed
      */
-    private static function getFromDePara($chave, $valor) {
-        return ( (isset(self::$depara[$chave][$valor])) ? self::$depara[$chave][$valor] : $valor);
+    private static function getFromDePara(string $chave, string $valor)
+    {
+        return ((isset(self::$depara[$chave][$valor])) ? self::$depara[$chave][$valor] : $valor);
     }
 
     /**
      * Cria uma tabela dimensao e acrescenta os dados em depara para não imprimir o ID e sim o name
-     * @param type $chave
-     * @param type $trello
-     * @param type $out
-     * @return type
+     * @param string $chave
+     * @param array $trello
+     * @param array $out
+     * @return array
      */
-    private static function setDimensao($chave, &$trello, &$out) {
+    private static function setDimensao($chave, &$trello, &$out)
+    {
         // lists
         $lists = [];
         foreach ($trello[$chave] as $item) {
@@ -43,7 +50,8 @@ class Trello {
         return $lists;
     }
 
-    private static function readFromDimensao($chave, $id) {
+    private static function readFromDimensao($chave, $id)
+    {
         foreach ($chave as $value) {
             if ($value['id'] === $id) {
                 return $value;
@@ -53,13 +61,14 @@ class Trello {
 
     /**
      * Le um arquivo exportado do Trello e prerara so diversos CSV para importação ou manipulação dos dados
-     * @param type $fileJson
-     * @param type $depara
-     * @return array []
+     * @param string $fileJson
+     * @param array $depara
+     * @return array
      */
-    public static function readJson($fileJson, $depara = []) {
+    public static function readJson($fileJson, $depara = [])
+    {
         if (!file_exists($fileJson)) {
-            return 'File not exists: ' . $fileJson;
+            throw new Exception('File not exists: ' . $fileJson);
         }
         self::$depara = $depara;
         $trello = json_decode(file_get_contents($fileJson), true);
@@ -94,15 +103,17 @@ class Trello {
                 'title' => $card['name'],
                 'description' => $card['desc'],
                 'state' => (($card['dueComplete'] === true || $listState === 'closed') ? 'closed' : 'opened'),
-                'card_state' => (($card['closed']) ? 'closed' : 'opened'), 
-                'id_list' => $card['idList'], // self::getFromDePara('dim_lists', $card['idList']),
+                'card_state' => (($card['closed']) ? 'closed' : 'opened'),
+                'id_list' => $card['idList'],
+                // self::getFromDePara('dim_lists', $card['idList']),
                 'list_name' => self::getFromDePara('dim_lists', $card['idList']),
                 'list_state' => $listState,
                 'duedate' => $card['due'],
-                'labels' => $labels, // implode(',', $labels),
+                'labels' => $labels,
+                // implode(',', $labels),
                 'date_last_activity' => $card['dateLastActivity'],
                 'id_assigned' => $card['idMembers'][0],
-                'assigned' => self::getFromDePara('dim_members', $card['idMembers'][0]), 
+                'assigned' => self::getFromDePara('dim_members', $card['idMembers'][0]),
                 'pos' => $card['pos']
             ];
 
@@ -138,7 +149,7 @@ class Trello {
                 'date' => $item['date'],
                 'action' => $item['type'],
                 'id_card' => $item['data']['card']['id'],
-                'text' => $item['data'], 
+                'text' => $item['data'],
                 'id_member' => $item['idMemberCreator']
             ];
         }
@@ -154,8 +165,9 @@ class Trello {
      * @param array $out
      * @param string $dirOut
      */
-    public static function loadOut2Csv(array $out, string $dirOut) {
-        foreach ($out as $key => $val) {         // gerar csv
+    public static function loadOut2Csv(array $out, string $dirOut)
+    {
+        foreach ($out as $key => $val) { // gerar csv
             if (is_array($val)) {
                 if (count($val) > 0) {
                     \NsUtil\Helper::array2csv($val, $dirOut . DIRECTORY_SEPARATOR . $key . '.csv');
@@ -168,13 +180,14 @@ class Trello {
      * Obtém os arquivos CSV em um diretorio e importar para o Postgres conforme conexão
      * @param \NsUtil\ConnectionPostgreSQL $con
      * @param string $schema
-     * @param type $dirOut
-     * @param type $dropSchema
-     * @param type $trucnateTables
+     * @param string $dirOut
+     * @param bool $dropSchema
+     * @param bool $trucnateTables
      */
-    public static function loadCsv2Postgres(\NsUtil\ConnectionPostgreSQL $con, $schema, $dirOut, $dropSchema = true, $trucnateTables = true) {
+    public static function loadCsv2Postgres(\NsUtil\ConnectionPostgreSQL $con, $schema, $dirOut, $dropSchema = true, $trucnateTables = true)
+    {
         $schema = 'trello_' . \NsUtil\Helper::sanitize($schema);
-        $load = new NsUtil\PgLoadCSV($con, $schema, true, true);
+        $load = new PgLoadCSV($con, $schema, true, true);
         $load->run($dirOut);
     }
 

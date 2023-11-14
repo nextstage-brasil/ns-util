@@ -77,7 +77,7 @@ class Assync
      */
     public function add(string $cmd, string $outputfile = '/dev/null'): Assync
     {
-        $pidfile = '/tmp/' . hash('sha1', (string)$cmd);
+        $pidfile = '/tmp/' . hash('sha1', (string) $cmd);
         $this->list[] = ['command' => sprintf("%s > %s 2>&1 & echo $! > %s", $cmd, $outputfile, $pidfile), 'pidfile' => $pidfile, 'cmd' => $cmd];
         if ($this->verbose !== false) {
             $this->status = new StatusLoader(count($this->list), (string) $this->verbose);
@@ -158,7 +158,7 @@ class Assync
      *
      * @param string $name Referência para registro em logs
      * @param Closure $fn Closure a ser executada
-     * @return void
+     * @return self
      */
     public function addClosure(string $name, Closure $fn)
     {
@@ -192,7 +192,7 @@ class Assync
      * @param ReflectionClass $class
      * @param string $function
      * @param array $params
-     * @return void
+     * @return self
      */
     public function addClassRunner(string $name, string $className, string $function, array $params = [])
     {
@@ -240,7 +240,7 @@ class Assync
     /**
      * Executa os processos adicionados, limitando a N processos por vez, conforme configuração
      */
-    public function run(?\Closure $onRunning = null)
+    public function run(?Closure $onRunning = null)
     {
         if (null === $this->isStarted) {
             $this->isStarted = true;

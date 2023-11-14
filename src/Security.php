@@ -2,22 +2,23 @@
 
 namespace NsUtil;
 
-class Security {
+class Security
+{
 
-    /**
-     * 
-     * @param type $URL_BASE: URL base da aplicação
-     */
-    public function __construct() {
-        
+
+    public function __construct()
+    {
+
     }
 
-    private static function addSessionToKey(&$chave) {
+    private static function addSessionToKey(&$chave)
+    {
         $ip = session_id();
         $chave = hash('md5', $ip . date('Ymd') . $chave);
     }
 
-    public static function getUrlOfFileInDisc($filepath) {
+    public static function getUrlOfFileInDisc($filepath)
+    {
         $env = getenv('DOCKER_PHP_FILES_DIR');
         $protocol = ((getenv('DOCKER_PROTOCOL_INCLUDE') !== false) ? getenv('DOCKER_PROTOCOL_INCLUDE') : $_SERVER['REQUEST_SCHEME']);
         $root = ((false !== $env) ? $env : $_SERVER['DOCUMENT_ROOT']);
@@ -27,7 +28,8 @@ class Security {
         return $protocol . '://' . $_SERVER['HTTP_HOST'] . $path;
     }
 
-    public static function includeJSFromUrl(array $js) {
+    public static function includeJSFromUrl(array $js)
+    {
         foreach ($js as $item) {
             $include[] = "'$item'";
         }
@@ -40,19 +42,20 @@ class Security {
         return Packer::jsPack($var);
     }
 
-    public static function getFingerprintJS($chave) {
+    public static function getFingerprintJS($chave)
+    {
         self::addSessionToKey($chave);
         $crypto = self::includeJSFromUrl([
-                    self::getUrlOfFileInDisc(__DIR__ . '/lib/js/crypto.js'),
-                    self::getUrlOfFileInDisc(__DIR__ . '/lib/js/fingerprint_util.js'),
+            self::getUrlOfFileInDisc(__DIR__ . '/lib/js/crypto.js'),
+            self::getUrlOfFileInDisc(__DIR__ . '/lib/js/fingerprint_util.js'),
         ]);
         $iv = substr((string) hash('md5', $chave . '_IV'), 0, 16);
         $js = ""
-                . "var _NSC118= '$chave';"
-                . "var _NSIV = '$iv';"
-                //. "console.log('$chave'); console.log('$iv');"
-                . file_get_contents(__DIR__ . '/lib/js/fingerprint.js')
-                . file_get_contents(__DIR__ . '/lib/js/mycrypto.js')
+            . "var _NSC118= '$chave';"
+            . "var _NSIV = '$iv';"
+            //. "console.log('$chave'); console.log('$iv');"
+            . file_get_contents(__DIR__ . '/lib/js/fingerprint.js')
+            . file_get_contents(__DIR__ . '/lib/js/mycrypto.js')
         ;
         $js = \NsUtil\Packer::jsPack($js);
         return $crypto . $js;
@@ -65,7 +68,8 @@ class Security {
      * @param mixed $jsonString
      * @return mixed
      */
-    static function cryptoJsAesDecrypt($passphrase, $jsonString) {
+    static function cryptoJsAesDecrypt($passphrase, $jsonString)
+    {
         self::addSessionToKey($passphrase);
         $jsondata = json_decode($jsonString, true);
         $salt = hex2bin($jsondata["s"]);
@@ -91,7 +95,8 @@ class Security {
      * @param mixed $value
      * @return string
      */
-    static function cryptoJsAesEncrypt($passphrase, $value) {
+    static function cryptoJsAesEncrypt($passphrase, $value)
+    {
         self::addSessionToKey($passphrase);
         $salt = openssl_random_pseudo_bytes(8);
         $salted = '';

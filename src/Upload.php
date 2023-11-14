@@ -2,15 +2,17 @@
 
 namespace NsUtil;
 
+use Exception;
 use finfo;
+use WideImage\Exception\InvalidImageSourceException;
 use WideImage\WideImage;
-use WideImage_InvalidImageSourceException;
 
 /**
  * Update at 26/02/2022
  */
 
-class Upload {
+class Upload
+{
 
     private $arquivo;
     private $tipo;
@@ -18,6 +20,8 @@ class Upload {
     private $nome;
     private $nomeOriginal;
     private $extensao;
+    private $thumbs;
+    private $file;
     // mimes definidos para evitar upload de arquivo malicioso, ou executavel
     private static $_MIMES = array(
         'application/pdf' => 'pdf',
@@ -49,7 +53,8 @@ class Upload {
         'application/msword' => 'doc',
     );
 
-    public function __construct($arquivo, $dir, $novaLargura = false, $thumbs = false) {
+    public function __construct($arquivo, $dir, $novaLargura = false, $thumbs = false)
+    {
         $this->arquivo = [];
         if ($arquivo) {
             $arquivo['dirSalvar'] = $dir . DIRECTORY_SEPARATOR;
@@ -66,10 +71,11 @@ class Upload {
         }
     }
 
-    private function setArquivo($arquivo) {
+    private function setArquivo($arquivo)
+    {
         $this->arquivo = $arquivo;
         $this->arquivo['maxFilesize'] = (int) $this->arquivo['maxFilesize'];
-        $this->arquivo['name'] = trim((string)$this->arquivo['name']);
+        $this->arquivo['name'] = trim((string) $this->arquivo['name']);
         // retirar extensão do arquivo
         //$t = explode('.', preg_replace("/&([a-z])[a-z]+;/i", "$1", htmlentities(trim((string)$this->arquivo['name']))));
         $t = explode('.', $this->arquivo['name']);
@@ -94,11 +100,13 @@ class Upload {
         }
     }
 
-    public function getNome() {
+    public function getNome()
+    {
         return $this->nome;
     }
 
-    public function execute() {
+    public function execute()
+    {
         if (!$this->tipo || !$this->arquivo) {
             return "Tipo de arquivo não suportado ou MIME não definido (" . $this->tipo . ")";
         }
@@ -121,7 +129,7 @@ class Upload {
                     $type = self::getMimeTypeStatic($this->arquivo["tmp_name"]);
                     try {
                         $wide = WideImage::load($this->arquivo["tmp_name"]);
-                    } catch (\WideImage\Exception\InvalidImageSourceException $exc) {
+                    } catch (InvalidImageSourceException $exc) {
                         return $exc->getMessage() . '. Type: ' . $type . ' (UP117)';
                     } catch (Exception $exc) {
                         return $exc->getMessage() . ' (UP121)';
@@ -141,17 +149,17 @@ class Upload {
                             // Aqui gera um processamento pesado...
                             $watermark = WideImage::load($this->arquivo['watermark']['file']);
                             $r = $wide
-                                    ->resize(500, null, 'outside')
-                                    ->merge($watermark, 'center', 'bottom-5', 30)
-                                    ->merge($watermark, 'center', 'top+5', 30)
-                                    ->saveToFile($this->thumbs, $qualidade);
-                        } catch (\WideImage\Exception\InvalidImageSourceException $exc) {
+                                ->resize(500, null, 'outside')
+                                ->merge($watermark, 'center', 'bottom-5', 30)
+                                ->merge($watermark, 'center', 'top+5', 30)
+                                ->saveToFile($this->thumbs, $qualidade);
+                        } catch (InvalidImageSourceException $exc) {
                             return $exc->getMessage() . ' (UP140)';
                         }
                     } else {
                         $r = $wide
-                                ->resize(500, null, 'outside')
-                                ->saveToFile($this->thumbs, $qualidade);
+                            ->resize(500, null, 'outside')
+                            ->saveToFile($this->thumbs, $qualidade);
                     }
                 }
 
@@ -187,7 +195,7 @@ class Upload {
                 //(new ResizeImage($this->arquivo['dirSalvar'] . $this->getNome(), 300)); // limite máximo de tamanho de imagem
 
                 return true; //$this->getNome();
-                break;
+            // break;
 
             default:
                 $ret = move_uploaded_file($this->arquivo['tmp_name'], $this->arquivo['dirSalvar'] . $this->getNome());
@@ -199,15 +207,18 @@ class Upload {
         }
     }
 
-    function getTipo() {
+    function getTipo()
+    {
         return $this->tipo;
     }
 
-    function getMime() {
+    function getMime()
+    {
         return $this->mime;
     }
 
-    function getNomeOriginal() {
+    function getNomeOriginal()
+    {
         return $this->nomeOriginal;
     }
 
@@ -217,7 +228,8 @@ class Upload {
      * @param boolean $encoding Define se também será retornado a codificação do arquivo
      * @return string
      */
-    public function getMimeType($encoding = true, $filename = false) {
+    public function getMimeType($encoding = true, $filename = false)
+    {
         $file = $this->arquivo['tmp_name'];
         if (function_exists('finfo_open')) {
             if (is_file($file) && is_readable($file)) {
@@ -233,37 +245,41 @@ class Upload {
         return str_replace('.', '-', $out);
     }
 
-    public static function getMimeTypeStatic($filename) {
+    public static function getMimeTypeStatic($filename)
+    {
         $t = new Upload(false, false);
         $t->arquivo['tmp_name'] = $filename;
         return $t->getMimeType();
     }
 
-    public static function geraThumbs($filepath, $width = 500) {
-        if (!file_exists($filepath)) {
-            return false;
-        }
-        $qualidade = ((stripos($filepath, 'png') > 0) ? 8 : 80);
-        try {
-            $wide = WideImage::load($filepath);
-        } catch (WideImage_InvalidImageSourceException $exc) {
-            return $exc->getMessage();
-        }
+    // public static function geraThumbs($filepath, $width = 500)
+    // {
+    //     if (!file_exists($filepath)) {
+    //         return false;
+    //     }
+    //     $qualidade = ((stripos($filepath, 'png') > 0) ? 8 : 80);
+    //     try {
+    //         $wide = WideImage::load($filepath);
+    //     } catch (InvalidImageSourceException $exc) {
+    //         return $exc->getMessage();
+    //     }
 
-        //thumbs
-        $r = $wide->resize($width, $width, 'outside');
-        $resized = $r->crop('center', 'center', $width, $width);
-        return $resized->saveToFile(Helper::thumbsOnName($filepath), $qualidade);
-    }
+    //     //thumbs
+    //     $r = $wide->resize($width, $width, 'outside');
+    //     $resized = $r->crop('center', 'center', $width, $width);
+    //     return $resized->saveToFile(Helper::thumbsOnName($filepath), $qualidade);
+    // }
 
-    public static function removeMimeTypePermitido(string $key): array {
+    public static function removeMimeTypePermitido(string $key): array
+    {
         if (isset(self::$_MIMES[$key])) {
             unset(self::$_MIMES[$key]);
         }
         return self::getMimes();
     }
 
-    public static function getMimes(): array {
+    public static function getMimes(): array
+    {
         return self::$_MIMES;
     }
 

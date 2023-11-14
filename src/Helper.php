@@ -826,7 +826,7 @@ class Helper
         // mantém e considera o traço um valor negativo
         if ($isNumber) {
             // remover virgulas
-            $str = str_replace([',', '.'], '',  $str);
+            $str = str_replace([',', '.'], '', $str);
 
             if (preg_match('/-?\d+/', $str, $matches)) {
                 return (int) $matches[0];

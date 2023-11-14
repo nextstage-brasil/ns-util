@@ -147,7 +147,7 @@ class JobbyRunner
             }
 
             // Programar a closure conforme chamado
-            if ($closure instanceof \Closure) {
+            if ($closure instanceof Closure) {
                 $this->pool->addClosure($name, function () use ($name, $closure, $maxTimeExecution) {
                     $onlyOne = new UniqueExecution(md5(__FILE__ . $name));
                     if ($onlyOne->isRunning($maxTimeExecution * 60)) {
@@ -183,7 +183,7 @@ class JobbyRunner
      */
     public function addClosure(
         string $name,
-        \Closure $closure,
+        Closure $closure,
         string $description = '',
         int $maxTimeExecution = 30,
         string $schedule = '* * * * *',

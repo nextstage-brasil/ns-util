@@ -98,7 +98,7 @@ class Sendmail
             } else {
                 return $mail->ErrorInfo;
             }
-        } catch (\Exception $exc) {
+        } catch (Exception $exc) {
             return $exc->getMessage();
         }
     }
@@ -157,7 +157,7 @@ class Sendmail
      * @param Closure|null $error
      * @return boolean
      */
-    public static function sendByAWS(string $to, string $subject, string $html_body, ?array $anexo = [],  array $template_data = [], ?string $template_id = null, ?Closure $success = null, ?Closure $error = null): bool
+    public static function sendByAWS(string $to, string $subject, string $html_body, ?array $anexo = [], array $template_data = [], ?string $template_id = null, ?Closure $success = null, ?Closure $error = null): bool
     {
         try {
 
@@ -167,7 +167,7 @@ class Sendmail
                 'SENDMAIL_EMAIL' => getenv('SENDMAIL_EMAIL'),
                 'to' => $to,
                 'subject' => $subject,
-                'body' => strlen($html_body) > 0 ?  $html_body : ($template_data[0] ?? '')
+                'body' => strlen($html_body) > 0 ? $html_body : ($template_data[0] ?? '')
             ], true);
 
             $SesClient = new SesClient([

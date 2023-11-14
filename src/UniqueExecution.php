@@ -18,7 +18,7 @@ class UniqueExecution
             case 'psql':
                 $this->con = ConnectionPostgreSQL::getConnectionByEnv();
                 break;
-                //sqlite
+            //sqlite
             default:
                 $user = posix_getpwuid(posix_geteuid())['name'];
                 $pathToDB = (($pathToDB === '/tmp') ? Helper::getTmpDir() : $pathToDB);
@@ -52,7 +52,7 @@ class UniqueExecution
         try {
             $this->con->executeQuery($query);
         } catch (Exception $exc) {
-            throw new \Exception('UNIQUE EXECUTION ERROR - CONNECT DB: ' . $exc->getMessage());
+            throw new Exception('UNIQUE EXECUTION ERROR - CONNECT DB: ' . $exc->getMessage());
         }
     }
 
@@ -71,7 +71,7 @@ class UniqueExecution
             'timeLimit' => time() - $timeLimit
         ])[0]['counter'];
 
-        $isRunning =  $counter > 0;
+        $isRunning = $counter > 0;
         if ($isRunning && $throwException) {
             throw new Exception($this->getDefaultMessageIsRunning());
         }

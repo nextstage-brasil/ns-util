@@ -2,33 +2,39 @@
 
 namespace NsUtil;
 
-class Password {
+class Password
+{
 
     /**
      * Metodo que codifica senha com token e criptografia
      * Constante TOKEN definida em _config.php
-     * @param unknown_type $senha
+     * @param string $senha
      */
-    public static function codificaSenha(string $senha): string {
+    public static function codificaSenha(string $senha): string
+    {
         self::addToken($senha);
         return password_hash($senha, PASSWORD_DEFAULT);
     }
 
-    public static function geraNovaSenha(): string {
+    public static function geraNovaSenha(): string
+    {
         $senha = substr(md5((string) microtime()), 0, 12);
         return $senha;
     }
 
-    public static function verify(string $senha, string $hash): bool {
+    public static function verify(string $senha, string $hash): bool
+    {
         self::addToken($senha);
         return password_verify($senha, $hash);
     }
 
-    private static function addToken(string &$senha, string $token = ''): void {
-        $senha = md5((string) trim((string)$senha) . Config::getData('token')); // incluir o token da aplicação
+    private static function addToken(string &$senha, string $token = ''): void
+    {
+        $senha = md5((string) trim((string) $senha) . Config::getData('token')); // incluir o token da aplicação
     }
 
-    public static function forcaSenha(string $senha): int {
+    public static function forcaSenha(string $senha): int
+    {
         $len = strlen($senha);
         if ($len < 6) {
             return -1;

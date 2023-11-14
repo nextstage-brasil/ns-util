@@ -114,16 +114,16 @@ class Package
             'version' => "$X.$Y.$Z",
             'version_full' => $versao,
             'path' => $path_versionNew,
-            'init' => (isset(($init)) ? $init . " &&" : ""),
+            'init' => ($init ? $init . " &&" : ""),
             'bat' => ""
-                . (isset(($init)) ? $init . " &&" : "")
+                . ($init ? $init . " &&" : "")
                 . " cd $path_versionNew &&"
                 . " git add .  &&"
                 . " git commit -m \"$message\" &&"
                 . (($createTag) ? " git tag $X.$Y.$Z HEAD &&" : "")
                 . "timeout /t 10",
             'git' => [
-                'local' => (isset(($init)) ? true : false),
+                'local' => ($init ? true : false),
                 'cd' => "cd $path_versionNew",
                 'add' => "git add . ",
                 'commit' => "git commit -m \"$message\" ",
@@ -215,7 +215,6 @@ class Package
                 break;
             default:
                 die('Build directory not found!');
-                break;
         }
         $buildDir = realpath($fontes . DIRECTORY_SEPARATOR . $build);
 
@@ -243,11 +242,7 @@ class Package
         //     . "\n\n";
 
         ConsoleTable::printHeader("NSUtil Package Generator");
-        foreach ([
-            'Running on' => $urlLocalApplication,
-            'PHP Version' => PHP_VERSION . " on " . Helper::getSO(),
-            'Package output' => $dirOutput . DIRECTORY_SEPARATOR . $projectName . '-package.zip',
-            'Create docker image' => ((count(self::$dockerBuildParams) > 0) ? 'yes' : 'no'),
+        foreach (['Running on' => $urlLocalApplication, 'PHP Version' => PHP_VERSION . " on " . Helper::getSO(), 'Package output' => $dirOutput . DIRECTORY_SEPARATOR . $projectName . '-package.zip', 'Create docker image' => ((count(self::$dockerBuildParams) > 0) ? 'yes' : 'no'),
             'Copy frontend files' => ((self::$createFrontendFiles === true) ? 'yes' : 'no')
         ] as $label => $message) {
             ConsoleTable::printTabular($label, $message);
@@ -359,7 +354,7 @@ class Package
             'zipCi' => "#!/bin/bash\nzip -qr \$CI_COMMIT_SHA.zip . $exCI",
             'ex' => $exCI
         ];
-        Helper::saveFile("$origem/$build/install/deploy/scripts/zipCommandToCI.sh", false, self::$zipExcluded->zipCi, 'SOBREPOR');
+        Helper::saveFile("$origem/$build/install/deploy/scripts/zipCommandToCI.sh", false, (string) self::$zipExcluded->zipCi, 'SOBREPOR');
 
         // salvar o comand para o pos ioncube
         // echo "\n - Criando arquivo post encode para ioncube ... ";

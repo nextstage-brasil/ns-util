@@ -195,7 +195,7 @@ class Validate
     public function getValidadeAsArray(array $data): array
     {
         $campos = [];
-        foreach ($this->obrigatorios['list'] as $item) {
+        foreach ($this->obrigatorios['list'] ?? [] as $item) {
             $campos[] = ['key' => $item['key'], 'value' => $data[$item['key']] ?? null, 'msg' => $item['msg'], 'type' => $item['type']];
         }
         return \NsUtil\Helper::validarCamposObrigatorios($campos);
