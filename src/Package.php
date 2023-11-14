@@ -262,7 +262,7 @@ class Package
         $composerIsOld = (!file_exists($composerLastUpdateFile)) || $last < time() - (60 * 60 * 2);
         // echo "\n - Atualizando pacotes via composer ... ";
         if (file_exists($origem . '/composer.json') && $composerIsOld) {
-            ConsoleTable::printTabularAndRunningCMD('Composer Update', 'composer update -q --prefer-dist --optimize-autoloader --no-dev --working-dir="' . $origem . '"');
+            ConsoleTable::printTabularAndRunningCMD('Composer Update', 'composer install -q --prefer-dist --optimize-autoloader --no-dev --working-dir="' . $origem . '"');
             // shell_exec('composer update -q --prefer-dist --optimize-autoloader --no-dev --working-dir="' . $origem . '"');
             file_put_contents($composerLastUpdateFile, time());
         } else {
